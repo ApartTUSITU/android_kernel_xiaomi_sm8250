@@ -45,13 +45,5 @@ $(obj)/linked_dtb.o: $(obj)/system.dtb
 
 obj-$(CONFIG_NIOS2_DTB_SOURCE_BOOL) += linked_dtb.o
 
-targets += $(dtb-y)
-
-# Rule to build device tree blobs with make command
-$(obj)/%.dtb: $(src)/dts/%.dts FORCE
-	$(call if_changed_dep,dtc)
-
-$(obj)/dtbs: $(addprefix $(obj)/, $(dtb-y))
-
 install:
 	sh $(srctree)/$(src)/install.sh $(KERNELRELEASE) $(BOOTIMAGE) System.map "$(INSTALL_PATH)"
