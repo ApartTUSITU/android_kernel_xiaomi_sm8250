@@ -308,6 +308,11 @@ $(obj)/%.dtb: $(src)/%.dts $(DTC) FORCE
 
 dtc-tmp = $(subst $(comma),_,$(dot-target).dts.tmp)
 
+# mkdtimg
+#----------------------------------------------------------------------------
+quiet_cmd_mkdtimg = DTBOIMG $@
+cmd_mkdtimg = mkdtimg create $@ --page_size=4096 $(filter-out FORCE,$^)
+
 # cat
 # ---------------------------------------------------------------------------
 # Concatentate multiple files together
