@@ -1,0 +1,90 @@
+# Xiaomi configuration options
+
+config MACH_XIAOMI
+	bool "Xiaomi device"
+	depends on ARCH_QCOM
+	help
+	  Support for Xiaomi products
+
+config MACH_XIAOMI_SM8250
+	bool "Xiaomi SM8250"
+	depends on ARCH_QCOM
+	select MACH_XIAOMI
+	help
+	  Support for Xiaomi SM8250 devices
+
+menu "Xiaomi board selection"
+
+	config MACH_XIAOMI_ALIOTH
+		bool "Xiaomi alioth board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Redmi K40 / POCO F3 / Mi 11X
+
+	config MACH_XIAOMI_APOLLO
+		bool "Xiaomi apollo board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Mi 10T / Mi 10T Pro / Redmi K30S Ultra
+
+	config MACH_XIAOMI_CAS
+		bool "Xiaomi cas board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Mi 10 Ultra
+
+	config MACH_XIAOMI_CMI
+		bool "Xiaomi cmi board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Mi 10 Pro
+
+	config MACH_XIAOMI_DAGU
+		bool "Xiaomi dagu board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Xiaomi Pad 5 Pro 12.4
+
+	config MACH_XIAOMI_ELISH
+		bool "Xiaomi elish board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Xiaomi Pad 5 Pro Wi-Fi
+
+	config MACH_XIAOMI_ENUMA
+		bool "Xiaomi enuma board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Xiaomi Pad 5 Pro 5G
+
+	config MACH_XIAOMI_LMI
+		bool "Xiaomi lmi board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Redmi K30 Pro / POCO F2 Pro
+
+	config MACH_XIAOMI_MUNCH
+		bool "Xiaomi munch board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Redmi K40S / POCO F4
+
+	config MACH_XIAOMI_PSYCHE
+		bool "Xiaomi psyche board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Xiaomi 12X
+
+	config MACH_XIAOMI_THYME
+		bool "Xiaomi thyme board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Mi 10S
+
+	config MACH_XIAOMI_UMI
+		bool "Xiaomi umi board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Mi 10
+
+endmenu
