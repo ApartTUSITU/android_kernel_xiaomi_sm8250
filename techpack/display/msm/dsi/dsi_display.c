@@ -4442,10 +4442,14 @@ static int _dsi_display_dyn_update_clks(struct dsi_display *display,
 					struct link_clk_freq *bkp_freq)
 {
 	int rc = 0, i;
+	u8 ctrl_version;
 	struct dsi_display_ctrl *m_ctrl, *ctrl;
 	struct dsi_clk_link_set *parent_clk, *enable_clk;
+	struct dsi_dyn_clk_caps *dyn_clk_caps;
 
 	m_ctrl = &display->ctrl[display->clk_master_idx];
+	dyn_clk_caps = &(display->panel->dyn_clk_caps);
+	ctrl_version = m_ctrl->ctrl->version;
 
 	if (dsi_display_is_type_cphy(display)) {
 		enable_clk = &display->clock_info.cphy_clks;
@@ -4491,6 +4495,15 @@ static int _dsi_display_dyn_update_clks(struct dsi_display *display,
 	}
 	dsi_phy_dynamic_refresh_trigger(m_ctrl->phy, true);
 
+	/*
+	 * Don't wait for dynamic refresh done for dsi ctrl greater than 2.5
+	 * and with constant fps, as dynamic refresh will applied with
+	 * next mdp intf ctrl flush.
+	 */
+	if ((ctrl_version >= DSI_CTRL_VERSION_2_4) &&
+			(dyn_clk_caps->maintain_const_fps))
+		goto defer_dfps_wait;
+
 	/* wait for dynamic refresh done */
 	display_for_each_ctrl(i, display) {
 		ctrl = &display->ctrl[i];
@@ -4509,6 +4522,7 @@ static int _dsi_display_dyn_update_clks(struct dsi_display *display,
 		dsi_phy_dynamic_refresh_clear(ctrl->phy);
 	}
 
+defer_dfps_wait:
 	rc = dsi_clk_update_parent(enable_clk,
 				&display->clock_info.mux_clks);
 
@@ -4909,8 +4923,10 @@ static int dsi_display_set_mode_sub(struct dsi_display *display,
 	int rc = 0, clk_rate = 0;
 	int i;
 	struct dsi_display_ctrl *ctrl;
+	struct dsi_display_ctrl *mctrl;
 	struct dsi_display_mode_priv_info *priv_info;
 	bool commit_phy_timing = false;
+	struct dsi_dyn_clk_caps *dyn_clk_caps;
 
 	priv_info = mode->priv_info;
 	if (!priv_info) {
@@ -4936,8 +4952,26 @@ static int dsi_display_set_mode_sub(struct dsi_display *display,
 	memcpy(&display->config.lane_map, &display->lane_map,
 	       sizeof(display->lane_map));
 
+	mctrl = &display->ctrl[display->clk_master_idx];
+	dyn_clk_caps = &(display->panel->dyn_clk_caps);
+
 	if (mode->dsi_mode_flags &
 			(DSI_MODE_FLAG_DFPS | DSI_MODE_FLAG_VRR)) {
+		display_for_each_ctrl(i, display) {
+			ctrl = &display->ctrl[i];
+			ctrl->ctrl->hw.ops.set_timing_db(&ctrl->ctrl->hw,
+					true);
+			dsi_phy_dynamic_refresh_clear(ctrl->phy);
+
+			if (!ctrl->ctrl || (ctrl != mctrl))
+				continue;
+
+			if ((ctrl->ctrl->version >= DSI_CTRL_VERSION_2_4) &&
+					(dyn_clk_caps->maintain_const_fps)) {
+				dsi_phy_dynamic_refresh_trigger_sel(ctrl->phy,
+						true);
+			}
+		}
 		rc = dsi_display_dfps_update(display, mode);
 		if (rc) {
 			DSI_ERR("[%s]DSI dfps update failed, rc=%d\n",

@@ -210,6 +210,7 @@ static void dsi_catalog_phy_2_0_init(struct dsi_phy_hw *phy)
 		dsi_phy_hw_v2_0_dyn_refresh_pipe_delay;
 	phy->ops.dyn_refresh_ops.dyn_refresh_helper =
 		dsi_phy_hw_v2_0_dyn_refresh_helper;
+	phy->ops.dyn_refresh_ops.dyn_refresh_trigger_sel = NULL;
 	phy->ops.dyn_refresh_ops.cache_phy_timings =
 		dsi_phy_hw_v2_0_cache_phy_timings;
 }
@@ -245,6 +246,7 @@ static void dsi_catalog_phy_3_0_init(struct dsi_phy_hw *phy)
 		dsi_phy_hw_v3_0_dyn_refresh_pipe_delay;
 	phy->ops.dyn_refresh_ops.dyn_refresh_helper =
 		dsi_phy_hw_v3_0_dyn_refresh_helper;
+	phy->ops.dyn_refresh_ops.dyn_refresh_trigger_sel = NULL;
 	phy->ops.dyn_refresh_ops.cache_phy_timings =
 		dsi_phy_hw_v3_0_cache_phy_timings;
 }
@@ -281,6 +283,8 @@ static void dsi_catalog_phy_4_0_init(struct dsi_phy_hw *phy)
 		dsi_phy_hw_v4_0_dyn_refresh_pipe_delay;
 	phy->ops.dyn_refresh_ops.dyn_refresh_helper =
 		dsi_phy_hw_v4_0_dyn_refresh_helper;
+	phy->ops.dyn_refresh_ops.dyn_refresh_trigger_sel =
+		dsi_phy_hw_v4_0_dyn_refresh_trigger_sel;
 	phy->ops.dyn_refresh_ops.cache_phy_timings =
 		dsi_phy_hw_v4_0_cache_phy_timings;
 	phy->ops.set_continuous_clk = dsi_phy_hw_v4_0_set_continuous_clk;
