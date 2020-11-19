@@ -208,6 +208,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -253,6 +254,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_swao0_out_tpda_swao: endpoint {
@@ -271,6 +273,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		qcom,msr-fix-req;
 
@@ -374,6 +377,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		nvmem-cells = <&stm_debug_fuse>;
 		nvmem-cell-names = "debug_fuse";
@@ -466,6 +470,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -541,6 +546,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -738,6 +744,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_dcc_out_tpda: endpoint {
@@ -756,6 +763,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_vsense_out_tpda: endpoint {
@@ -774,6 +782,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_prng_out_tpda: endpoint {
@@ -792,6 +801,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_pimem_out_tpda: endpoint {
@@ -810,6 +820,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_qm_out_tpda: endpoint {
@@ -829,6 +840,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1034,6 +1046,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_dlct_out_funnel_dl_center: endpoint {
@@ -1053,6 +1066,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_ipcc_out_funnel_dl_center: endpoint {
@@ -1074,6 +1088,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 		ports {
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -1107,6 +1122,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 		port {
 			tpdm_nav_out_tpda_nav0: endpoint {
 				remote-endpoint =
@@ -1126,6 +1142,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1178,6 +1195,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		qcom,msr-fix-req;
 
@@ -1199,6 +1217,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_llm_turing_out_funnel_turing: endpoint {
@@ -1233,6 +1252,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1303,6 +1323,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_compute0_out_funnel_dl_compute: endpoint {
@@ -1322,6 +1343,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_compute1_out_funnel_dl_compute: endpoint {
@@ -1342,6 +1364,7 @@
 		clocks = <&aopcc QDSS_CLK>;
 
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_npu_out_funnel_npu: endpoint {
@@ -1369,6 +1392,7 @@
 				<&npucc NPU_CC_LLM_CURR_CLK>,
 				<&npucc NPU_CC_LLM_TEMP_CLK>,
 				<&npucc NPU_CC_LLM_XO_CLK>;
+		status = "disabled";
 
 		clock-names = "apb_pclk",
 				"npu_axi_clk",
@@ -1417,6 +1441,7 @@
 				<&npucc NPU_CC_DPM_CLK>,
 				<&npucc NPU_CC_DPM_TEMP_CLK>,
 				<&npucc NPU_CC_DPM_XO_CLK>;
+		status = "disabled";
 
 		clock-names = "apb_pclk",
 				"dl_dpm_clk",
@@ -1453,6 +1478,7 @@
 		clocks = <&aopcc QDSS_CLK>;
 
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1529,6 +1555,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1563,6 +1590,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		qcom,msr-fix-req;
 
@@ -1584,6 +1612,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1639,6 +1668,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_mdss_out_funnel_dl_center: endpoint {
@@ -1659,6 +1689,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1693,6 +1724,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_dl_mm_out_funnel_dl_mm: endpoint {
@@ -1822,6 +1854,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1889,6 +1922,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -1926,6 +1960,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 		qcom,duplicate-funnel;
 
 		ports {
@@ -2002,6 +2037,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -2044,6 +2080,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		qcom,msr-fix-req;
 
@@ -2085,6 +2122,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		qcom,msr-fix-req;
 
@@ -2179,6 +2217,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -2212,6 +2251,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_olc_out_tpda_olc: endpoint {
@@ -2233,6 +2273,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -2266,6 +2307,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_apss_out_tpda_apss: endpoint {
@@ -2287,6 +2329,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -2320,6 +2363,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_llm_silver_out_tpda_llm_silver: endpoint {
@@ -2342,6 +2386,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		ports {
 			#address-cells = <1>;
@@ -2375,6 +2420,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 
 		port {
 			tpdm_llm_gold_out_tpda_llm_gold: endpoint {
@@ -2652,6 +2698,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti1_apss: cti@78f0000 {
@@ -2664,6 +2711,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti2_apss: cti@7900000 {
@@ -2676,6 +2724,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_iris: cti@6830000 {
@@ -2688,6 +2737,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0: cti@6010000 {
@@ -2700,7 +2750,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti1: cti@6011000 {
@@ -2713,7 +2763,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti2: cti@6012000 {
@@ -2730,6 +2780,7 @@
 		qcom,cti-gpio-trigout = <4>;
 		pinctrl-names = "cti-trigout-pctrl";
 		pinctrl-0 = <&trigout_a>;
+		status = "disabled";
 	};
 
 	cti3: cti@6013000 {
@@ -2742,7 +2793,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti4: cti@6014000 {
@@ -2755,7 +2806,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti5: cti@6015000 {
@@ -2768,7 +2819,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti6: cti@6016000 {
@@ -2781,7 +2832,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti7: cti@6017000 {
@@ -2794,7 +2845,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti8: cti@6018000 {
@@ -2807,7 +2858,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti9: cti@6019000 {
@@ -2820,7 +2871,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti10: cti@601a000 {
@@ -2833,7 +2884,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti11: cti@601b000 {
@@ -2846,7 +2897,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti12: cti@601c000 {
@@ -2859,7 +2910,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti13: cti@601d000 {
@@ -2872,7 +2923,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti14: cti@601e000 {
@@ -2885,7 +2936,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti15: cti@601f000 {
@@ -2898,7 +2949,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti_cpu0: cti@7020000 {
@@ -2912,7 +2963,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
-
+		status = "disabled";
 	};
 
 	cti_cpu1: cti@7120000 {
@@ -2926,6 +2977,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_cpu2: cti@7220000 {
@@ -2939,6 +2991,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_cpu3: cti@7320000 {
@@ -2952,6 +3005,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_cpu4: cti@7420000 {
@@ -2965,6 +3019,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_cpu5: cti@7520000 {
@@ -2978,6 +3033,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_cpu6: cti@7620000 {
@@ -2991,6 +3047,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_cpu7: cti@7720000 {
@@ -3004,6 +3061,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0_swao:cti@6b00000 {
@@ -3016,6 +3074,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti1_swao:cti@6b01000 {
@@ -3028,6 +3087,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti2_swao:cti@6b02000 {
@@ -3040,6 +3100,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti3_swao:cti@6b03000 {
@@ -3052,6 +3113,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0_dlct: cti@6c2a000 {
@@ -3064,6 +3126,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti1_dlct: cti@6c2b000 {
@@ -3076,6 +3139,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti2_dlct: cti@6c2c000 {
@@ -3088,6 +3152,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0_dlmm: cti@6c09000 {
@@ -3100,6 +3165,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti1_dlmm: cti@6c0a000 {
@@ -3112,6 +3178,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0_dlcompute: cti@6c3a000 {
@@ -3124,6 +3191,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0_ddr0: cti@6e02000 {
@@ -3136,6 +3204,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti1_ddr0: cti@6e03000 {
@@ -3148,6 +3217,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti2_ddr0: cti@6e04000 {
@@ -3160,6 +3230,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti0_ddr1: cti@6e10000 {
@@ -3172,6 +3243,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti1_ddr1: cti@6e11000 {
@@ -3184,6 +3256,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti2_ddr1: cti@6e12000 {
@@ -3196,6 +3269,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_gpu_m3: cti@6962000 {
@@ -3234,6 +3308,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_npu_dl0: cti@6c42000 {
@@ -3246,6 +3321,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_npu_dl1: cti@6c43000 {
@@ -3258,6 +3334,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_npu: cti@6c4b000 {
@@ -3270,6 +3347,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_turing:cti@6982000 {
@@ -3282,6 +3360,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	cti_turing_q6:cti@698b000 {
@@ -3294,6 +3373,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	tpdm_lpass_lpi: tpdm@6b26000 {
@@ -3351,6 +3431,7 @@
 
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 
 	hwevent {
@@ -3359,5 +3440,6 @@
 		coresight-csr = <&csr>;
 		clocks = <&aopcc QDSS_CLK>;
 		clock-names = "apb_pclk";
+		status = "disabled";
 	};
 };
