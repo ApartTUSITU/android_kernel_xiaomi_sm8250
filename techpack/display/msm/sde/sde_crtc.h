@@ -289,6 +289,7 @@ struct sde_crtc_misr_info {
  * @needs_hw_reset  : Initiate a hw ctl reset
  * @comp_ratio      : Compression ratio
  * @dspp_blob_info  : blob containing dspp hw capability information
+ * @hist_irq_idx    : hist interrupt irq idx
  */
 struct sde_crtc {
 	struct drm_crtc base;
@@ -375,6 +376,7 @@ struct sde_crtc {
 	struct mutex ltm_buffer_lock;
 	spinlock_t ltm_lock;
 	bool needs_hw_reset;
+	int hist_irq_idx;
 
 	int comp_ratio;
 
