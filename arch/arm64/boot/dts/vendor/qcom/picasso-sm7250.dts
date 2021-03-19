@@ -1,0 +1,10 @@
+/dts-v1/;
+
+#include "lito.dtsi"
+#include "picasso-sm7250.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. Picasso";
+	compatible = "qcom,lito-mtp", "qcom,lito", "qcom,mtp";
+	qcom,board-id = <36 0>;
+};

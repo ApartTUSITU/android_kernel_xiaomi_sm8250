@@ -108,6 +108,7 @@
 				<&dai_pri_tdm_rx_0>, <&dai_pri_tdm_tx_0>,
 				<&dai_sec_tdm_rx_0>, <&dai_sec_tdm_tx_0>,
 				<&dai_tert_tdm_rx_0>, <&dai_tert_tdm_tx_0>,
+                <&dai_tert_tdm_rx_1>, <&dai_tert_tdm_tx_1>,
 				<&dai_quat_tdm_rx_0>, <&dai_quat_tdm_tx_0>,
 				<&dai_quin_tdm_rx_0>, <&dai_quin_tdm_tx_0>,
 				<&dai_sen_tdm_rx_0>, <&dai_sen_tdm_tx_0>,
@@ -142,6 +143,7 @@
 				"msm-dai-q6-tdm.36864", "msm-dai-q6-tdm.36865",
 				"msm-dai-q6-tdm.36880", "msm-dai-q6-tdm.36881",
 				"msm-dai-q6-tdm.36896", "msm-dai-q6-tdm.36897",
+                "msm-dai-q6-tdm.36898", "msm-dai-q6-tdm.36899",
 				"msm-dai-q6-tdm.36912", "msm-dai-q6-tdm.36913",
 				"msm-dai-q6-tdm.36928", "msm-dai-q6-tdm.36929",
 				"msm-dai-q6-tdm.36944", "msm-dai-q6-tdm.36945",
@@ -174,8 +176,8 @@
 
 &qupv3_se15_i2c {
 	status = "ok";
-	fsa4480: fsa4480@43 {
+	fsa4480: fsa4480@42 {
 		compatible = "qcom,fsa4480-i2c";
-		reg = <0x43>;
+		reg = <0x42>;
 	};
 };

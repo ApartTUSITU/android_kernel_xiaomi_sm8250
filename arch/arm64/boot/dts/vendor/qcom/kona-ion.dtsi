@@ -9,6 +9,11 @@
 			qcom,ion-heap-type = "SYSTEM";
 		};
 
+		qcom,ion-heap@20 {
+			reg = <20>;
+			qcom,ion-heap-type = "CAMERA";
+		};
+
 		adsp_heap: qcom,ion-heap@22 {
 			reg = <22>;
 			memory-region = <&sdsp_mem>;

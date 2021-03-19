@@ -1,0 +1,10 @@
+/dts-v1/;
+
+#include "lito.dtsi"
+#include "monet-sm7250.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. Monet";
+	compatible = "qcom,lito-mtp", "qcom,lito", "qcom,mtp";
+	qcom,board-id = <37 0>;
+};

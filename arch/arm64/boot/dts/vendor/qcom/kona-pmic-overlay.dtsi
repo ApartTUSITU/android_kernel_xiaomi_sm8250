@@ -134,7 +134,7 @@
 			  input-enable;
 			  bias-pull-up;
 			  qcom,pull-up-strength = <PMIC_GPIO_PULL_UP_30>;
-			  power-source = <0>;
+			  power-source = <1>;
 		  };
 	};
 };
@@ -177,6 +177,60 @@
 			bias-disable;
 			qcom,drive-strength = <3>; /* high */
 			power-source = <1>; /* 1.8 V */
+		};
+	};
+
+	otg_vbus_boost {
+		otg_vbus_boost_default: otg_vbus_boost_default {
+			pins = "gpio12";
+			function = "normal";
+			output-low;
+			power-source = <0>;
+		};
+	};
+
+	power_good {
+		/*Get the DC Power Good signal*/
+		power_good_default: power_good_default {
+			pins = "gpio7";
+			function = "normal";
+			qcom,drive-strength = <2>; /* 2 MA */
+			power-source = <1>;
+			bias-pull-down;
+			input-enable;
+		};
+	};
+
+	wireless_ovp_en {
+		/*ovp control*/
+		wireless_ovp_en_default: wireless_ovp_en_default{
+			pins = "gpio1";
+			function = "normal";
+			qcom,drive-strength = <2>; /* 2 MA */
+			power-source = <1>;
+			bias-pull-down;
+			output-high;
+		};
+	};
+
+	rx_sleep {
+		/*rx sleep*/
+		rx_sleep_active: rx_sleep_active{
+			pins = "gpio8";
+			function = "normal";
+			qcom,drive-strength = <2>; /* 2 MA */
+			power-source = <1>;
+			bias-pull-down;
+			output-low;
+		};
+	};
+
+	wl_bq_en {
+		wl_bq_en_default: wl_bq_en_default {
+			pins = "gpio1";
+			function = "normal";
+			output-low;
+			power-source = <0>;
 		};
 	};
 };

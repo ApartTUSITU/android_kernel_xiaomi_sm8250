@@ -1416,7 +1416,7 @@
 		};
 	};
 
-	modem-lte-sub6-pa1 {
+	modem1_pa0 {//place close to RF PA0
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "user_space";
@@ -1432,7 +1432,7 @@
 		};
 	};
 
-	modem-lte-sub6-pa2 {
+	modem1_pa1 {//place close to RF PA1
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "user_space";
@@ -1512,7 +1512,7 @@
 		};
 	};
 
-	modem-skin-usr {
+	modem1_xo {//place close to modem1 hot place
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "user_space";
@@ -1528,7 +1528,7 @@
 		};
 	};
 
-	modem-wifi-usr {
+	modem1_wifi {//place close to wifi module
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "user_space";
@@ -1544,7 +1544,7 @@
 		};
 	};
 
-	modem-ambient-usr {
+	modem1_quiet {//place close to modem1 quiet place
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
 		thermal-governor = "user_space";

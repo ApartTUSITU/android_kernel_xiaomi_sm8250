@@ -135,7 +135,7 @@
 			interrupts = <0x5 0xec 0x1 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "sc-irq";
 			qcom,pmic-revid = <&pm8150l_revid>;
-			qcom,voltage-step-ramp;
+			//qcom,voltage-step-ramp;
 			status = "disabled";
 
 			lcdb_ldo_vreg: ldo {
@@ -284,6 +284,20 @@
 				qcom,led-mask = <4>; /* Channel 3 */
 				qcom,default-led-trigger = "switch3_trigger";
 			};
+			/* Added by zhaoqingsong@xiaomi.com liaokuanlong@xiaomi.com */
+			pm8150l_flashlight: qcom,flashlight {
+				label = "flash";
+				qcom,led-name = "flashlight";
+				qcom,max-current = <750>;
+				qcom,default-led-trigger = "flashlight_trigger";
+				qcom,id = <3>;
+				qcom,current-ma = <500>;
+				qcom,duration-ms = <1280>;
+				qcom,ires-ua = <12500>;
+				qcom,hdrm-voltage-mv = <325>;
+				qcom,hdrm-vol-hi-lo-win-mv = <100>;
+			};
+			/* End of Added by zhaoqingsong@xiaomi.com liaokuanlong@xiaomi.com */
 		};
 
 		pm8150l_wled: qcom,wled@d800 {

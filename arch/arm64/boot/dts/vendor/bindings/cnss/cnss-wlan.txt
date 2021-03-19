@@ -77,12 +77,12 @@ Optional properties:
                              and off sequences.
   - qcom,converged-dt: Boolean property to decide whether it supports multiple
                        WLAN devices.
-  - cnss-enable-self-recovery: Boolean property to enable self recovery when
-                               recovery is trigeered with reason link down.
   - qcom,bt-en-gpio: QCA6490 requires synchronization for BT and WLAN GPIO
                    enable to resolve PMU power up issues. Provide BT GPIO using
                    this config param.
   - qcom,sw-ctrl-gpio: Switch control GPIO for device power control
+  - cnss-enable-self-recovery: Boolean property to enable self recovery when
+                               recovery is trigeered with reason link down.
 
 Example:
 

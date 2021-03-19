@@ -30,9 +30,10 @@
 		clocks = <&gcc GCC_QUPV3_WRAP0_S2_CLK>,
 			<&gcc GCC_QUPV3_WRAP_0_M_AHB_CLK>,
 			<&gcc GCC_QUPV3_WRAP_0_S_AHB_CLK>;
-		pinctrl-names = "default", "sleep";
+		pinctrl-names = "default", "sleep", "init";
 		pinctrl-0 = <&qupv3_se2_2uart_active>;
 		pinctrl-1 = <&qupv3_se2_2uart_sleep>;
+		pinctrl-2 = <&qupv3_se2_2uart_init>;
 		interrupts = <GIC_SPI 603 IRQ_TYPE_LEVEL_HIGH>;
 		qcom,wrapper-core = <&qupv3_0>;
 		status = "disabled";
@@ -503,7 +504,7 @@
 			<&gcc GCC_QUPV3_WRAP_1_S_AHB_CLK>;
 		pinctrl-names = "default", "sleep";
 		pinctrl-0 = <&qupv3_se7_spi_active>;
-		pinctrl-1 = <&qupv3_se7_spi_sleep>;
+		pinctrl-1 = <&qupv3_se7_spi_sleep &qupv3_se7_spi_cs_sleep>;
 		interrupts = <GIC_SPI 354 IRQ_TYPE_LEVEL_HIGH>;
 		spi-max-frequency = <50000000>;
 		qcom,wrapper-core = <&qupv3_1>;

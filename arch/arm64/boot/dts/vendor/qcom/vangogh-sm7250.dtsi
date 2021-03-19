@@ -1,0 +1,477 @@
+ /*
+ file is for attribution only of vangogh
+ And public attribution of xiaomi platforms(like J12 and so and)
+ */
+
+#include "vangogh-pinctrl.dtsi"
+#include "xiaomi-sm7250-common.dtsi"
+
+&qupv3_se11_spi {
+	status = "ok";
+	irled@0 {
+		compatible = "ir-spi";
+		reg = <0x0>;
+		status = "ok";
+		spi-max-frequency = <19200000>;
+	};
+};
+
+&pm8150l_gpios {
+	aw8624_pins {
+		/* GPIO_10 : AW8624_INTERRUP_PIN */
+		aw8624_interrupt_pin: aw8624_interrupt_pin {
+			pins = "gpio10";
+			function = "gpio";
+			qcom,drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+};
+
+&rmtfs_sharedmem {
+    reg = <0x0 0x280000>;
+};
+
+&L10A {
+    regulator-min-microvolt = <3000000>;
+    regulator-max-microvolt = <3000000>;
+    qcom,init-voltage = <3000000>;
+};
+
+&qupv3_se9_i2c {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "ok";
+	qcom,clk-freq-out = <400000>;
+	#include "smb1398.dtsi"
+	/* AWINIC AW8624 Haptic */
+	aw8624_haptic@5A {
+		compatible = "awinic,aw8624_haptic";
+		reg = <0x5A>;
+		reset-gpio = <&tlmm 26 0>;
+		irq-gpio = <&pm8150l_gpios 10 0>;
+		vib_f0_pre = < 2050 >;
+		vib_f0_cali_percen = < 7 >;
+		vib_cont_drv_lev = < 106 >;
+		vib_cont_drv_lvl_ov = < 155 >;
+		vib_cont_td = < 0xF06C >;
+		vib_cont_zc_thr = < 0x08F8 >;
+		vib_cont_num_brk = < 3 >;
+		vib_f0_coeff = < 260 >; /*Don't modify it*/
+		vib_duration_time = < 15 60 0 0 0 >;
+		vib_brake_ram_config = < 1 1 90 60 20 3 1 3 1 1 90 60 30 5 1 3 0 0 50 40 25 0 5 3 >;
+		vib_brake_cont_config = < 1 1 90 42 20 5 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 >;
+		vib_f0_trace_parameter = < 9 5 1 15 >;
+		vib_bemf_config = < 0 8 3 0xf8 >;
+		vib_sw_brake = < 0x2c >;
+		vib_wavseq = < 0 1 1 2 0 0 0 0 0 0 0 0 0 0 0 0 >; /*wavseq1-seq8 0x07-0x0E*/
+		vib_wavloop = < 0 6 1 15 0 0 0 0 0 0>;/*loop1-mainloog 0x0f-0x13*/
+		vib_td_brake = < 42720 42720 42720 >; /*level0 level1 level2*/
+		vib_tset = < 0x11 >;
+		vib_func_parameter1 = < 1 >;
+		vib_gain_flag = < 1 >;
+		vib_r_spare = < 0x68 >;
+		vib_bstdbg = < 0x30 0xeb 0xd4 0 0 0 >;
+		vib_effect_id_boundary = < 10 >;
+		vib_effect_max = < 170 >;
+		vib_rtp_time = < 20 20 20 20 20 20 20 20 20 30
+				 40 50 60 70 80 90 100 110 120 130
+				 140 150 160 170 180 190 200 210 220 230
+				 240 250 260 270 280 290 300 310 320 330
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 20 20 20 20 20
+				 20 20 20 20 20 >;
+		pinctrl-names = "aw8624_reset_reset","aw8624_reset_active","aw8624_interrupt_active";
+		pinctrl-0 = <&msm_gpio_26>;
+		pinctrl-1 = <&msm_gpio_26_output_high>;
+		pinctrl-2 = <&aw8624_interrupt_pin>;
+		wf_0 {
+			/*CLICK*/
+			qcom,effect-id = <0>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_1 {
+			/*DOUBLE CLICK*/
+			qcom,effect-id = <1>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [7e 3e];
+			qcom,wf-brake-pattern = [03 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_2 {
+			/*TICK*/
+			qcom,effect-id = <2>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [7e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_3 {
+			/*THUD*/
+			qcom,effect-id = <3>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_4 {
+			/*POP*/
+			qcom,effect-id = <4>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <28000>;
+		};
+		wf_5 {
+			/*HEAVY CLICK*/
+			qcom,effect-id = <5>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [7e 7e 7e];
+			qcom,wf-brake-pattern = [03 03 01 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_6 {
+			/*id 6*/
+			qcom,effect-id = <6>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_7 {
+			/*id 7*/
+			qcom,effect-id = <7>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_8 {
+			/*id 8*/
+			qcom,effect-id = <8>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+		wf_9 {
+			/*id 9*/
+			qcom,effect-id = <9>;
+			qcom,wf-vmax-mv = <3600>;
+			qcom,wf-pattern = [3e 3e];
+			qcom,wf-brake-pattern = [02 01 00 00];
+			qcom,wf-play-rate-us = <20000>;
+		};
+	};
+	/* AWINIC AW8624 Haptic End */
+};
+
+&qupv3_se8_i2c {
+	status = "ok";
+
+        /* Speaker */
+	cs35l41@40 {
+		#sound-dai-cells = <1>;
+		compatible = "cirrus,cs35l41";
+		reset-gpios = <&tlmm 58 0>;
+		reg = <0x40>;
+		pinctrl-names = "cs35l41_irq_speaker";
+		pinctrl-0 = <&cs35l41_int_speaker>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 0>;
+		cirrus,temp-warn_threshold = <3>;
+		cirrus,boost-peak-milliamp = <4500>;
+		cirrus,boost-ind-nanohenry = <1000>;
+		cirrus,boost-cap-microfarad = <15>;
+		cirrus,asp-sdout-hiz = <1>;
+		cirrus,gpio-config2 {
+			cirrus,gpio-src-select = <0x4>;
+			cirrus,gpio-output-enable;
+		};
+	};
+};
+
+&mtp_batterydata {
+	qcom,batt-id-range-pct = <15>;
+	#include "batterydata_monet_J9_NVT_4160mAH.dtsi"
+	#include "batterydata_monet_J9_SWD_4160mAH.dtsi"
+};
+
+&pm7250b_charger {
+	status = "ok";
+	io-channels =
+		<&pm7250b_vadc ADC_USB_IN_V_16>,
+		<&pm7250b_vadc ADC_USB_IN_I>,
+		<&pm7250b_vadc ADC_CHG_TEMP>,
+		<&pm7250b_vadc ADC_DIE_TEMP>,
+		<&pm7250b_vadc ADC_AMUX_THM3_PU2>,
+		<&pm7250b_vadc ADC_SBUx>,
+		<&pm7250b_vadc ADC_VPH_PWR>;
+	io-channel-names =
+		"usb_in_voltage",
+		"usb_in_current",
+		"chg_temp",
+		"die_temp",
+		"conn_temp",
+		"sbux_res",
+		"vph_voltage";
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,sec-charger-config = <1>;
+	qcom,usb-icl-ua = <2800000>;
+	qcom,fcc-max-ua = <4000000>;
+	qcom,fv-max-uv = <4480000>;
+	qcom,float-option = <1>;
+	qcom,chg-term-src = <1>;
+	qcom,chg-term-current-ma = <(-200)>;
+	//qcom,auto-recharge-vbat-mv = <4440000>;
+	qcom,auto-recharge-soc = <98>;
+	qcom,step-charging-enable;
+	qcom,sw-jeita-enable;
+	qcom,lpd-disable;
+	dpdm-supply = <&usb2_phy0>;
+	qcom,en-qc3-with-cp;
+	mi,use-smb-pump;
+	qcom,distinguish-qc-class-ab;
+	//mi,use-bq-pump;
+	//qcom,usbpd-phandle = <&pm7250b_pdphy>;
+	//qcom,charger-temp-max = <800>;
+	//qcom,smb-temp-max = <800>;
+	//qcom,wd-bark-time-secs = <16>;
+	//qcom,suspend-input-on-debug-batt;
+	//qcom,fcc-stepping-enable;
+	qcom,support-conn-therm;
+	mi,support-ffc;
+
+	qcom,thermal-mitigation
+				= <4000000 4000000 3500000 3400000 3300000 3200000 3000000
+				   2800000 2600000 2400000 2200000 2000000 1800000 1500000
+				   1000000 500000>;
+	qcom,thermal-mitigation-icl
+				= <2800000 2700000 2600000 2400000 2200000 2100000 2000000
+				   1800000 1700000 1500000 1400000 1300000 1200000 1100000
+				   950000 750000>;
+	qcom,thermal-mitigation-dcp
+				= <1800000 1800000 1800000 1800000 1800000 1800000 1800000
+				   1800000 1800000 1700000 1600000 1400000 1200000 1100000
+				   1100000 1000000>;
+	qcom,thermal-mitigation-qc2
+				= <1500000 1500000 1500000 1500000 1450000 1400000 1350000
+				   1300000 1150000 1100000 1000000 900000 850000 750000
+				   650000 500000>;
+	qcom,thermal-fcc-qc3-normal
+				= <4000000 4000000 3600000 3500000 3400000 3300000 3200000
+				   3000000 2900000 2700000 2500000 2300000 2200000 2000000
+				   1000000 750000>;
+	qcom,thermal-fcc-qc3-cp
+				= <4000000 4000000 3600000 3500000 3400000 3300000 3200000
+				   3100000 3000000 2900000 2700000 2400000 2200000 2000000
+				   1000000 700000>;
+	qcom,thermal-mitigation-pd-base
+				= <3000000 2800000 2600000 2400000 2200000 2000000 1800000
+				   1600000 1600000 1400000 1200000 1100000 1050000 1000000
+				   950000 500000>;
+	qcom,thermal-fcc-pps-cp
+				= <3500000 3400000 3300000 3200000 3100000 3000000 2900000
+				   2800000 2700000 2600000 2400000 2200000 2000000 2000000
+				   750000 750000>;
+
+	vbus-disable-gpio = <&tlmm 67 GPIO_ACTIVE_HIGH>;
+	pinctrl-names = "default", "vbus_disable_active", "vbus_disable_suspend";
+	pinctrl-0 = <&vbus_disable_suspend>;
+	pinctrl-1 = <&vbus_disable_active>;
+	pinctrl-2 = <&vbus_disable_suspend>;
+};
+
+/*
+&pm7250b_pdphy {
+	mi,non-qcom-pps-ctrl;
+};
+*/
+
+&pm7250b_gpios {
+	smb_stat {
+		smb_stat_default: smb_stat_default {
+			pins = "gpio6";
+			function = "normal";
+			input-enable;
+			bias-pull-up;
+			qcom,pull-up-strength = <PMIC_GPIO_PULL_UP_30>;
+			power-source = <0>;
+		};
+	};
+};
+
+&pm7250b_qg {
+	status = "ok";
+	io-channels =
+		<&pm7250b_vadc ADC_BAT_THERM_PU2>,
+		<&pm7250b_vadc ADC_BAT_ID_PU2>;
+	io-channel-names =
+		"batt-therm",
+		"batt-id";
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,vbatt-cutoff-mv = <3400>;
+	qcom,vbatt-low-mv = <3300>;
+	qcom,vbatt-low-cold-mv = <3700>;
+	qcom,vbatt-empty-mv = <3100>;
+	qcom,vbatt-empty-cold-mv = <3100>;
+	qcom,s3-entry-fifo-length = <2>;
+	qcom,s3-entry-ibat-ua = <25000>;
+	qcom,s3-exit-ibat-ua = <45000>;
+	qcom,qg-iterm-ma = <350>;
+	qcom,hold-soc-while-full;
+	qcom,linearize-soc;
+	qcom,cl-feedback-on;
+	qcom,qg-ext-sns;
+	qcom,shutdown-soc-threshold = <3>;
+	qcom,tcss-enable;
+	qcom,shutdown-delay-enable;
+};
+
+&smb1396 {
+	/delete-property/ interrupts;
+	interrupts = <0x2 0xc5 0x0 IRQ_TYPE_LEVEL_LOW>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&smb_stat_default>;
+	status = "ok";
+};
+
+&smb1396_div2_cp_master {
+	io-channels = <&pm7250b_vadc ADC_AMUX_THM2>;
+	status = "ok";
+};
+
+&soc {
+	fingerprint_goodix {
+		compatible = "goodix,fingerprint";
+		goodix,gpio-pwr= <&tlmm 68 0x0>;
+		goodix,gpio-reset = <&tlmm 63 0x0>;
+		goodix,gpio-irq = <&tlmm 121 0x0>;
+                //fp_vdd_vreg-supply = <&pm8150_l13>;
+		status = "ok";
+	};
+	thermal_message: thermal-message {
+		board-sensor = "VIRTUAL-SENSOR";
+	};
+
+	simtray {
+		compatible = "xiaomi,simtray-status";
+		status-gpio = <&tlmm 82 0x00>;
+        };
+};
+
+&usb_qmp_dp_phy {
+	//vdd-supply = <&vdda_usb_ss_dp_core>;
+	status = "disabled";
+};
+
+&usb0 {
+	dwc3@a600000 {
+		usb-phy = <&usb2_phy0>, <&usb_nop_phy>;
+		maximum-speed = "high-speed";
+	};
+};
+
+&usb2_phy0 {
+	qcom,param-override-seq =
+		<0x64 0x6c
+		0x08 0x70
+		0x37 0x74>;
+};
+
+&qupv3_se7_i2c {
+	status = "ok";
+	focaltech@38 {
+		compatible = "focaltech,focal";
+		reg = <0x38>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <39 0x2002>;
+		/* vddio-supply = <&pm8150a_l1>; */
+		/* avdd-supply = <&pm8150a_l1>; */
+		focaltech,vdd-gpio = <&tlmm 8 0x0>;//3v
+		focaltech,avdd-load = <300000>;
+		focaltech,reset-gpio = <&tlmm 4 0x01>;
+		focaltech,irq-gpio = <&tlmm 5 0x02>;
+		focaltech,max-touch-number = <10>;
+		focaltech,display-coords = <0 0 1080 2400>;
+		focaltech,reset-when-resume;
+		focaltech,lockdown-info-addr = <0x1E000>;
+		focaltech,open-min = <2700>;
+		pinctrl-names = "pmx_tp_active", "pmx_tp_suspend";
+		pinctrl-0 = <&tp_active>;
+		pinctrl-1 = <&tp_int_suspend &tp_reset_suspend>;
+		/* focaltech,have-key; */
+	};
+};
+
+&pm8008_regulators {
+	vdd_l3_l4-supply = <&L9C>;
+	vdd_l5-supply = <&L9C>;
+	vdd_l7-supply = <&BOB>;
+};
+
+&L1P {
+	regulator-min-microvolt = <1200000>;
+	regulator-max-microvolt = <1200000>;
+	qcom,min-dropout-voltage = <100000>;
+};
+
+&L2P {
+	regulator-min-microvolt = <1050000>;
+	regulator-max-microvolt = <1200000>;
+	qcom,min-dropout-voltage = <100000>;
+};
+
+&L3P {
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+};
+
+&L4P {
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+};
+
+&L5P {
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+};
+
+&L6P {
+	regulator-min-microvolt = <1500000>;
+	regulator-max-microvolt = <1800000>;
+};
+
+&L7P {
+	regulator-min-microvolt = <2800000>;
+	regulator-max-microvolt = <2800000>;
+};
+
+&pm8150l_rgb_led {
+	red {
+		status = "disabled";
+	};
+
+	green {
+		status = "disabled";
+	};
+
+	blue {
+		label = "white";
+	};
+};

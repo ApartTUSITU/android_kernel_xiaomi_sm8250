@@ -26,7 +26,7 @@
 		clock-names = "gcc_iface", "gcc_bus", "gcc_nrt_bus",
 				"iface_clk", "core_clk", "vsync_clk",
 				"lut_clk", "rot_clk";
-		clock-rate = <0 0 0 0 460000000 19200000 460000000
+		clock-rate = <0 0 0 0 345000000 19200000 200000000
 						200000000>;
 		clock-max-rate = <0 0 0 0 460000000 19200000 460000000
 						460000000>;

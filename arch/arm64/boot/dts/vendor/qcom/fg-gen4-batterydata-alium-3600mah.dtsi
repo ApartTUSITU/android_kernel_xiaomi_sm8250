@@ -1,7 +1,7 @@
 qcom,alium_860_89032_0000_3600mah_averaged_masterslave_sep24th2018 {
 	/* #Alium_860_89032_0000_3600mAh_averaged_MasterSlave_Sept24th2018*/
 	qcom,max-voltage-uv = <4350000>;
-	qcom,fastchg-current-ma = <5400>;
+	qcom,fastchg-current-ma = <6250>;
 	qcom,jeita-fcc-ranges = <0  100  2500000
 				101 400  3600000
 				401 450  2500000>;

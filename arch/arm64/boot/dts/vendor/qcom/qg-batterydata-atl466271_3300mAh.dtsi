@@ -1,28 +1,29 @@
 qcom,ATL466271_3300mAh {
 	/* ATL466271_3300mAh_averaged_MasterSlave_Jun12th2019 */
-	qcom,max-voltage-uv = <4400000>;
-	qcom,fg-cc-cv-threshold-uv = <4390000>;
-	qcom,fastchg-current-ma = <8000>;
+	qcom,max-voltage-uv = <4450000>;
+	qcom,fg-cc-cv-threshold-uv = <4440000>;
+	qcom,fastchg-current-ma = <3600>;
+	qcom,nom-batt-capacity-mah = <4190>;
 	qcom,batt-id-kohm = <24>;
 	qcom,battery-beta = <4250>;
 	qcom,battery-therm-kohm = <100>;
 	qcom,battery-type =
-		"ATL466271_3300mAh_averaged_MasterSlave_Jun12th2019";
+		"Default_battery_ATL466271";
 	qcom,qg-batt-profile-ver = <100>;
 
-	qcom,jeita-fcc-ranges = <0  100  1600000
-				101 200  3200000
-				201 450  8000000
-				451 550  1600000>;
-
-	qcom,jeita-fv-ranges = <0   100  4400000
-				101 200  4400000
-				201 450  4400000
-				451 550  4050000>;
-
-	qcom,step-chg-ranges = <3500000  4000000  8000000
-				4000001  4200000  6000000
-				4200001  4400000  4000000>;
+	qcom,jeita-fcc-ranges = <0  50   810000
+				51  100  2030000
+				101 150  3250000
+				151 450  3600000
+				451 600  2030000>;
+	qcom,jeita-fv-ranges = <0   50   4450000
+				51  100  4450000
+				101 150  4450000
+				151 450  4050000
+				451 600  4100000>;
+	qcom,step-chg-ranges = <3400000  4000000  3600000
+				4000001  4300000  3000000
+				4300001  4450000  1800000>;
 	qcom,ocv-based-step-chg;
 
 	/* COOL = 10 degc, WARM = 45 degC */

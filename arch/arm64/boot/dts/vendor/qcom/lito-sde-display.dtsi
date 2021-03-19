@@ -55,7 +55,7 @@
 			qcom,supply-max-voltage = <1800000>;
 			qcom,supply-enable-load = <62000>;
 			qcom,supply-disable-load = <80>;
-			qcom,supply-post-on-sleep = <20>;
+			qcom,supply-post-on-sleep = <0>;
 		};
 
 		qcom,panel-supply-entry@1 {
@@ -110,6 +110,16 @@
 			qcom,supply-enable-load = <100000>;
 			qcom,supply-disable-load = <100>;
 		};
+
+		qcom,panel-supply-entry@2 {
+			reg = <2>;
+			qcom,supply-name = "avee";
+			qcom,supply-min-voltage = <4600000>;
+			qcom,supply-max-voltage = <6000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-post-on-sleep = <20>;
+		};
 	};
 
 	dsi_panel_pwr_supply_no_labibb: dsi_panel_pwr_supply_no_labibb {
@@ -123,6 +133,40 @@
 			qcom,supply-max-voltage = <1800000>;
 			qcom,supply-enable-load = <62000>;
 			qcom,supply-disable-load = <80>;
+			qcom,supply-post-on-sleep = <20>;
+		};
+	};
+
+	dsi_panel_pwr_supply_labibb: dsi_panel_pwr_supply_labibb {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-post-on-sleep = <20>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "lab";
+			qcom,supply-min-voltage = <4600000>;
+			qcom,supply-max-voltage = <6000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+		};
+
+		qcom,panel-supply-entry@2 {
+			reg = <2>;
+			qcom,supply-name = "ibb";
+			qcom,supply-min-voltage = <4600000>;
+			qcom,supply-max-voltage = <6000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
 			qcom,supply-post-on-sleep = <20>;
 		};
 	};
@@ -162,6 +206,8 @@
 
 		vddio-supply = <&L1C>;
 		vdd-supply = <&L16A>;
+		avdd-supply = <&lcdb_ldo_vreg>;
+		avee-supply = <&lcdb_ncp_vreg>;
 		lab-supply = <&ab_vreg>;
 		ibb-supply = <&ibb_vreg>;
 
@@ -200,14 +246,6 @@
 		compatible = "qcom,wb-display";
 		cell-index = <0>;
 		label = "wb_display";
-	};
-
-	msm_notifier: qcom,msm_notifier@0 {
-		compatible = "qcom,msm-notifier";
-		panel = <&dsi_sw43404_amoled_cmd &dsi_sharp_qsync_wqhd_cmd
-			&dsi_dual_sim_dsc_375_cmd &dsi_sw43404_amoled_video
-			&dsi_sharp_qsync_wqhd_video &dsi_sharp_qsync_fhd_cmd
-			&dsi_sharp_qsync_fhd_video>;
 	};
 };
 

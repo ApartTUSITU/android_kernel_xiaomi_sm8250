@@ -1,0 +1,116 @@
+/*
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+//#include "lito-audio-overlay.dtsi"
+
+&lito_snd {
+	qcom,model = "lito-mtp-snd-card";
+	qcom,msm-mi2s-master = <1>, <1>, <1>, <1>, <1>, <1>;
+	qcom,wcn-btfm = <1>;
+	qcom,ext-disp-audio-rx = <1>;
+	qcom,audio-routing =
+		// wcd9385 TX
+		"AMIC1", "MIC BIAS1",
+		"MIC BIAS1", "Handset Mic",
+		"AMIC2", "MIC BIAS2",
+		"MIC BIAS2", "Headset Mic",
+		"AMIC5", "MIC BIAS3",
+		"MIC BIAS3", "Secondary Mic",
+		// WCD9385 <--- Bolero
+		"IN1_HPHL", "HPHL_OUT",
+		"IN2_HPHR", "HPHR_OUT",
+		"IN3_AUX", "AUX_OUT",
+		// WCD9385 ---> Bolero
+		"TX SWR_ADC0", "ADC1_OUTPUT",
+		"TX SWR_ADC1", "ADC2_OUTPUT",
+		"TX SWR_ADC2", "ADC3_OUTPUT",
+		"TX SWR_ADC3", "ADC4_OUTPUT",
+		// IIR Loopback
+		"RX_TX DEC0_INP", "TX DEC0 MUX",
+		"RX_TX DEC1_INP", "TX DEC1 MUX",
+		"RX_TX DEC2_INP", "TX DEC2 MUX",
+		"RX_TX DEC3_INP", "TX DEC3 MUX",
+		// VA
+		"VA_AIF1 CAP", "VA_SWR_CLK",
+		"VA_AIF2 CAP", "VA_SWR_CLK",
+		"VA_AIF3 CAP", "VA_SWR_CLK",
+		"VA DMIC0", "MIC BIAS3",
+		"VA DMIC1", "MIC BIAS3",
+		"VA DMIC2", "MIC BIAS1",
+		"VA DMIC3", "MIC BIAS1",
+		"VA DMIC4", "MIC BIAS4",
+		"VA DMIC5", "MIC BIAS4",
+		"VA SWR_ADC0", "ADC1_OUTPUT",
+		"VA SWR_ADC1", "ADC2_OUTPUT",
+		"VA SWR_ADC2", "ADC3_OUTPUT",
+		"VA SWR_ADC3", "ADC4_OUTPUT";
+	qcom,msm-mbhc-hphl-swh = <1>;
+	qcom,msm-mbhc-gnd-swh = <1>;
+	/*qcom,cdc-dmic01-gpios = <&cdc_dmic01_gpios>;*/
+	qcom,cdc-dmic23-gpios = <&cdc_dmic23_gpios>;
+	qcom,cdc-dmic45-gpios = <&cdc_dmic45_gpios>;
+	qcom,sec-mi2s-gpios = <&cdc_sec_mi2s_gpios>;//
+	asoc-codec  = <&stub_codec>, <&bolero>, <&ext_disp_audio_codec>;
+	asoc-codec-names = "msm-stub-codec.1", "bolero_codec",
+			   "msm-ext-disp-audio-codec-rx";
+	qcom,wsa-max-devs = <0>;
+	qcom,wsa-devs = <&wsa881x_0211>, <&wsa881x_0212>,
+			<&wsa881x_0213>, <&wsa881x_0214>;
+	qcom,wsa-aux-dev-prefix = "SpkrLeft", "SpkrRight",
+				  "SpkrLeft", "SpkrRight";
+	qcom,codec-max-aux-devs = <1>;
+	qcom,codec-aux-devs = <&wcd938x_codec>;
+	qcom,msm_audio_ssr_devs = <&audio_apr>, <&q6core>, <&bolero>,
+				  <&lpi_tlmm>;
+};
+
+&soc {
+       cdc_sec_mi2s_gpios: msm_cdc_pinctrl_sec {
+               compatible = "qcom,msm-cdc-pinctrl";
+               pinctrl-names = "aud_active", "aud_sleep";
+               pinctrl-0 = <&sec_i2s_sck_active &sec_i2s_ws_active
+                            &sec_i2s_data0_active &sec_i2s_data1_active>;
+               pinctrl-1 = <&sec_i2s_sck_sleep &sec_i2s_ws_sleep
+                            &sec_i2s_data0_sleep &sec_i2s_data1_sleep>;
+       };
+};
+
+&wsa_swr_gpios {
+	status = "disabled";
+};
+
+&wsa_spkr_en1 {
+	status = "disabled";
+};
+
+&wsa_spkr_en2 {
+	status = "disabled";
+};
+
+&bolero {
+	qcom,num-macros = <3>;
+};
+
+&wsa_macro {
+	compatible = "qcom,wsa-macro";
+	status = "disabled";
+};
+
+&wcd938x_codec {
+	compatible = "qcom,wcd938x-codec";
+        qcom,cdc-micbias1-mv = <2750>;
+        qcom,cdc-micbias2-mv = <2750>;
+        qcom,cdc-micbias3-mv = <2750>;
+        qcom,cdc-micbias4-mv = <2750>;
+};

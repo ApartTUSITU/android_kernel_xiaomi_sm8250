@@ -1,0 +1,146 @@
+
+qcom,04916363_xiaomi_k11_4520mah_averaged_masterslave_nov9th2020 {
+	qcom,profile-revision = <24>;
+	/* #04916363_Xiaomi_K11_4520mah_averaged_MasterSlave_Nov9th2020*/
+	qcom,max-voltage-uv = <4480000>;
+	qcom,fastchg-current-ma = <6000>;
+	qcom,jeita-fcc-ranges = <(-100)  0   442000
+				1  50  884000
+				51  100  2210000
+				101 150  3536000
+				151 480  6000000
+				481 580  2210000>;
+	qcom,jeita-fv-ranges = <(-100)  0   4450000
+				1   50  4450000
+				51  100  4450000
+				101 150  4450000
+				151 480  4480000
+				481 580  4100000>;
+	qcom,jeita-too-hot = <580>;
+	qcom,jeita-too-cold = <(-100)>;
+	qcom,jeita-warm-th= <480>;
+	qcom,jeita-cool-th= <150>;
+	qcom,use-bq-pump;
+	mi,six-pin-battery;
+	qcom,ffc-term-current-ma = <(-666)>;
+	qcom,fg-cc-cv-threshold-mv = <4440>;
+	qcom,fg-ffc-cc-cv-threshold-mv = <4490>;
+	qcom,nom-batt-capacity-mah = <4520>;
+	qcom,batt-id-kohm = <100>;
+	qcom,battery-beta = <4250>;
+	qcom,therm-room-temp = <100000>;
+	qcom,battery-type = "K11A_GY_4520mah";
+	qcom,therm-coefficients = <0x2318 0xd0c 0xdaf7 0xc556 0x848d>;
+	qcom,therm-center-offset = <0x70>;
+	qcom,therm-pull-up = <100>;
+	qcom,rslow-normal-coeffs = <0x25 0x0c 0x65 0x0b>;
+	qcom,rslow-low-coeffs = <0xb0 0x14 0x1e 0x05>;
+	qcom,checksum = <0x6477>;
+	qcom,gui-version = "PM855GUI - 1.0.0.14";
+	qcom,fg-profile-data = [
+		 09 00 49 E2
+		 A4 DD 5E E2
+		 42 DD 00 00
+		 54 B5 D2 82
+		 FC 87 15 8D
+		 AC 82 0E 80
+		 35 00 25 0C
+		 65 0B 50 04
+		 83 02 CE 07
+		 32 00 5F EB
+		 64 ED 5F D5
+		 78 0B CF EA
+		 36 B5 28 00
+		 28 D5 33 D2
+		 60 00 39 00
+		 40 00 45 00
+		 38 00 2D 00
+		 35 00 40 00
+		 3F 00 44 00
+		 42 00 60 00
+		 34 00 36 00
+		 3A 00 37 00
+		 35 00 5F 00
+		 46 64 40 00
+		 43 00 3F 08
+		 60 00 44 00
+		 43 08 6E 10
+		 55 10 49 00
+		 8A 28 60 50
+		 51 68 4A 09
+		 4A 00 D8 00
+		 73 20 2E 0C
+		 B5 03 2E 05
+		 12 1C 3C 0A
+		 A1 0C B0 2B
+		 D3 16 A3 4B
+		 E1 5C B0 03
+		 65 10 25 20
+		 AA 04 80 0B
+		 2E 05 D5 1C
+		 12 02 9C 05
+		 DF 02 1D 17
+		 26 22 FA 45
+		 9D 52 75 12
+		 AB 20 39 E4
+		 BD C3 FF BC
+		 DF 1C 9B C1
+		 4E 05 67 B3
+		 3A 17 DD 83
+		 A6 84 F8 9B
+		 87 98 09 80
+		 23 02 35 F5
+		 F9 04 E8 03
+		 00 F8 82 CD
+		 92 E2 FD 07
+		 AF EA 16 CD
+		 0C 20 21 08
+		 54 ED 89 02
+		 83 05 81 01
+		 CE 07 32 00
+		 2F 03 55 04
+		 56 05 5E 03
+		 29 05 21 02
+		 47 03 C2 02
+		 66 05 59 00
+		 40 00 42 00
+		 41 64 44 00
+		 45 00 3E 08
+		 40 00 44 00
+		 44 00 37 10
+		 45 10 3E 00
+		 4C 28 4B 48
+		 50 60 58 0C
+		 3F 00 45 00
+		 4F 08 49 00
+		 35 00 44 00
+		 44 10 58 10
+		 4F 00 5F 20
+		 74 40 46 58
+		 55 0E 52 00
+		 3B 08 25 10
+		 D8 00 D3 20
+		 64 04 70 0B
+		 5D 0D C0 1C
+		 81 23 95 45
+		 8D 52 51 18
+		 3D 02 43 05
+		 54 02 6E 11
+		 3F 0A 75 20
+		 85 04 94 03
+		 17 05 BE 1C
+		 47 03 B1 05
+		 97 02 7C 18
+		 BB 03 14 04
+		 DE 02 69 00
+		 6A 21 BA 05
+		 2C 02 66 04
+		 F2 1C 00 02
+		 F1 05 5E 02
+		 8C 18 3B 03
+		 10 05 AC 03
+		 83 00 B9 00
+		 C0 00 FA 00
+		 CF 11 00 00
+	];
+};

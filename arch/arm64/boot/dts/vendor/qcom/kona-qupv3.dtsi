@@ -477,9 +477,10 @@
 		clocks = <&clock_gcc GCC_QUPV3_WRAP1_S4_CLK>,
 			<&clock_gcc GCC_QUPV3_WRAP_1_M_AHB_CLK>,
 			<&clock_gcc GCC_QUPV3_WRAP_1_S_AHB_CLK>;
-		pinctrl-names = "default", "sleep";
+		pinctrl-names = "default", "sleep", "init";
 		pinctrl-0 = <&qupv3_se12_2uart_active>;
 		pinctrl-1 = <&qupv3_se12_2uart_sleep>;
+		pinctrl-2 = <&qupv3_se12_2uart_init>;
 		interrupts = <GIC_SPI 357 IRQ_TYPE_LEVEL_HIGH>;
 		qcom,wrapper-core = <&qupv3_1>;
 		qcom,change-sampling-rate;

@@ -54,35 +54,6 @@
 	vdda-0p9-supply = <&vdda_usb_ss_dp_core>;
 };
 
-&qupv3_se7_i2c {
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	status = "ok";
-	qcom,i2c-touch-active = "st,fts";
-
-	st_fts@49 {
-		compatible = "st,fts";
-		reg = <0x49>;
-		interrupt-parent = <&tlmm>;
-		interrupts = <9 0x2008>;
-		vdd-supply = <&pm8150_s4>;
-		avdd-supply = <&pm8150_l13>;
-		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
-		pinctrl-0 = <&ts_active>;
-		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
-		st,irq-gpio = <&tlmm 9 0x2008>;
-		st,reset-gpio = <&tlmm 8 0x00>;
-		st,regulator_dvdd = "vdd";
-		st,regulator_avdd = "avdd";
-		st,x-flip;
-		st,y-flip;
-		st,power_on_suspend;
-		panel = <&dsi_sw43404_amoled_cmd &dsi_sw43404_amoled_video
-			 &dsi_sw43404_amoled_fhd_plus_cmd>;
-	};
-};
-
 &tlmm {
 	pmx_ts_active {
 		ts_active: ts_active {
@@ -102,14 +73,15 @@
 	pmx_ts_int_suspend {
 		ts_int_suspend: ts_int_suspend {
 			mux {
-				pins = "gpio9";
+				pins = "gpio5";
 				function = "gpio";
 			};
 
 			config {
-				pins = "gpio9";
-				drive-strength = <2>;
-				bias-pull-down;
+				pins = "gpio5";
+				drive-strength = <16>;
+				bias-disable;
+				input-enable;
 			};
 		};
 	};
@@ -117,14 +89,14 @@
 	pmx_ts_reset_suspend {
 		ts_reset_suspend: ts_reset_suspend {
 			mux {
-				pins = "gpio8";
+				pins = "gpio4";
 				function = "gpio";
 			};
 
 			config {
-				pins = "gpio8";
-				drive-strength = <2>;
-				bias-pull-down;
+				pins = "gpio4";
+				drive-strength = <16>;
+				bias-disable;
 			};
 		};
 	};
@@ -725,8 +697,8 @@
 	qcom,wsa-devs = <&wsa881x_0212>, <&wsa881x_0214>;
 	qcom,wsa-aux-dev-prefix = "SpkrRight", "SpkrRight";
 	qcom,msm-mbhc-usbc-audio-supported = <1>;
-	qcom,msm-mbhc-hphl-swh = <0>;
-	qcom,msm-mbhc-gnd-swh = <0>;
+	qcom,msm-mbhc-hphl-swh = <1>;
+	qcom,msm-mbhc-gnd-swh = <1>;
 };
 
 &dsi_sw43404_amoled_video {
