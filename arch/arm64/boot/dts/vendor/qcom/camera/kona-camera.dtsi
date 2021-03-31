@@ -260,7 +260,7 @@
 			hw-thd-dat = <16>;
 			hw-thd-sta = <15>;
 			hw-tbuf = <24>;
-			hw-scl-stretch-en = <0>;
+			hw-scl-stretch-en = <1>;
 			hw-trdhld = <3>;
 			hw-tsp = <3>;
 			cci-clk-src = <37500000>;
@@ -1444,11 +1444,11 @@
 			"ife_clk";
 		clocks =
 			<&clock_camcc CAM_CC_IFE_LITE_CSID_CLK_SRC>,
-			<&clock_camcc CAM_CC_IFE_LITE_CSID_CLK>,
 			<&clock_camcc CAM_CC_CPHY_RX_CLK_SRC>,
 			<&clock_camcc CAM_CC_IFE_LITE_CPHY_RX_CLK>,
 			<&clock_camcc CAM_CC_IFE_LITE_CLK_SRC>,
 			<&clock_camcc CAM_CC_IFE_LITE_AHB_CLK>,
+			<&clock_camcc CAM_CC_IFE_LITE_CSID_CLK>,
 			<&clock_camcc CAM_CC_IFE_LITE_CLK>;
 		clock-rates =
 			<400000000 0 0 0 400000000 0 0>,
