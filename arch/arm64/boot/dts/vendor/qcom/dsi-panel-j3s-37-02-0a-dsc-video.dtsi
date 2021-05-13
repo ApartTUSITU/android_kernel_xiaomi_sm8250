@@ -52,7 +52,7 @@
 			17000 15500 30000 8000 3000>;
 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
 		qcom,mdss-dsi-panel-blackness-level = <3230>;
-		/* qcom,mdss-dsi-qsync-min-refresh-rate = <60>; */
+		qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
 		qcom,mdss-dsi-pan-enable-dynamic-fps;
 		qcom,mdss-dsi-pan-fps-update =
 				"dfps_immediate_porch_mode_vfp";
