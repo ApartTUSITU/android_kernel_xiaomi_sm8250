@@ -499,8 +499,8 @@
 	mi,mdss-dsi-panel-hbm-off-51-index = <1>;
 	mi,esd-err-irq-gpio = <&tlmm 51 0x2001>;
 	mi,mdss-panel-on-dimming-delay = <120>;
-	mi,mdss-dsi-pan-enable-smart-fps;
-	mi,mdss-dsi-smart-fps-max_framerate = <120>;
+	// mi,mdss-dsi-pan-enable-smart-fps;
+	// mi,mdss-dsi-smart-fps-max_framerate = <120>;
 	mi,mdss-dsi-panel-hbm-brightness = <1>;
 	mi,mdss-dsi-panel-dc-threshold = <440>;
 	mi,mdss-dsi-panel-max-brightness-clone = <8191>;

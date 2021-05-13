@@ -361,7 +361,7 @@
 	mi,esd-err-irq-gpio = <&tlmm 51 0x2002>; /* trig-flags: falling-0x0002 rasing-0x0001*/
 	mi,mdss-dsi-panel-xy-coordinate = <0x6 0x18>;
 	mi,mdss-dsi-panel-max-luminance = <0x6 0x4>;
-	mi,mdss-dsi-pan-enable-smart-fps;
+	// mi,mdss-dsi-pan-enable-smart-fps;
 	mi,mdss-panel-idle-fps = <60>;
 
 	qcom,mdss-dsi-display-timings {
