@@ -35,6 +35,8 @@
 #include <linux/log2.h>
 #include <linux/bitmap.h>
 
+#include <linux/pinctrl/pinctrl_mi.h>
+
 #include "../core.h"
 #include "../pinconf.h"
 #include "pinctrl-msm.h"
@@ -486,6 +488,17 @@ static int msm_gpio_get(struct gpio_chip *chip, unsigned offset)
 	val = readl(pctrl->regs + g->io_reg);
 	return !!(val & BIT(g->in_bit));
 }
+
+void __iomem *msm_gpio_regadd_get(unsigned offset)
+{
+	const struct msm_pingroup *g;
+	struct msm_pinctrl *pctrl = gpiochip_get_data(&msm_pinctrl_data->chip);
+
+	g = &pctrl->soc->groups[offset];
+
+	return (pctrl->regs + g->io_reg);
+}
+EXPORT_SYMBOL(msm_gpio_regadd_get);
 
 static void msm_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 {
