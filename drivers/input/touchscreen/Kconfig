@@ -1360,4 +1360,6 @@ source "drivers/input/touchscreen/focaltech_spi/Kconfig"
 
 source "drivers/input/touchscreen/fts_521/Kconfig"
 
+source "drivers/input/touchscreen/goodix_driver_gt9886/Kconfig"
+
 endif
