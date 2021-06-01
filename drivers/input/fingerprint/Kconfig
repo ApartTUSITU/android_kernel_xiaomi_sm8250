@@ -1,0 +1,10 @@
+#
+# Fingerprint sensor configuration
+#
+menuconfig INPUT_FINGERPRINT
+	bool "Fingerprint sensors"
+	help
+	  Say Y here, and a list of supported fingerprint sensors will be displayed.
+	  This option doesn't affect the kernel.
+
+	  If unsure, say N.
