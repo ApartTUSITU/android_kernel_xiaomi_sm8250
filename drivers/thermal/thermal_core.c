@@ -22,6 +22,12 @@
 #include <net/netlink.h>
 #include <net/genetlink.h>
 #include <linux/suspend.h>
+#include <linux/cpu_cooling.h>
+#include <linux/power_supply.h>
+
+#ifdef CONFIG_DRM
+#include <drm/drm_notifier_mi.h>
+#endif
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/thermal.h>
@@ -34,6 +40,8 @@ MODULE_DESCRIPTION("Generic thermal management sysfs support");
 MODULE_LICENSE("GPL v2");
 
 #define THERMAL_MAX_ACTIVE	16
+#define CPU_LIMITS_PARAM_NUM	2
+#define BOARD_BUFFER_SIZE 128
 
 static DEFINE_IDA(thermal_tz_ida);
 static DEFINE_IDA(thermal_cdev_ida);
@@ -52,6 +60,37 @@ static bool power_off_triggered;
 static struct thermal_governor *def_governor;
 
 static struct workqueue_struct *thermal_passive_wq;
+
+#ifdef CONFIG_DRM
+struct screen_monitor {
+	struct notifier_block thermal_notifier;
+	int screen_state; /* 1: on; 0:off */
+};
+
+struct screen_monitor sm;
+#endif
+
+struct usb_monitor {
+	struct notifier_block psy_notifier;
+	int usb_online;
+};
+
+struct usb_monitor usb_state;
+static atomic_t charger_mode = ATOMIC_INIT(-1);
+
+static struct device thermal_message_dev;
+static atomic_t switch_mode = ATOMIC_INIT(-1);
+static atomic_t balance_mode = ATOMIC_INIT(0);
+static atomic_t temp_state = ATOMIC_INIT(0);
+static atomic_t modem_limit = ATOMIC_INIT(0);
+static atomic_t market_download_limit = ATOMIC_INIT(0);
+static atomic_t board_sensor_temp_comp_default = ATOMIC_INIT(0);
+static char boost_buf[128];
+const char *board_sensor;
+static char board_sensor_temp[128];
+static char board_sensor_second_temp[128];
+const char *ambient_sensor;
+static char ambient_sensor_temp[128];
 
 /*
  * Governor section: set of functions to handle thermal governors
@@ -472,6 +511,7 @@ static void update_temperature(struct thermal_zone_device *tz)
 static void thermal_zone_device_init(struct thermal_zone_device *tz)
 {
 	struct thermal_instance *pos;
+
 	tz->temperature = THERMAL_TEMP_INVALID;
 	tz->prev_low_trip = -INT_MAX;
 	tz->prev_high_trip = INT_MAX;
@@ -830,7 +870,7 @@ int thermal_zone_bind_cooling_device(struct thermal_zone_device *tz,
 		 "cdev%d_weight", dev->id);
 	sysfs_attr_init(&dev->weight_attr.attr);
 	dev->weight_attr.attr.name = dev->weight_attr_name;
-	dev->weight_attr.attr.mode = S_IWUSR | S_IRUGO;
+	dev->weight_attr.attr.mode = 0644;
 	dev->weight_attr.show = weight_show;
 	dev->weight_attr.store = weight_store;
 	result = device_create_file(&tz->device, &dev->weight_attr);
@@ -1661,6 +1701,518 @@ static struct notifier_block thermal_pm_nb = {
 	.notifier_call = thermal_pm_notify,
 };
 
+static int of_parse_thermal_message(void)
+{
+	struct device_node *np;
+
+	np = of_find_node_by_name(NULL, "thermal-message");
+	if (!np)
+		return -EINVAL;
+
+	if (of_property_read_string(np, "board-sensor", &board_sensor))
+		return -EINVAL;
+	pr_info("%s board sensor: %s\n", __func__, board_sensor);
+
+	if (of_property_read_string(np, "ambient-sensor", &ambient_sensor))
+		return -EINVAL;
+	pr_info("%s ambient sensor: %s\n", __func__, ambient_sensor);
+
+	return 0;
+}
+
+#ifdef CONFIG_DRM
+static ssize_t screen_state_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", sm.screen_state);
+}
+
+static DEVICE_ATTR_RO(screen_state);
+#endif
+
+static ssize_t usb_online_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", usb_state.usb_online);
+}
+
+static DEVICE_ATTR_RO(usb_online);
+
+static ssize_t sconfig_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&switch_mode));
+}
+
+static ssize_t sconfig_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&switch_mode, val);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(sconfig);
+
+static ssize_t charger_temp_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&charger_mode));
+}
+
+static ssize_t charger_temp_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&charger_mode, val);
+
+	return len;
+}
+static DEVICE_ATTR_RW(charger_temp);
+
+static ssize_t balance_mode_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&balance_mode));
+}
+
+static ssize_t balance_mode_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&balance_mode, val);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(balance_mode);
+
+static ssize_t boost_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, boost_buf);
+}
+
+static ssize_t boost_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int ret;
+
+	ret = snprintf(boost_buf, sizeof(boost_buf), buf);
+	return len;
+}
+
+static DEVICE_ATTR_RW(boost);
+
+static ssize_t temp_state_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&temp_state));
+}
+
+static ssize_t temp_state_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&temp_state, val);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(temp_state);
+
+static ssize_t cpu_limits_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return 0;
+}
+
+static ssize_t cpu_limits_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	unsigned int cpu;
+	unsigned int max;
+
+	if (sscanf(buf, "cpu%u %u", &cpu, &max) != CPU_LIMITS_PARAM_NUM) {
+		pr_err("input param error, can not parse param\n");
+		return -EINVAL;
+	}
+
+	cpu_limits_set_level(cpu, max);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(cpu_limits);
+
+static ssize_t board_sensor_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	if (!board_sensor)
+		board_sensor = "invalid";
+
+	return snprintf(buf, PAGE_SIZE, "%s", board_sensor);
+}
+
+static DEVICE_ATTR_RO(board_sensor);
+
+static ssize_t board_sensor_temp_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, board_sensor_temp);
+}
+
+static ssize_t board_sensor_temp_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	snprintf(board_sensor_temp, BOARD_BUFFER_SIZE, buf);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(board_sensor_temp);
+
+static ssize_t board_sensor_second_temp_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, board_sensor_second_temp);
+}
+
+static ssize_t board_sensor_second_temp_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	snprintf(board_sensor_second_temp, BOARD_BUFFER_SIZE, buf);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(board_sensor_second_temp);
+
+static ssize_t board_sensor_temp_comp_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n",
+			atomic_read(&board_sensor_temp_comp_default));
+}
+
+static ssize_t board_sensor_temp_comp_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&board_sensor_temp_comp_default, val);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(board_sensor_temp_comp);
+
+static ssize_t modem_limit_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&modem_limit));
+}
+
+static ssize_t modem_limit_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&modem_limit, val);
+	return len;
+}
+
+static DEVICE_ATTR_RW(modem_limit);
+
+static ssize_t market_download_limit_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&market_download_limit));
+}
+static ssize_t market_download_limit_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	int val = -1;
+
+	val = simple_strtol(buf, NULL, 10);
+
+	atomic_set(&market_download_limit, val);
+	return len;
+}
+
+static DEVICE_ATTR_RW(market_download_limit);
+
+static ssize_t ambient_sensor_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	if (!ambient_sensor)
+		ambient_sensor = "invalid";
+
+	return snprintf(buf, PAGE_SIZE, "%s", ambient_sensor);
+}
+
+static DEVICE_ATTR_RO(ambient_sensor);
+
+static ssize_t ambient_sensor_temp_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, ambient_sensor_temp);
+}
+
+static ssize_t ambient_sensor_temp_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t len)
+{
+	snprintf(ambient_sensor_temp, BOARD_BUFFER_SIZE, buf);
+
+	return len;
+}
+
+static DEVICE_ATTR_RW(ambient_sensor_temp);
+
+static int create_thermal_message_node(void)
+{
+	int ret = 0;
+
+	thermal_message_dev.class = &thermal_class;
+
+	dev_set_name(&thermal_message_dev, "thermal_message");
+	ret = device_register(&thermal_message_dev);
+	if (!ret) {
+#ifdef CONFIG_DRM
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_screen_state.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create batt message node failed\n");
+#endif
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_usb_online.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create usb online node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_sconfig.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create sconfig node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_balance_mode.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create balance mode node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_boost.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create boost node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_temp_state.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create temp state node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_cpu_limits.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create cpu limits node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_board_sensor.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create board sensor node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_board_sensor_temp.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create board sensor temp node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_board_sensor_second_temp.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create board sensor second temp node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_board_sensor_temp_comp.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create board sensor temp comp node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_charger_temp.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create charger temp node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_modem_limit.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create modem limit node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_market_download_limit.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create market download limit node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_ambient_sensor.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create ambient sensor node failed\n");
+
+		ret = sysfs_create_file(&thermal_message_dev.kobj,
+					&dev_attr_ambient_sensor_temp.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create ambient sensor temp node failed\n");
+	}
+	return ret;
+}
+
+static void destroy_thermal_message_node(void)
+{
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_market_download_limit.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_charger_temp.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_modem_limit.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_board_sensor_second_temp.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_board_sensor_temp.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_board_sensor_temp_comp.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_board_sensor.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_cpu_limits.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_temp_state.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_boost.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_sconfig.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_balance_mode.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_ambient_sensor_temp.attr);
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_ambient_sensor.attr);
+
+#ifdef CONFIG_DRM
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_screen_state.attr);
+#endif
+
+	sysfs_remove_file(&thermal_message_dev.kobj,
+			  &dev_attr_usb_online.attr);
+
+	device_unregister(&thermal_message_dev);
+}
+
+#ifdef CONFIG_DRM
+static const char *get_screen_state_name(int mode)
+{
+	switch (mode) {
+	case MI_DRM_BLANK_UNBLANK:
+		return "On";
+	case MI_DRM_BLANK_LP1:
+		return "Doze";
+	case MI_DRM_BLANK_LP2:
+		return "DozeSuspend";
+	case MI_DRM_BLANK_POWERDOWN:
+		return "Off";
+	default:
+		return "Unknown";
+	}
+}
+
+static int screen_state_for_thermal_callback(struct notifier_block *nb,
+		unsigned long val, void *data)
+{
+	struct mi_drm_notifier *evdata = data;
+	unsigned int blank;
+
+	if (val != MI_DRM_EVENT_BLANK || !evdata || !evdata->data)
+		return 0;
+
+	blank = *(int *)(evdata->data);
+	switch (blank) {
+	case MI_DRM_BLANK_UNBLANK:
+		sm.screen_state = 1;
+		break;
+	case MI_DRM_BLANK_LP1:
+	case MI_DRM_BLANK_LP2:
+	case MI_DRM_BLANK_POWERDOWN:
+		sm.screen_state = 0;
+		break;
+	default:
+		break;
+	}
+
+	pr_warn("%s: %s, sm.screen_state = %d\n", __func__,
+			get_screen_state_name(blank), sm.screen_state);
+
+	sysfs_notify(&thermal_message_dev.kobj, NULL, "screen_state");
+
+	return NOTIFY_OK;
+}
+#endif
+
+static int usb_online_callback(struct notifier_block *nb,
+		unsigned long val, void *data)
+{
+	static struct power_supply *usb_psy;
+	struct power_supply *psy = data;
+	union power_supply_propval ret = {0,};
+	int err = 0;
+
+	if (strcmp(psy->desc->name, "usb"))
+		return NOTIFY_OK;
+
+	if (!usb_psy)
+		usb_psy = power_supply_get_by_name("usb");
+
+	if (usb_psy) {
+		err = power_supply_get_property(usb_psy,
+				POWER_SUPPLY_PROP_ONLINE, &ret);
+		if (err) {
+			pr_err("usb online read error:%d\n",err);
+			return err;
+		}
+		usb_state.usb_online = ret.intval;
+
+		sysfs_notify(&thermal_message_dev.kobj, NULL, "usb_online");
+	}
+
+	return NOTIFY_OK;
+}
+
 static int __init thermal_init(void)
 {
 	int result;
@@ -1692,6 +2244,30 @@ static int __init thermal_init(void)
 		pr_warn("Thermal: Can not register suspend notifier, return %d\n",
 			result);
 
+	result = of_parse_thermal_message();
+	if (result)
+		pr_warn("Thermal: Can not parse thermal message node, return %d\n",
+			result);
+
+	result = create_thermal_message_node();
+	if (result)
+		pr_warn("Thermal: create thermal message node failed, return %d\n",
+			result);
+
+#ifdef CONFIG_DRM
+	sm.thermal_notifier.notifier_call = screen_state_for_thermal_callback;
+	if (mi_drm_register_client(&sm.thermal_notifier) < 0)
+		pr_warn("Thermal: register screen state callback failed\n");
+#endif
+
+	usb_state.psy_notifier.notifier_call = usb_online_callback;
+	result = power_supply_reg_notifier(&usb_state.psy_notifier);
+	if (result < 0) {
+		pr_err("usb online notifier registration error. defer. err:%d\n",
+			result);
+		result = -EPROBE_DEFER;
+	}
+
 	return 0;
 
 exit_zone_parse:
@@ -1711,10 +2287,14 @@ error:
 
 static void thermal_exit(void)
 {
+#ifdef CONFIG_DRM
+	mi_drm_unregister_client(&sm.thermal_notifier);
+#endif
 	unregister_pm_notifier(&thermal_pm_nb);
 	of_thermal_destroy_zones();
 	destroy_workqueue(thermal_passive_wq);
 	genetlink_exit();
+	destroy_thermal_message_node();
 	class_unregister(&thermal_class);
 	thermal_unregister_governors();
 	ida_destroy(&thermal_tz_ida);
