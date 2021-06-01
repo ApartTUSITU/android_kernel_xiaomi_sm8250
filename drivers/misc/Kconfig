@@ -584,6 +584,17 @@ config OKL4_RINGBUF
 	  Say Y here if you want to test communication between OKL4 guests
 	  using virtual interrupts and shared memory.
 
+config HALL_AKM09970
+	tristate "HALL_AK09970 digital hall sensor support"
+	depends on I2C
+        default n
+        help
+	  Say Y here if you have AKM Sensortec's AK09970 magnet
+	  sensor hooked to an I2C bus.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called akm09970.
+
 config TEST_IRQ_REQUESTER
 	tristate "Receive interrupt notifications in user-space"
 	depends on DEBUG_FS
