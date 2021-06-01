@@ -595,6 +595,15 @@ config HALL_AKM09970
 	  To compile this driver as a module, choose M here: the
 	  module will be called akm09970.
 
+config MOTOR_DRV8846
+	tristate "TI step motor driver IC"
+	depends on PWM
+        default n
+        help
+	  Say Y here to include support for the H-Bridge Stepper
+	  Motor Driver. The MISC peripheral holds the pwm and the
+	  driver provides an API to drive stepper motor.
+
 config TEST_IRQ_REQUESTER
 	tristate "Receive interrupt notifications in user-space"
 	depends on DEBUG_FS
