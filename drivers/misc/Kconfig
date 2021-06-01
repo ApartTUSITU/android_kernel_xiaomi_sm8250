@@ -4,6 +4,13 @@
 
 menu "Misc devices"
 
+config SPI_XIAOMI_TP
+        bool
+        depends on SPI
+        default y if TOUCHSCREEN_NT36xxx_HOSTDL_SPI
+        help
+        Say Y if want use xiaomi touch panel.
+
 config SENSORS_LIS3LV02D
 	tristate
 	depends on INPUT
