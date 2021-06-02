@@ -8,3 +8,9 @@ menuconfig INPUT_FINGERPRINT
 	  This option doesn't affect the kernel.
 
 	  If unsure, say N.
+
+if INPUT_FINGERPRINT
+
+source "drivers/input/fingerprint/fpc_fod/Kconfig"
+
+endif
