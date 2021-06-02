@@ -13,5 +13,6 @@ if INPUT_FINGERPRINT
 
 source "drivers/input/fingerprint/fpc_fod/Kconfig"
 source "drivers/input/fingerprint/fpc_tee/Kconfig"
+source "drivers/input/fingerprint/goodix/Kconfig"
 
 endif
