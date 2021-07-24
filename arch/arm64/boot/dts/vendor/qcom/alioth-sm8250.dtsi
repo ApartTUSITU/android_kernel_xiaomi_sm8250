@@ -193,7 +193,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 		status = "ok";
 		compatible = "focaltech,fts";
 		reg = <0x0>;
-		spi-max-frequency = <6000000>;
+		spi-max-frequency = <10000000>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <39 0x2008>;
 		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend", "pmx_ts_release";
