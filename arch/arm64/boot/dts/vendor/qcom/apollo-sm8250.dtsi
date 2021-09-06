@@ -251,7 +251,7 @@ And public attribution of xiaomi platforms(like apollo and so and)
 	qcom,fs-current-limit = <22500>;
 	qcom,cabc-sel = <1>;
 	mi,cabcoff-dbv = <200>;
-	mi,cabc-pwm = <3276 4095>;
+	mi,cabc-pwm = <4095 4095>;
 };
 
 &dsi_panel_pwr_supply_lab_ibb {
