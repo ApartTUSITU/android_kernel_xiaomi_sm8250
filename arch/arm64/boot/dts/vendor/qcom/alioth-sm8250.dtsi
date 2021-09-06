@@ -255,6 +255,11 @@ And public attribution of xiaomi platforms(like alioth and so and)
 	regulator-min-microvolt = <3000000>;
 	regulator-max-microvolt = <3000000>;
 };
+
+&pm8150l_rgb_led {
+	status = "disabled";
+};
+
 &soc {
 	fingerprint_goodix {
 		compatible = "goodix,fingerprint";
