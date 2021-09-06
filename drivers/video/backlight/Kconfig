@@ -477,6 +477,13 @@ config BACKLIGHT_BD6107
 	help
 	  If you have a Rohm BD6107 say Y to enable the backlight driver.
 
+config BACKLIGHT_KTZ8866
+	tristate "KTZ8866 Backlight"
+	depends on I2C && BACKLIGHT_CLASS_DEVICE
+	default n
+	help
+	  If you have a KTZ8866 say Y to enable the backlight driver.
+
 config BACKLIGHT_ARCXCNN
 	tristate "Backlight driver for the Arctic Sands ARCxCnnnn family"
 	depends on I2C
