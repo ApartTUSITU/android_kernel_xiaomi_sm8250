@@ -68,13 +68,31 @@
 		cell-index = <0>;
 		compatible = "qcom,eeprom";
 		cam_vio-supply = <&pm8150a_l5>;
-		regulator-names = "cam_vio";
+		cam_vana-supply = <&L7P>;//AVDD2.9
+		cam_v_custom1-supply =<&L6P>;//AVDD1.8
+		cam_vdig-supply = <&L2P>;
+		cam_clk-supply = <&titan_top_gdsc>;
+		regulator-names = "cam_vio", "cam_vana", "cam_v_custom1", "cam_vdig",
+			"cam_clk";
 		rgltr-cntrl-support;
-		rgltr-min-voltage = <1800000>;
-		rgltr-max-voltage = <1800000>;
-		rgltr-load-current = <120000>;
+		rgltr-min-voltage = <1800000 2900000 1800000 1100000 0>;
+		rgltr-max-voltage = <1800000 2900000 1800000 1100000 0>;
+		rgltr-load-current = <120000 180000 80000 1200000 0>;
+		gpio-no-mux = <0>;
+		gpios = <&tlmm 94 0>,
+				<&tlmm 93 0>;
+		gpio-reset = <1>;
+		gpio-req-tbl-num = <0 1>;
+		gpio-req-tbl-flags = <1 0>;
+		gpio-req-tbl-label = "CAMIF_MCLK0",
+							"CAM_RESET0";
 		cci-master = <0>;
 		status = "ok";
+		use-shared-clk;
+		clocks = <&clock_camcc CAM_CC_MCLK0_CLK>;
+		clock-names = "cam_clk";
+		clock-cntl-level = "turbo";
+		clock-rates = <19200000>;
 	};
 	/* ALIOTH Macro eeprom */
 	eeprom_macro: qcom,eeprom@3 {
