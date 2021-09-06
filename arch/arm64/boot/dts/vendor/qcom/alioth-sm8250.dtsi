@@ -539,6 +539,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 	mi,support-ffc;
 	qcom,lpd-disable;
 	mi,use-bq-pump;
+	mi,chg-enable-k11a;
 	mi,support-second-ffc-term-current;
 	mi,support-second-ffc-term-current-diff = <133>;
 	mi,support-qc3p5-without-smb;
@@ -608,6 +609,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 	qcom,five-pin-battery;
 	qcom,soc-hi-res;
 	qcom,sun-profile-only;
+	qcom,k11a-batt-profile;
 	qcom,soc_decimal_rate = <
 		0  38
 		10 35
@@ -662,12 +664,13 @@ And public attribution of xiaomi platforms(like alioth and so and)
 		mi,pd-bat-curr-max = <6000>;
 		mi,pd-bus-volt-max = <12000>;
 		mi,pd-bus-curr-max = <3000>;
-		mi,pd-bus-curr-compensate  = <0>;
+		mi,pd-bus-curr-compensate  = <50>;
 		mi,pd-non-ffc-bat-volt-max = <4450>;
 		mi,pd-battery-warm-th = <480>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
 		mi,therm-level-threshold = <12>;
+		mi,chg-enable-k11a;
 	};
 
 	umi_batterydata: qcom,battery-data {
