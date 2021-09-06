@@ -230,6 +230,7 @@
 	mi,mdss-dsi-panel-xy-coordinate = <0x6 0x18>;
 	mi,mdss-dsi-panel-max-luminance = <0x6 0x4>;
 	mi,mdss-dsi-pan-enable-smart-fps;
+	mi,mdss-dsi-panel-max-brightness-clone = <8191>;
 
 	qcom,mdss-dsi-display-timings {
 		timing@0{

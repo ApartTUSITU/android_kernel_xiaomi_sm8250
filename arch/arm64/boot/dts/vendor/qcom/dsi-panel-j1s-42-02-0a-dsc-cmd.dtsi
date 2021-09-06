@@ -369,6 +369,7 @@
 	mi,mdss-dsi-pan-enable-smart-fps;
 	mi,mdss-dsi-smart-fps-max_framerate = <120>;
 	mi,mdss-dsi-panel-hbm-brightness = <1>;
+	mi,mdss-dsi-panel-max-brightness-clone = <6143>;
 	mi,mdss-dsi-dimlayer-brightness-alpha-lut-item-count = <21>;
 	mi,mdss-dsi-dimlayer-brightness-alpha-lut =
 	/* brightness  alpha */
