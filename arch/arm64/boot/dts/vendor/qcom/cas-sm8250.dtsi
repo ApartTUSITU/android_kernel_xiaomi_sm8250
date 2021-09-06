@@ -833,6 +833,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 		pinctrl-names = "idt_active", "idt_suspend";
 		pinctrl-0 = <&idt_int_active &txon_enable_active &rx_sleep_active_status &power_good_active &reverse_booset_enable_active>;
 		pinctrl-1 = <&idt_int_suspend &txon_enable_suspend &rx_sleep_suspend_status &power_good_suspend &reverse_booset_enable_suspend>;
+		mi,urd-device;
 	};
     rx1619@61 {
 		compatible = "nuvolta,wl_charger_rx1619";
@@ -846,6 +847,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 		pinctrl-names = "nu_active", "nu_suspend";
 		pinctrl-0 = <&idt_int_active &txon_enable_active &rx_sleep_active_status &power_good_active &reverse_booset_enable_active>;
 		pinctrl-1 = <&idt_int_suspend &txon_enable_suspend &rx_sleep_suspend_status &power_good_suspend &reverse_booset_enable_suspend>;
+		mi,urd-device;
    };
 	rx1619@67 {
 		compatible = "nuvolta,wl_rx1619_trim";
