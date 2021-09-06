@@ -43,8 +43,8 @@
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
 		qcom,mdss-dsi-reset-sequence = <1 5>, <0 1>, <1 10>;
-		qcom,mdss-pan-physical-width-dimension = <695>;
-		qcom,mdss-pan-physical-height-dimension = <1544>;
+		qcom,mdss-pan-physical-width-dimension = <79>;
+		qcom,mdss-pan-physical-height-dimension = <155>;
 		qcom,mdss-dsi-tx-eot-append;
 		qcom,bl-update-flag = "delay_until_first_frame";
 		qcom,disp-panel-offon-mode-enabled;
