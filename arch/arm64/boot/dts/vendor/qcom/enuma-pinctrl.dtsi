@@ -1,0 +1,553 @@
+/*for enuma pinctrl */
+
+&sde_dsi_active {
+	mux {
+		pins = "gpio75";
+		function = "gpio";
+	};
+	config {
+		pins = "gpio75";
+		drive-strength = <8>;	/* 8 mA */
+		bias-disable = <0>;   /* no pull */
+	};
+};
+
+&sde_dsi_suspend {
+	mux {
+		pins = "gpio75";
+		function = "gpio";
+	};
+	config {
+		pins = "gpio75";
+		drive-strength = <2>;	/* 2 mA */
+		bias-pull-down; 		/* PULL DOWN */
+	};
+};
+
+&nfc_enable_active {
+	/* active state */
+	mux {
+		/* 83: Enable 110: Firmware */
+		pins = "gpio83", "gpio110";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio83", "gpio110";
+		drive-strength = <2>; /* 2 MA */
+		bias-pull-up;
+	};
+};
+
+&nfc_enable_suspend {
+	/* sleep state */
+	mux {
+		/* 83: Enable 110: Firmware */
+		pins = "gpio83", "gpio110";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio83", "gpio110";
+		drive-strength = <2>; /* 2 MA */
+		bias-disable;
+	};
+};
+
+&tlmm {
+	/* used for wire charging and otg and wirelss reverse charging features */
+	ncp3902 {
+		ncp3902_en_active: ncp3902_en_active {
+			/* active state */
+			mux {
+				/* GPIO 152 is used for NCP3092 chip to enable */
+				pins = "gpio152";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio152";
+				bias-disable; /* No PULL */
+				drive-strength = <16>; /* 16 MA */
+				output-low;
+			};
+		};
+
+		ncp3902_en_suspend: ncp3902_en_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio152";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio152";
+				drive-strength = <16>; /* 16 MA */
+				bias-disable;
+				output-low;
+			};
+		};
+	};
+
+	ncp3902_pass_en {
+		ncp3902_pass_en_active: ncp3902_pass_en_active {
+			/* active state */
+			mux {
+				pins = "gpio153";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio153";
+				bias-disable; /* No PULL */
+				drive-strength = <16>; /* 16 MA */
+				output-low;
+			};
+		};
+
+		ncp3902_pass_en_suspend: ncp3902_pass_en_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio153";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio153";
+				drive-strength = <16>; /* 16 MA */
+				bias-disable;
+				output-low;
+			};
+		};
+	};
+
+	dc_chg_enable {
+		dc_en_active: dc_en_active {
+			/* active state */
+			mux {
+				/* GPIO 82 is used for wireless charge enable bq by output vol to bq vac */
+				pins = "gpio82";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio82";
+				bias-disable; /* No PULL */
+				drive-strength = <16>; /* 16 MA */
+				output-low;
+			};
+		};
+
+		dc_en_suspend: dc_en_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio82";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio82";
+				drive-strength = <16>; /* 16 MA */
+				bias-disable;
+				output-low;
+			};
+		};
+	};
+
+	rx_hw_sleep_enable {
+		rx_hw_en_active: rx_hw_en_active {
+			/* active state */
+			mux {
+				/* GPIO 78 is used for hardware disable wireless rx */
+				pins = "gpio78";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio78";
+				bias-disable; /* No PULL */
+				drive-strength = <8>; /* 8 MA */
+				output-high;
+			};
+		};
+
+		rx_hw_en_suspend: rx_hw_en_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio78";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio78";
+				drive-strength = <8>; /* 8 MA */
+				bias-disable;
+				output-low;
+			};
+		};
+	};
+
+	bq2597x {
+		bq2597x_master_int_default: bq2597x_master_int_default {
+			/* active state */
+			mux {
+				/* GPIO 68 is used for bq25970 master ic interrupt usage */
+				pins = "gpio68";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio68";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		bq2597x_master_int_suspend: bq2597x_master_int_suspend {
+			/* sleep state */
+			mux {
+				/* GPIO 83 is used for bq25970 master ic interrupt usage */
+				pins = "gpio68";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio68";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		bq2597x_slave_int_default: bq2597x_slave_int_default {
+			/* active state */
+			mux {
+				/* GPIO 64 is used for bq25970 slave ic interrupt usage */
+				pins = "gpio64";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio64";
+				drive-strength = <2>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+	};
+
+	hall {
+		hall_intr3_active: hall_intr3_active {
+			/* active state */
+			mux {
+				pins = "gpio136";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio136";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		hall_intr3_suspend: hall_intr3_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio136";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio136";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		hall_intr4_active: hall_intr4_active {
+			/* active state */
+			mux {
+				pins = "gpio138";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio138";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		hall_intr4_suspend: hall_intr4_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio138";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio138";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+	};
+
+	idt {
+		idt_int_active: idt_int_active {
+			/* active state */
+			mux {
+				pins = "gpio113";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio113";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		idt_int_suspend: idt_int_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio113";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio113";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		txon_enable_active: txon_enable_active {
+			/* active state */
+			mux {
+				pins = "gpio47";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio47";
+				drive-strength = <16>;
+				bias-disable;
+				bias-pull-down;
+				output-low;
+			};
+		};
+
+		txon_enable_suspend: txon_enable_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio47";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio47";
+				drive-strength = <16>;
+				bias-disable;
+				bias-pull-down;
+				output-low;
+			};
+		};
+
+		power_good_active: power_good_active {
+			/* active state */
+			mux {
+				pins = "gpio145";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio145";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-down;
+				input-enable;
+				};
+
+		};
+
+		power_good_suspend: power_good_suspend {
+			/* active state */
+			mux {
+				pins = "gpio145";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio145";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+				};
+		};
+
+		reverse_booset_enable_active: reverse_booset_enable__active {
+			/* active state */
+			mux {
+				pins = "gpio22";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio22";
+				drive-strength = <16>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+
+		reverse_booset_enable_suspend: reverse_booset_enable_suspend {
+			/* sleep state */
+			mux {
+				pins = "gpio22";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio22";
+				drive-strength = <16>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+	};
+
+	sbu_uart_en_ctrl {
+		sbu_uart_en_idle: uart_audio_en_idle {
+			mux {
+				pins = "gpio159";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio159";
+				drive-strength = <2>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+
+		sbu_uart_en_active: uart_audio_en_active {
+			mux {
+				pins = "gpio159";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio159";
+				drive-strength = <2>;
+				bias-disable;
+				output-high;
+			};
+		};
+	};
+	xiaomi_keyboard_mcu {
+		xiaomi_keyboard_suspend: xiaomi_keyboard_suspend {
+			mux {
+				pins = "gpio155";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio155";
+				drive-strength = <8>;
+				bias-pull-down;
+			};
+		};
+
+		xiaomi_keyboard_active: xiaomi_keyboard_active {
+			mux {
+				pins = "gpio155";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio155";
+				drive-strength = <8>;
+				bias-pull-up;
+			};
+		};
+	};
+
+	vbus_disable {
+		vbus_disable_active: usb_vbus_active {
+			mux {
+				pins = "gpio74";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio74";
+				drive-strength = <2>;
+				bias-pull-up;
+				output-high;
+			};
+		};
+
+		vbus_disable_suspend: usb_vbus_suspend {
+			mux {
+				pins = "gpio74";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio74";
+				drive-strength = <2>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+	};
+
+	test_mode_irq: test_mode_irq {
+		mux {
+			pins = "gpio70";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio70";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+
+/* GPIO_130 : display_panel_enp +5V */
+	display_panel_enp_default: display_panel_enp_default {
+		mux {
+			pins = "gpio130";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio130";
+			drive-strength = <8>;
+			bias-disable = <0>;
+			output-high;
+		};
+	};
+
+/* GPIO_131 : display_panel_enn -5V */
+	display_panel_enn_default: display_panel_enn_default {
+		mux {
+			pins = "gpio131";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio131";
+			drive-strength = <8>;
+			bias-disable = <0>;
+			output-high;
+		};
+	};
+};

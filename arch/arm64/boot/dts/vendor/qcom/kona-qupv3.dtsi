@@ -1070,5 +1070,26 @@
 		dma-names = "tx", "rx";
 		status = "disabled";
 	};
+	qupv3_se5_4uart: qcom,qup_uart@994000 {
+		compatible = "qcom,msm-geni-serial-hs";
+		reg = <0x994000 0x4000>;
+		reg-names = "se_phys";
+		clock-names = "se-clk", "m-ahb", "s-ahb";
+			clocks = <&clock_gcc GCC_QUPV3_WRAP0_S5_CLK>,
+		<&clock_gcc GCC_QUPV3_WRAP_0_M_AHB_CLK>,
+		<&clock_gcc GCC_QUPV3_WRAP_0_S_AHB_CLK>;
+		pinctrl-names = "default", "active", "sleep";
+			pinctrl-0 = <&qupv3_se5_default_cts>,
+		<&qupv3_se5_default_rtsrx>, <&qupv3_se5_default_tx>;
+			pinctrl-1 = <&qupv3_se5_ctsrx>, <&qupv3_se5_rts>,
+		<&qupv3_se5_tx>;
+			pinctrl-2 = <&qupv3_se5_ctsrx>, <&qupv3_se5_rts>,
+		<&qupv3_se5_tx>;
+			interrupts-extended = <&intc GIC_SPI 606 IRQ_TYPE_LEVEL_HIGH>,
+		<&tlmm 15 0>;
+		status = "disabled";
+		qcom,wakeup-byte = <0xFD>;
+		qcom,wrapper-core = <&qupv3_0>;
+	};
 
 };

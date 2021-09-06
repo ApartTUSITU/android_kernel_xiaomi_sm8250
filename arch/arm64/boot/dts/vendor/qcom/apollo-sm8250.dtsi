@@ -286,6 +286,10 @@ And public attribution of xiaomi platforms(like apollo and so and)
 	};
 };
 
+&usb1 {
+        extcon = <&extcon_usb1>;
+};
+
 &sde_dsi {
 	/delete-property/ vdd-supply;
 	/delete-property/ avdd-supply;

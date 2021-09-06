@@ -31,6 +31,10 @@ And public attribution of xiaomi platforms(like J1 and so and)
 	qcom,platform-reset-gpio = <&tlmm 46 0>;
 };
 
+&usb1 {
+        extcon = <&extcon_usb1>;
+};
+
 &sde_dsi {
 	/delete-property/ vdd-supply;
 	/delete-property/ avdd-supply;

@@ -409,7 +409,6 @@
 };
 
 &usb1 {
-        extcon = <&extcon_usb1>;
         status = "disabled";
 };
 
@@ -668,6 +667,28 @@
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
 
+&dsi_k81_42_02_0a_dual_cphy_video {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_k81_vddio>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <2>;
+	qcom,mdss-dsi-bl-max-level = <2047>;
+	qcom,mdss-brightness-max-level = <2047>;
+	qcom,mdss-brightness-init-level = <410>;
+	qcom,platform-te-gpio = <&tlmm 66 0>;
+	qcom,platform-reset-gpio = <&tlmm 75 0>;
+};
+
+&dsi_k81_35_02_0b_dual_cphy_video {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_k81_vddio>;
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+	qcom,mdss-dsi-bl-min-level = <2>;
+	qcom,mdss-dsi-bl-max-level = <2047>;
+	qcom,mdss-brightness-max-level = <2047>;
+	qcom,mdss-brightness-init-level = <410>;
+	qcom,platform-te-gpio = <&tlmm 66 0>;
+	qcom,platform-reset-gpio = <&tlmm 75 0>;
+};
+
 &dsi_j2s_mp_42_02_0a_dsc_cmd {
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_vci>;
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
@@ -695,10 +716,6 @@
         cd-gpios = <&tlmm 77 GPIO_ACTIVE_LOW>;
 
 	status = "ok";
-};
-
-&usb1 {
-	extcon = <&extcon_usb1>;
 };
 
 &wil6210 {
