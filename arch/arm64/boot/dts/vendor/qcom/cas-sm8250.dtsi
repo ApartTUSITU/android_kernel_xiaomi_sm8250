@@ -92,6 +92,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 
 	cmi_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
+		#include "jeita-step-cfg-j1t.dtsi"
 	};
 
 	fingerprint_goodix {
