@@ -724,6 +724,14 @@ config QCOM_SMP2P_SLEEPSTATE
 	  notifications from the remote to prevent suspend on the local
 	  processor.
 
+config SMP2P_SLEEPSTATE_WAKEUP_MS
+	int "SMP2P Sleepstate wakeup time"
+	default 200
+	depends on QCOM_SMP2P
+	help
+	  This option is used to configure the wakeup timeout of smp2p_sleepstate
+	  interrupt handler.
+
 config QCOM_QDSS_BRIDGE
 	bool "Configure bridge driver for QTI/Qualcomm Technologies, Inc. MDM"
 	depends on MHI_BUS
