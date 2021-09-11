@@ -94,7 +94,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 		mi,cp-sec-enable;
 	};
 
-	cmi_batterydata: qcom,battery-data {
+	cas_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "jeita-step-cfg-j1t.dtsi"
 	};
@@ -358,7 +358,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
-	qcom,battery-data = <&cmi_batterydata>;
+	qcom,battery-data = <&cas_batterydata>;
 	qcom,lpd-disable;
 	qcom,support-ext-fg;
 	qcom,support-ext-bbc;

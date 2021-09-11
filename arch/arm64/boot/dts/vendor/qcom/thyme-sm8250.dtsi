@@ -384,7 +384,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	pinctrl-1 = <&ncp3902_en_active &dc_en_active &rx_hw_en_active &ncp3902_pass_en_active>;
 	pinctrl-2 = <&ncp3902_en_suspend &dc_en_suspend &rx_hw_en_suspend &ncp3902_pass_en_suspend>;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&thyme_batterydata>;
 	mi,six-pin-step-chg-params = <4240000  6000000
 				4390000  4680000
 				4450000  3740000>;
@@ -480,7 +480,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 };
 
 &pm8150b_fg {
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&thyme_batterydata>;
 	qcom,rapid-soc-dec-en;
 	qcom,five-pin-battery;
 	qcom,soc-hi-res;
@@ -576,7 +576,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 		status = "ok";
 	};
 */
-	umi_batterydata: qcom,battery-data {
+	thyme_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "fg-gen4-batterydata-umi-gybm-4780mah.dtsi"
 		#include "fg-gen4-batterydata-umi-NVTBM4N-4780mah.dtsi"

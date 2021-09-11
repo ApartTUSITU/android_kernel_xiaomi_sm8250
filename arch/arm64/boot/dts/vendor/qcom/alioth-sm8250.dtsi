@@ -1,6 +1,5 @@
 /*
-this file is for attribution only of umi
-And public attribution of xiaomi platforms(like alioth and so and)
+this file is for attribution only of alioth
 */
 
 #include "alioth-pinctrl.dtsi"
@@ -533,7 +532,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&alioth_batterydata>;
 	mi,six-pin-step-chg-params = <4250000  6000000
 				4450000  5400000
 				4480000  3536000>;
@@ -608,7 +607,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 };
 
 &pm8150b_fg {
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&alioth_batterydata>;
 	qcom,rapid-soc-dec-en;
 	qcom,five-pin-battery;
 	qcom,soc-hi-res;
@@ -677,7 +676,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 		mi,chg-enable-k11a;
 	};
 
-	umi_batterydata: qcom,battery-data {
+	alioth_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "fg-gen4-batterydata-alioth-FMT-4520mah.dtsi"
 		#include "fg-gen4-batterydata-alioth-GY-4520mah.dtsi"

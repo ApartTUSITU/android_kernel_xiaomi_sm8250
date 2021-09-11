@@ -235,7 +235,7 @@ And public attribution of xiaomi platforms(like J1 and so and)
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&lmi_batterydata>;
 	mi,six-pin-step-chg-params = <4250000  6000000
 				4450000  5400000
 				4480000  3680000>;
@@ -305,7 +305,7 @@ And public attribution of xiaomi platforms(like J1 and so and)
 };
 
 &pm8150b_fg {
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&lmi_batterydata>;
 	qcom,rapid-soc-dec-en;
 	qcom,five-pin-battery;
 	qcom,soc-hi-res;
@@ -367,7 +367,7 @@ And public attribution of xiaomi platforms(like J1 and so and)
 		//mi,cp-sec-enable;
 	};
 
-	umi_batterydata: qcom,battery-data {
+	lmi_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "fg-gen4-batterydata-lmi-sun-4700mah.dtsi"
 	};

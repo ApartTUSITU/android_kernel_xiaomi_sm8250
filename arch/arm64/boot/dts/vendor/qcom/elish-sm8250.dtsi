@@ -1,6 +1,5 @@
 /*
-this file is for attribution only of umi
-And public attribution of xiaomi platforms(like elish and so and)
+this file is for attribution only of elish
 */
 
 #include "elish-pinctrl.dtsi"
@@ -970,7 +969,7 @@ And public attribution of xiaomi platforms(like elish and so and)
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
-	qcom,battery-data = <&enuma_batterydata>;
+	qcom,battery-data = <&elish_batterydata>;
 	//mi,fcc-batt-unverify-ua = <2000000>;
 	mi,support-ffc;
 	qcom,lpd-disable;
@@ -1097,7 +1096,7 @@ And public attribution of xiaomi platforms(like elish and so and)
 
 	};
 
-	enuma_batterydata: qcom,battery-data {
+	elish_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "jeita-step-cfg-k81.dtsi"
 	};

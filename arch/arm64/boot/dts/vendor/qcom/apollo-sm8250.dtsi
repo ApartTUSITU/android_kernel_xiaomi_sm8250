@@ -1,6 +1,5 @@
 /*
-this file is for attribution only of umi
-And public attribution of xiaomi platforms(like apollo and so and)
+this file is for attribution only of apollo
 */
 
 #include "apollo-pinctrl.dtsi"
@@ -545,7 +544,7 @@ And public attribution of xiaomi platforms(like apollo and so and)
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&apollo_batterydata>;
 	mi,six-pin-step-chg-params = <4250000  6000000
 				4450000  5400000
 				4480000  3680000>;
@@ -618,7 +617,7 @@ And public attribution of xiaomi platforms(like apollo and so and)
 };
 
 &pm8150b_fg {
-	qcom,battery-data = <&umi_batterydata>;
+	qcom,battery-data = <&apollo_batterydata>;
 	qcom,rapid-soc-dec-en;
 	qcom,five-pin-battery;
 	qcom,soc-hi-res;
@@ -685,7 +684,7 @@ And public attribution of xiaomi platforms(like apollo and so and)
 		mi,therm-level-threshold = <12>;
 	};
 
-	umi_batterydata: qcom,battery-data {
+	apollo_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "fg-gen4-batterydata-apollo-sun-5000mah.dtsi"
 	};
