@@ -2121,7 +2121,7 @@ static void fts_restore_mode_value(int mode, int value_type)
 		xiaomi_touch_interfaces.touch_mode[mode][value_type];
 }
 
-static void fts_restore_normal_mode()
+static void fts_restore_normal_mode(void)
 {
 	int i;
 	for (i = 0; i < Touch_Report_Rate; i++) {
