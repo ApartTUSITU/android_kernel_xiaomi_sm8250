@@ -43,6 +43,12 @@ dtbo-$(CONFIG_BOARD_LMI) += \
 lmi-sm8250-overlay.dtbo-base := kona.dtb kona-v2.dtb kona-v2.1.dtb
 endif
 
+ifeq ($(CONFIG_BOARD_PSYCHE),y)
+dtbo-$(CONFIG_BOARD_PSYCHE) += \
+                psyche-sm8250-overlay.dtbo
+psyche-sm8250-overlay.dtbo-base := kona.dtb kona-v2.dtb kona-v2.1.dtb
+endif
+
 ifeq ($(CONFIG_BOARD_THYME),y)
 dtbo-$(CONFIG_BOARD_THYME) += \
                 thyme-sm8250-overlay.dtbo

@@ -36,6 +36,8 @@
 #include "dsi-panel-j1t-38-0c-0a-dsc-cmd.dtsi"
 #include "dsi-panel-j3s-37-02-0a-dsc-video.dtsi"
 #include "dsi-panel-j2s-mp-42-02-0a-dsc-cmd.dtsi"
+#include "dsi-panel-j2s-mp-42-02-0b-dsc-cmd.dtsi"
+#include "dsi-panel-l3a-mp-42-02-0a-dsc-cmd.dtsi"
 #include "dsi-panel-k81-42-02-0a-video.dtsi"
 #include "dsi-panel-k81-35-02-0b-video.dtsi"
 
@@ -232,6 +234,125 @@
 		};
 	};
 
+	dsi_panel_pwr_supply_vci_j2s_0b: dsi_panel_pwr_supply_vci_j2s_0b {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <0>;
+			qcom,supply-post-on-sleep = <3>;
+			qcom,supply-post-off-sleep = <0>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "vci";
+			qcom,supply-min-voltage = <3000000>;
+			qcom,supply-max-voltage = <3000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <1>;
+			qcom,supply-post-on-sleep = <10>;
+			qcom,supply-post-off-sleep = <2>;
+		};
+	};
+
+	dsi_panel_pwr_supply_vci_l3a: dsi_panel_pwr_supply_vci_l3a {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <2>;
+			qcom,supply-post-on-sleep = <3>;
+			qcom,supply-post-off-sleep = <2>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "dvdd";
+			qcom,supply-min-voltage = <1200000>;
+			qcom,supply-max-voltage = <1200000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <0>;
+			qcom,supply-post-on-sleep = <3>;
+			qcom,supply-post-off-sleep = <0>;
+		};
+
+		qcom,panel-supply-entry@2 {
+			reg = <2>;
+			qcom,supply-name = "vci";
+			qcom,supply-min-voltage = <3000000>;
+			qcom,supply-max-voltage = <3000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <1>;
+			qcom,supply-post-on-sleep = <10>;
+			qcom,supply-post-off-sleep = <2>;
+		};
+	};
+
+	dsi_panel_pwr_supply_vci_l10a: dsi_panel_pwr_supply_vci_l10a {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <2>;
+			qcom,supply-post-on-sleep = <3>;
+			qcom,supply-post-off-sleep = <2>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "dvdd";
+			qcom,supply-min-voltage = <1200000>;
+			qcom,supply-max-voltage = <1200000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <0>;
+			qcom,supply-post-on-sleep = <3>;
+			qcom,supply-post-off-sleep = <0>;
+		};
+
+		qcom,panel-supply-entry@2 {
+			reg = <2>;
+			qcom,supply-name = "vci";
+			qcom,supply-min-voltage = <3000000>;
+			qcom,supply-max-voltage = <3000000>;
+			qcom,supply-enable-load = <100000>;
+			qcom,supply-disable-load = <100>;
+			qcom,supply-pre-on-sleep = <0>;
+			qcom,supply-pre-off-sleep = <1>;
+			qcom,supply-post-on-sleep = <10>;
+			qcom,supply-post-off-sleep = <2>;
+		};
+	};
+
 	dsi_panel_j11_pwr_supply_vci: dsi_panel_j11_pwr_supply_vci {
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -403,6 +524,7 @@
 		vci-supply = <&display_panel_vci>;
 		lab-supply = <&ab_vreg>;
 		ibb-supply = <&ibb_vreg>;
+		dvdd-supply = <&pm8150a_l2>;
 
 		qcom,mdp = <&mdss_mdp>;
 		qcom,dsi-default-panel = <&dsi_sw43404_amoled_cmd>;
@@ -467,7 +589,10 @@
 			&dsi_j3s_37_02_0a_dsc_video
 			&dsi_k81_42_02_0a_dual_cphy_video
 			&dsi_k81_35_02_0b_dual_cphy_video
-			&dsi_j2s_mp_42_02_0a_dsc_cmd>;
+			&dsi_j2s_mp_42_02_0a_dsc_cmd
+			&dsi_j2s_mp_42_02_0b_dsc_cmd
+			&dsi_l3a_mp_42_02_0a_dsc_cmd>;
+
 	};
 };
 
@@ -1554,6 +1679,69 @@
 	};
 };
 
+&dsi_j2s_mp_42_02_0b_dsc_cmd {
+	qcom,ulps-enabled;
+
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0",
+				"src_byte_clk0", "src_pixel_clk0",
+				"shadow_byte_clk0", "shadow_pixel_clk0";
+
+	qcom,mdss-dsi-clk-strength = <0xFF>;
+	qcom,mdss-dsi-display-timings {
+		/* 60 Hz */
+		timing@0{
+			qcom,mdss-dsi-panel-phy-timings = [00 18 06 06 21 20 06
+				06 04 02 04 00 15 16];
+			qcom,display-topology = <1 1 1>;
+			qcom,default-topology-index = <0>;
+		};
+		/* 90 Hz */
+		timing@1{
+			qcom,mdss-dsi-panel-phy-timings = [00 18 06 06 21 20 06
+				06 04 02 04 00 15 16];
+			qcom,display-topology = <1 1 1>;
+			qcom,default-topology-index = <0>;
+		};
+	};
+};
+
+&dsi_l3a_mp_42_02_0a_dsc_cmd {
+	qcom,ulps-enabled;
+
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0",
+				"src_byte_clk0", "src_pixel_clk0",
+				"shadow_byte_clk0", "shadow_pixel_clk0";
+
+	qcom,mdss-dsi-clk-strength = <0xFF>;
+
+	qcom,mdss-dsi-dma-schedule-line = <1>;
+	qcom,mdss-dsi-dma-schedule-window = <50>;
+
+	qcom,mdss-dsi-display-timings {
+		/* 60 Hz */
+		timing@0{
+			qcom,mdss-dsi-panel-phy-timings = [00 24 0A 0A 1A 25 09
+			    0A 0A 09 02 04 1E 0F];
+			qcom,display-topology = <1 1 1>;
+			qcom,default-topology-index = <0>;
+		};
+		/* 90 Hz */
+		timing@1{
+			qcom,mdss-dsi-panel-phy-timings = [00 24 0A 0A 1A 25 09
+			    0A 0A 09 02 04 1E 0F];
+			qcom,display-topology = <1 1 1>;
+			qcom,default-topology-index = <0>;
+		};
+		/* 120 Hz */
+		timing@2{
+			qcom,mdss-dsi-panel-phy-timings = [00 24 0A 0A 1A 19 09
+			    0A 0A 09 02 04 1E 0F];
+			qcom,display-topology = <1 1 1>;
+			qcom,default-topology-index = <0>;
+		};
+	};
+};
+
 &dsi_r66451_amoled_144hz_cmd {
 	qcom,ulps-enabled;
 	qcom,esd-check-enabled;
@@ -1595,7 +1783,7 @@
 
 	qcom,mdss-dsi-display-timings {
 		timing@0 {
-			qcom,mdss-dsi-panel-phy-timings = [00 00 00 00 27 2A 0A
+			qcom,mdss-dsi-panel-phy-timings = [00 00 00 00 27 2B 0A
 					19 0A 02 04 00 00 00];
 			qcom,display-topology = <2 0 2>;
 			qcom,default-topology-index = <0>;

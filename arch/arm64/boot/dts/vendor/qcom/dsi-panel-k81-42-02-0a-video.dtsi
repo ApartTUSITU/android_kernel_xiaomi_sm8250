@@ -394,6 +394,13 @@
 			mi,mdss-dsi-max-luminance-read-command = [
 				06 01 00 00 00 00 01 A1];
 			mi,mdss-dsi-max-luminance-read-command-state = "dsi_lp_mode";
+
+			mi,mdss-dsi-disable-insert-black-command = [
+				05 01 00 00 00 00 02 13 00];
+			mi,mdss-dsi-disable-insert-black-command-state = "dsi_lp_mode";
+			mi,mdss-dsi-insert-black-screen-command = [
+				05 01 00 00 00 00 02 22 00];
+			mi,mdss-dsi-insert-black-screen-command-state = "dsi_lp_mode";
 		};
 	};
 };

@@ -550,4 +550,19 @@
 			output-high;
 		};
 	};
+
+        md_mode_ctrl_irq {
+		ant1_ctrl_irq: ant1_ctrl_irq {
+			mux {
+				pins = "gpio111";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio111";
+				drive-strength = <2>;
+				bias-disable;
+				input-enable;
+			};
+		};
+	};
 };

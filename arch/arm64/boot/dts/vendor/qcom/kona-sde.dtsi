@@ -578,8 +578,9 @@
 		cell-index = <0>;
 		frame-threshold-time-us = <800>;
 		reg = <0xae94000 0x400>,
-			<0xaf08000 0x4>;
-		reg-names = "dsi_ctrl", "disp_cc_base";
+			<0xaf08000 0x4>,
+			<0x0ae6b800 0x300>;
+		reg-names = "dsi_ctrl", "disp_cc_base", "mdp_intf_base";
 		interrupt-parent = <&mdss_mdp>;
 		interrupts = <4 0>;
 		vdda-1p2-supply = <&pm8150_l9>;
@@ -628,8 +629,9 @@
 		cell-index = <1>;
 		frame-threshold-time-us = <800>;
 		reg = <0xae96000 0x400>,
-			<0xaf08000 0x4>;
-		reg-names = "dsi_ctrl", "disp_cc_base";
+			<0xaf08000 0x4>,
+			<0x0ae6c000 0x300>;
+		reg-names = "dsi_ctrl", "disp_cc_base", "mdp_intf_base";
 		interrupt-parent = <&mdss_mdp>;
 		interrupts = <5 0>;
 		vdda-1p2-supply = <&pm8150_l9>;

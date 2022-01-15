@@ -83,6 +83,14 @@ this file is for attribution only of enuma
 		status = "ok";
 	};
 
+	md_testing_mode {
+		compatible = "modem,md-testing-mode";
+		status-gpio = <&tlmm 111 0x00>;
+		debounce-time = <30>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ant1_ctrl_irq>;
+	};
+
 };
 
 &qupv3_se2_spi {
@@ -308,8 +316,8 @@ this file is for attribution only of enuma
 		novatek,config-array-size = <1>;
 		novatek,cfg_0 {
 			novatek,display-maker = <0x42>;
-			novatek,fw-name = "novatek_nt36523_fw01.bin";
-			novatek,mp-name = "novatek_nt36523_mp01.bin";
+			novatek,fw-name = "novatek_nt36523_k81_fw01.bin";
+			novatek,mp-name = "novatek_nt36523_k81_mp01.bin";
 		};
 	};
 };
@@ -978,6 +986,7 @@ this file is for attribution only of enuma
 		mi,qc3-battery-warm-th = <480>;
 		mi,support-qc3p5-without-smb;
 		mi,cp-sec-enable;
+		mi,chg-enable-k81;
 	};
 
 	usbpd_pm {

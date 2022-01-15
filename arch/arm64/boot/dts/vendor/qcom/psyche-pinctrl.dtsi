@@ -1,0 +1,196 @@
+/*for L3A pinctrl */
+
+&sde_dsi_active {
+	mux {
+		pins = "gpio12";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio12";
+		drive-strength = <8>;	/* 8 mA */
+		bias-disable = <0>;   /* no pull */
+	};
+};
+
+&sde_dsi_suspend {
+	mux {
+		pins = "gpio12";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio12";
+		drive-strength = <2>;	/* 2 mA */
+		bias-pull-down; 		/* PULL DOWN */
+	};
+};
+
+&nfc_enable_active {
+	/* active state */
+	mux {
+		/* 83: Enable 110: Firmware */
+		pins = "gpio83", "gpio110";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio83", "gpio110";
+		drive-strength = <2>; /* 2 MA */
+		bias-pull-up;
+	};
+};
+
+&nfc_enable_suspend {
+	/* sleep state */
+	mux {
+		/* 83: Enable 110: Firmware */
+		pins = "gpio83", "gpio110";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio83", "gpio110";
+		drive-strength = <2>; /* 2 MA */
+		bias-disable;
+	};
+};
+
+
+&tlmm {
+	bq2597x {
+		bq2597x_master_int_default: bq2597x_master_int_default {
+			/* active state */
+			mux {
+				/* GPIO 68 is used for bq25970 master ic interrupt usage */
+				pins = "gpio68";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio68";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+
+		bq2597x_master_int_suspend: bq2597x_master_int_suspend {
+			/* sleep state */
+			mux {
+				/* GPIO 68 is used for bq25970 master ic interrupt usage */
+				pins = "gpio68";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio68";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				input-enable;
+			};
+		};
+	};
+
+	sbu_uart_en_ctrl {
+		sbu_uart_en_idle: uart_audio_en_idle {
+			mux {
+				pins = "gpio159";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio159";
+				drive-strength = <2>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+
+		sbu_uart_en_active: uart_audio_en_active {
+			mux {
+				pins = "gpio159";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio159";
+				drive-strength = <2>;
+				bias-disable;
+				output-high;
+			};
+		};
+	};
+
+	vbus_disable {
+		vbus_disable_active: usb_vbus_active {
+			/* active state */
+			mux {
+				pins = "gpio25";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio25";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-up;
+				output-high;
+			};
+		};
+
+		vbus_disable_suspend: usb_vbus_suspend {
+			mux {
+				pins = "gpio25";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio25";
+				drive-strength = <2>; /* 2 MA */
+				bias-pull-down;
+				output-low;
+			};
+		};
+	};
+
+	mi_ts_active: mi_ts_active {
+		mux {
+			pins = "gpio33", "gpio39";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio33", "gpio39";
+			drive-strength = <8>;
+			bias-disable = <0>;
+		};
+	};
+
+	pmx_ts_reset_suspend {
+		ts_reset_suspend: ts_reset_suspend {
+			mux {
+				pins = "gpio33";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio33";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+	};
+
+	pmx_ts_int_suspend {
+		ts_int_suspend: ts_int_suspend {
+			mux {
+				pins = "gpio39";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio39";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+	};
+};
