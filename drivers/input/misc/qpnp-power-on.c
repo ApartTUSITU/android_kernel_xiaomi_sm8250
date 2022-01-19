@@ -533,6 +533,51 @@ static ssize_t pshold_reboot_store(struct device *dev,
 
 static DEVICE_ATTR_RW(pshold_reboot);
 
+static ssize_t kpdpwr_reset_show(struct device *dev,
+				 struct device_attribute *attr, char *buf)
+{
+	struct qpnp_pon *pon = dev_get_drvdata(dev);
+	int val;
+	int rc;
+
+	rc = regmap_read(pon->regmap, QPNP_PON_KPDPWR_S2_CNTL2(pon), &val);
+	if (rc) {
+		pr_err("Unable to read pon_dbc_ctl rc=%d\n", rc);
+		return rc;
+	}
+
+	val &= QPNP_PON_S2_RESET_ENABLE;
+	val = val >> 7;
+
+	return snprintf(buf, QPNP_PON_BUFFER_SIZE, "%d\n", val);
+
+}
+
+static ssize_t kpdpwr_reset_store(struct device *dev,
+				  struct device_attribute *attr,
+				  const char *buf, size_t size)
+{
+	struct qpnp_pon *pon = dev_get_drvdata(dev);
+	u32 value;
+	int rc;
+
+	if (size > QPNP_PON_BUFFER_SIZE)
+		return -EINVAL;
+
+	rc = kstrtou32(buf, 10, &value);
+	if (rc)
+		return rc;
+
+	value = value << 7;
+	value &= QPNP_PON_S2_RESET_ENABLE;
+
+	rc = regmap_write(pon->regmap, QPNP_PON_KPDPWR_S2_CNTL2(pon), value);
+
+	return size;
+}
+
+static DEVICE_ATTR_RW(kpdpwr_reset);
+
 static int qpnp_pon_reset_config(struct qpnp_pon *pon,
 				 enum pon_power_off_type type)
 {
@@ -2557,6 +2602,13 @@ static int qpnp_pon_probe(struct platform_device *pdev)
 				 rc);
 			return rc;
 		}
+
+		rc = device_create_file(dev, &dev_attr_kpdpwr_reset);
+		if (rc) {
+			dev_err(dev, "sysfs kpdpwr reset file creation failed, rc=%d\n",
+				 rc);
+			return rc;
+		}
 	}
 
 	if (sys_reset)
@@ -2577,8 +2629,10 @@ static int qpnp_pon_remove(struct platform_device *pdev)
 
 	device_remove_file(&pdev->dev, &dev_attr_debounce_us);
 
-	if (!to_spmi_device(pon->dev->parent)->usid)
+	if (!to_spmi_device(pon->dev->parent)->usid) {
 		device_remove_file(&pdev->dev, &dev_attr_pshold_reboot);
+		device_remove_file(&pdev->dev, &dev_attr_kpdpwr_reset);
+	}
 
 	cancel_delayed_work_sync(&pon->bark_work);
 
