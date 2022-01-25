@@ -3,11 +3,11 @@ qcom,4345460_xiaomi_J9_SWD_4160mAH_PM7250 {
     qcom,max-voltage-uv = <4450000>;
     qcom,fg-cc-cv-threshold-uv = <4440000>;
     qcom,ffc-max-voltage-uv = <4480000>;
-    qcom,fastchg-current-ma = <4000>;
+    qcom,fastchg-current-ma = <3600>;
     qcom,jeita-fcc-ranges = <0  50  812000
 			     51  100  2030000
 			     101 150  3248000
-			     151 450  4000000
+			     151 450  3600000
 			     451 580  2030000>;
     qcom,jeita-fv-ranges = <0   50  4450000
 			    51  100  4450000
