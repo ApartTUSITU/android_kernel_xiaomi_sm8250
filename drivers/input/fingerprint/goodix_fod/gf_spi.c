@@ -75,6 +75,64 @@
 
 #define N_SPI_MINORS			32	/* ... up to 256 */
 
+
+#if IS_ENABLED(CONFIG_BOARD_PSYCHE)
+#define MI_FP_3V
+static struct regulator *p_3v0_vreg = NULL;
+static int disable_regulator_3V0(struct regulator *vreg);
+static int enable_regulator_3V0(struct device *dev,struct regulator **pp_vreg);
+
+static int disable_regulator_3V0(struct regulator *vreg)
+{
+	pr_err(" xiaomi put regulator: %s , end it\n", __func__);
+	if(vreg == NULL) {
+            pr_err("vreg is null!");
+	    return 0;
+	}
+	devm_regulator_put(vreg);
+	vreg = NULL;
+	return 0;
+}
+
+static int enable_regulator_3V0(struct device *dev, struct regulator **pp_vreg)
+{
+	int rc = 0;
+	struct regulator *vreg;
+	// vreg = devm_regulator_get(dev, "pm8350c_l11");
+	vreg = devm_regulator_get(dev, "l13a_vdd");
+	if (IS_ERR(vreg)) {
+		dev_err(dev, "fp %s: no of vreg found\n", __func__);
+		return PTR_ERR(vreg);
+	} else {
+		dev_err(dev, "fp %s: of vreg successful found\n", __func__);
+	}
+
+        rc = regulator_set_voltage(vreg, 3204000, 3204000);
+
+	if (rc) {
+		dev_err(dev, "xiaomi %s: set voltage failed\n",__func__);
+		return rc;
+	}
+
+	//rc = regulator_set_load(vreg, 200000);
+
+	//if (rc) {
+	//	dev_err(dev, "xiaomi set load faild rc002: %d , %s: \n",rc, __func__);
+	//	return rc;
+	//}
+
+	rc = regulator_enable(vreg);
+
+	if (rc) {
+		dev_err(dev, "xiaomi %s: enable voltage failed\n", __func__);
+		return rc;
+	}
+
+	*pp_vreg = vreg;
+	return rc;
+}
+#endif
+
 static int SPIDEV_MAJOR;
 
 static DECLARE_BITMAP(minors, N_SPI_MINORS);
@@ -375,6 +433,9 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	gf_nav_event_t nav_event = GF_NAV_NONE;
 #endif
 	int retval = 0;
+#if IS_ENABLED(CONFIG_BOARD_PSYCHE)
+	int status = 0;
+#endif
 	u8 netlink_route = NETLINK_TEST;
 	struct gf_ioc_chip_info info;
 
@@ -485,6 +546,13 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		if (gf_dev->device_available == 1) {
 			pr_debug("Sensor has already powered-on.\n");
 		} else {
+#if IS_ENABLED(CONFIG_BOARD_PSYCHE)
+			status = enable_regulator_3V0(&gf_dev->spi->dev,&p_3v0_vreg);
+			if (status) {
+				pr_err("enable regulator failed and disable it.\n");
+				disable_regulator_3V0(p_3v0_vreg);
+			}
+#endif
 			gf_power_on(gf_dev);
 		}
 
@@ -940,6 +1008,7 @@ static int gf_probe(struct platform_device *pdev)
 	fp_wakelock = wakeup_source_register(&gf_dev->spi->dev, "fp_wakelock");
 	pr_debug("version V%d.%d.%02d\n", VER_MAJOR, VER_MINOR, PATCH_LEVEL);
 	return status;
+
 #ifdef AP_CONTROL_CLK
 gfspi_probe_clk_enable_failed:
 	gfspi_ioctl_clk_uninit(gf_dev);
@@ -978,6 +1047,9 @@ static int gf_remove(struct platform_device *pdev)
 	struct gf_dev *gf_dev = &gf;
 	wakeup_source_unregister(fp_wakelock);
 
+#if IS_ENABLED(CONFIG_BOARD_PSYCHE)
+	disable_regulator_3V0(p_3v0_vreg);
+#endif
 	/* make sure ops on existing fds can abort cleanly */
 	if (gf_dev->irq) {
 		free_irq(gf_dev->irq, gf_dev);
