@@ -59,6 +59,8 @@
 #define FTS_I2C_VTG_MAX_UV                  1800000
 #endif
 
+#define SUPER_RESOLUTION_FACOTR             8
+
 /*****************************************************************************
 * Global variable or extern global variabls/functions
 *****************************************************************************/
@@ -2346,6 +2348,12 @@ static void fts_palm_mode_recovery(struct fts_ts_data *ts_data)
 		FTS_ERROR("set palm sensor cmd failed: %d\n", ts_data->palm_sensor_switch);
 }
 
+static int fts_get_touch_super_resolution_factor(void)
+{
+	FTS_INFO("current super resolution factor is: %d", SUPER_RESOLUTION_FACOTR);
+	return SUPER_RESOLUTION_FACOTR;
+}
+
 #endif
 
 
@@ -2403,6 +2411,7 @@ static int fts_ts_probe(struct spi_device *spi)
 	xiaomi_touch_interfaces.resetMode = fts_reset_mode;
 	xiaomi_touch_interfaces.getModeAll = fts_get_mode_all;
 	xiaomi_touch_interfaces.palm_sensor_write = fts_palm_sensor_write;
+	xiaomi_touch_interfaces.get_touch_super_resolution_factor = fts_get_touch_super_resolution_factor;
 
 	fts_init_touch_mode_data(ts_data);
 	xiaomitouch_register_modedata(&xiaomi_touch_interfaces);
