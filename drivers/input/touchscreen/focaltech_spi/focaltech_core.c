@@ -153,6 +153,9 @@ void fts_tp_state_recovery(struct fts_ts_data *ts_data)
 	/* recover TP palm mode state */
 	fts_palm_mode_recovery(ts_data);
 #endif
+	/* set touch in charge mode or not */
+	ts_data->charger_mode = false;
+	queue_work(ts_data->ts_workqueue, &ts_data->power_supply_work);
 	FTS_FUNC_EXIT();
 }
 
@@ -1519,7 +1522,7 @@ static int fts_power_supply_event(struct notifier_block *nb,
 static void fts_power_supply_work(struct work_struct *work)
 {
 	struct fts_ts_data *ts_data = container_of(work, struct fts_ts_data, power_supply_work);
-	int charger_mode;
+	bool charger_mode;
 	int ret;
 
 	if (ts_data == NULL)
@@ -1533,7 +1536,7 @@ static void fts_power_supply_work(struct work_struct *work)
 	pm_stay_awake(ts_data->dev);
 	mutex_lock(&ts_data->power_supply_lock);
 	charger_mode = !!power_supply_is_system_supplied();
-	if (charger_mode != ts_data->charger_mode || ts_data->charger_mode < 0) {
+	if (charger_mode != ts_data->charger_mode) {
 		ts_data->charger_mode = charger_mode;
 		FTS_INFO("%s %d\n", __func__, charger_mode);
 		if (charger_mode) {
@@ -1715,7 +1718,7 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 	register_early_suspend(&ts_data->early_suspend);
 #endif
 
-	ts_data->charger_mode = -1;
+	ts_data->charger_mode = false;
 	mutex_init(&ts_data->power_supply_lock);
 	INIT_WORK(&ts_data->power_supply_work, fts_power_supply_work);
 	ts_data->power_supply_notifier.notifier_call = fts_power_supply_event;
