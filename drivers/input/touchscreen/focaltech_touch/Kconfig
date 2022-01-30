@@ -5,10 +5,12 @@
 config TOUCHSCREEN_FTS
 		bool "Focaltech Touchscreen"
 		depends on I2C
+		depends on BOARD_XIAOMI
 		default n
 		help
 		  Say Y here if you have Focaltech touch panel.
 		  If unsure, say N.
+
 config TOUCHSCREEN_FTS_FOD
 		bool "Focaltech Touchscreen Fod func"
 		depends on TOUCHSCREEN_FTS
