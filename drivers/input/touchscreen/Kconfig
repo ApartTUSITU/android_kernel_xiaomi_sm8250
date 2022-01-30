@@ -1324,6 +1324,15 @@ config TOUCHSCREEN_ST
 	  To compile this driver as a module, choose M here: the
 	  module will be called st.
 
+config SECURE_TOUCH
+	bool "Secure Touch support for Xiaomi Touchscreen"
+	help
+          Say Y here
+	  -Goodix touch driver is connected
+	  -To enable secure touch for Goodix touch driver
+
+	  If unsure, say N.
+
 source "drivers/input/touchscreen/st/Kconfig"
 
 config TOUCHSCREEN_SYNAPTICS_DSX
@@ -1361,6 +1370,8 @@ source "drivers/input/touchscreen/nt36xxx/Kconfig"
 source "drivers/input/touchscreen/focaltech_spi/Kconfig"
 
 source "drivers/input/touchscreen/fts_521/Kconfig"
+
+source "drivers/input/touchscreen/fts_spi/Kconfig"
 
 source "drivers/input/touchscreen/goodix_driver_gt9886/Kconfig"
 

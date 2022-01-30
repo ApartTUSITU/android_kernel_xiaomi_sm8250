@@ -1,0 +1,18 @@
+config TOUCHSCREEN_ST_FTS_V521_SPI
+	tristate "ST FTS V521 I2C Touchscreen"
+	depends on I2C
+	help
+	  Say Y here if you have ST FTS series I2C touchscreen.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+
+
+config FTS_FOD_AREA_REPORT
+        tristate "FTS FOD area report"
+        depends on TOUCHSCREEN_ST_FTS_V521_SPI
+        help
+          Say Y here to enable fod area report functionality.
+
+          If unsure, say N.
