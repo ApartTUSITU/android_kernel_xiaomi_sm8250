@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/of_device.h>
@@ -1395,6 +1396,10 @@ static void dsi_kickoff_msg_tx(struct dsi_ctrl *dsi_ctrl,
 
 	if (dsi_ctrl->hw.reset_trig_ctrl)
 		dsi_hw_ops.reset_trig_ctrl(&dsi_ctrl->hw,
+				&dsi_ctrl->host_config.common_config);
+
+	if (dsi_hw_ops.init_cmddma_trig_ctrl)
+		dsi_hw_ops.init_cmddma_trig_ctrl(&dsi_ctrl->hw,
 				&dsi_ctrl->host_config.common_config);
 
 	/*
