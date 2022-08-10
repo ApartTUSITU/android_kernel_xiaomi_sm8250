@@ -138,7 +138,6 @@ struct fts_ts_info *fts_info;
 static struct drm_panel *active_panel;
 #endif
 static int fts_init_sensing(struct fts_ts_info *info);
-static int fts_mode_handler(struct fts_ts_info *info, int force);
 static int fts_chip_initialization(struct fts_ts_info *info, int init_type);
 static irqreturn_t fts_event_handler(int irq, void *ts_info);
 static int fts_enable_reg(struct fts_ts_info *info, bool enable);
