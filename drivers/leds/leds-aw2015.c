@@ -856,7 +856,6 @@ static int aw2015_led_parse_child_node(struct aw2015_led *led_array,
 
 		led->cdev.default_trigger = of_get_property(temp,
 				"linux,default-trigger", NULL);
-		led->cdev.flags |= LED_KEEP_TRIGGER;
 
 		led->cdev.blink_set = aw2015_led_set_blink;
 
