@@ -113,6 +113,7 @@ obj-$(CONFIG_TOUCHSCREEN_ST)		+= st/
 obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX) += synaptics_dsx/
 obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM)	+= synaptics_tcm/
 obj-$(CONFIG_TOUCHSCREEN_FTS)	+= focaltech_touch/
+obj-$(CONFIG_TOUCHSCREEN_FOCALTECH_3658U)	+= focaltech_3658u/
 obj-$(CONFIG_TOUCHSCREEN_NT36XXX)	+= nt36xxx/
 obj-$(CONFIG_INPUT_PRESS_NDT) += ndt_button.o
 obj-$(CONFIG_TOUCHSCREEN_FOCALTECH) += focaltech_spi/
