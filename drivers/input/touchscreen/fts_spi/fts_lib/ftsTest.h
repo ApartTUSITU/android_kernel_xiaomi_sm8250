@@ -31,6 +31,7 @@
 
 #define WAIT_FOR_FRESH_FRAMES			200										/*Time in ms to wait after start to sensing before reading a frame*/
 #define WAIT_AFTER_SENSEOFF				50										/*Time in ms to wait after stop sensing and before reading a frame from memory*/
+#define WAIT_AFTER_LOW_POWER			15
 
 #define NO_INIT							0										/*No Initialization required during the MP*/
 

@@ -3819,6 +3819,9 @@ static u8 fts_need_enter_lp_mode(void)
  */
 	u8 tmp_value = 0;
 
+	if (fts_info->nonui_status == 2)
+		return tmp_value;
+
 	if (fts_info->aod_status && !fts_info->nonui_status)
 		tmp_value |= FOD_SINGLETAP_EVENT;
 	if ((fts_info->fod_status != -1 && fts_info->fod_status != 100)) {
@@ -7736,12 +7739,29 @@ static void fts_switch_mode_work(struct work_struct *work)
 		logError(1, "%s %s touch in resume mode, don't need to set gesture cmds\n", tag, __func__);
 		return;
 	}
+
+	pm_stay_awake(info->dev);
+	if ((!gesture_type && !info->gesture_enabled) || info->nonui_status == 2) {
+		logError(0, "%s %s: Sense OFF! \n", tag, __func__);
+		setScanMode(SCAN_MODE_ACTIVE, 0x00);
+		fts_disableInterrupt();
+		mdelay(WAIT_AFTER_SENSEOFF);
+		pm_relax(info->dev);
+		return;
+	} else {
+		logError(0, "%s %s: enter low power mode! gesture_type: %d, gesture_enable: %d\n",
+				tag, __func__, gesture_type, info->gesture_enabled);
+		setScanMode(SCAN_MODE_LOW_POWER, 0);
+		mdelay(WAIT_AFTER_LOW_POWER);
+		fts_enableInterrupt();
+	}
 	if (info->gesture_enabled)
 		gesture_cmd[2] = 0x20;
 	res = fts_write_dma_safe(gesture_cmd, ARRAY_SIZE(gesture_cmd));
 	if (res < OK)
 		logError(1, "%s %s: send gesture cmd error! ERROR %08X recovery in senseOff...\n",
 			 tag, __func__, res);
+	pm_relax(info->dev);
 }
 #endif
 
