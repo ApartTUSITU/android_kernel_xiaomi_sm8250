@@ -185,6 +185,7 @@ static int goodix_cfg_bin_proc(struct goodix_ts_core *core_data)
 		return -ENOMEM;
 	}
 	if (!ts_dev) {
+		kfree(cfg_bin);
 		ts_err("ts device can't be null");
 		return -EINVAL;
 	}
