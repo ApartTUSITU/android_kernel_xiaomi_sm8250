@@ -365,10 +365,11 @@ this file is for attribution only of elish
 
 &usb1 {
 	status = "ok";
-};
+	qcom,ignore-wakeup-src-in-hostmode;
 
-&dwc1 {
-	dr_mode = "host";
+	dwc3@a800000 {
+		dr_mode = "host";
+	};
 };
 
 &usb2_phy1 {
