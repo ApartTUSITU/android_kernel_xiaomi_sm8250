@@ -76,7 +76,7 @@
 				qcom,mdss-dsi-v-bottom-border = <0>;
 				qcom,mdss-dsi-panel-clockrate = <1100000000>;
 				qcom,mdss-dsi-panel-jitter = <0x5 0x1>;
-				qcom,mdss-mdp-transfer-time-us = <8000>;
+				qcom,mdss-mdp-transfer-time-us = <7000>;
 				qcom,mdss-dsi-on-command = [
 					39 00 00 00 00 00 06 F0 55 AA 52 08 00
 					15 00 00 00 00 00 02 6F 29
@@ -142,6 +142,12 @@
 					39 01 00 00 00 00 06 F0 55 AA 52 08 05
 					39 00 00 00 00 00 02 CA 11
 					39 01 00 00 00 00 04 CB 22 22 22
+					39 01 00 00 00 00 06 F0 55 AA 52 08 00
+					39 00 00 00 00 00 02 6F 01
+					39 00 00 00 00 00 02 C0 B3
+					39 00 00 00 00 00 05 FF AA 55 A5 80
+					39 00 00 00 00 00 02 6F 2E
+					39 01 00 00 00 00 02 FB D1
 					/* Sleep Out */
 					05 01 00 00 50 00 02 11 00
 					/* Display On */
@@ -193,7 +199,7 @@
 				qcom,mdss-dsi-v-bottom-border = <0>;
 				qcom,mdss-dsi-panel-clockrate = <1100000000>;
 				qcom,mdss-dsi-panel-jitter = <0x5 0x1>;
-				qcom,mdss-mdp-transfer-time-us = <9500>;
+				qcom,mdss-mdp-transfer-time-us = <7000>;
 				qcom,mdss-dsi-on-command = [
 					39 00 00 00 00 00 06 F0 55 AA 52 08 00
 					15 00 00 00 00 00 02 6F 29
@@ -265,6 +271,12 @@
 					39 01 00 00 00 00 06 F0 55 AA 52 08 05
 					39 00 00 00 00 00 02 CA 11
 					39 01 00 00 00 00 04 CB 22 22 22
+					39 01 00 00 00 00 06 F0 55 AA 52 08 00
+					39 00 00 00 00 00 02 6F 01
+					39 00 00 00 00 00 02 C0 B3
+					39 00 00 00 00 00 05 FF AA 55 A5 80
+					39 00 00 00 00 00 02 6F 2E
+					39 01 00 00 00 00 02 FB D1
 					/* Sleep Out */
 					05 01 00 00 50 00 02 11 00
 					/* Display On */
@@ -395,6 +407,12 @@
 					39 01 00 00 00 00 06 F0 55 AA 52 08 05
 					39 00 00 00 00 00 02 CA 11
 					39 01 00 00 00 00 04 CB 22 22 22
+					39 01 00 00 00 00 06 F0 55 AA 52 08 00
+					39 00 00 00 00 00 02 6F 01
+					39 00 00 00 00 00 02 C0 B3
+					39 00 00 00 00 00 05 FF AA 55 A5 80
+					39 00 00 00 00 00 02 6F 2E
+					39 01 00 00 00 00 02 FB D1
 					/* Sleep Out */
 					05 01 00 00 50 00 02 11 00
 					/* Display On */
@@ -1136,6 +1154,21 @@
 				39 01 00 00 00 00 03 B2 07 FF
 				];
 			mi,mdss-dsi-dim-fp-dbv-max-in-normal-command-state = "dsi_lp_mode";
+
+/*fix first 120hz after dc on cause issue MIUI-2195281 start*/ 	
+			mi,mdss-dsi-dc-off-command = [
+				39 01 00 00 00 00 06 F0 55 AA 52 08 00 /* Set page 0 */
+				39 00 00 00 00 00 02 B2 18
+				39 00 00 00 00 00 02 6F 0F
+				39 00 00 00 00 00 05 B2 30 20 81 47
+				39 01 00 00 00 00 25 B3 00 08 00 18 00 18 00 31 00 31 00 62 00 62 00 C0 00 C0 01 46 01 46 01 47 01 47 03 33 03 33 07 FF 07 FF 0F FF
+				39 00 00 00 00 00 06 F0 55 AA 52 08 04 /* Set page 4 */
+				39 01 00 00 00 00 4C D2
+					20 1E 0E 0D 0A 22 20 18 14 0A 24 22 20 18 16 26 24 22 20 1D 2F 28 26 22 20
+					80 24 20 16 12 70 26 24 1D 0F 64 28 26 22 20 5F 2A 28 2A 28 30 2D 2C 2B 2A
+					2F 2F 20 08 0F 30 32 2C 1D 14 3D 34 2E 2A 18 48 36 2F 32 30 5F 38 36 34 32];
+			mi,mdss-dsi-dc-off-command-state = "dsi_lp_mode";
+/*fix first 120hz after dc on cause issue MIUI-2195281 end*/
 		};
 	};
 };
