@@ -390,6 +390,7 @@ And public attribution of xiaomi platforms(like J2 and so and)
 	qcom,disable-suspend-on-collapse;
 	qcom,distinguish-qc-class-ab;
 	qcom,support-conn-therm;
+	qcom,support-ext-5v-boost;
 	vbus-disable-gpio = <&tlmm 8 GPIO_ACTIVE_HIGH>;
 	io-channels = <&pm8150b_vadc ADC_USB_IN_V_16>,
 			<&pm8150b_vadc ADC_MID_CHG_DIV6>,
