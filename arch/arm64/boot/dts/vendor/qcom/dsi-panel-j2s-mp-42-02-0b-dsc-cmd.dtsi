@@ -320,18 +320,18 @@
 			/* aod mode -> hbm on for fingerprint unlock */
 			mi,mdss-dsi-hbm-fod-on-command = [
 				/* Dimming Off */
-				15 00 00 00 00 00 02 53 20
-				/* HBM Mode 700 nit */
-				39 01 00 00 00 00 05 51 0F 8F 00 00
+				39 01 00 00 00 00 02 53 20
 				/* Aod to Normal */
 				39 00 00 00 00 00 06 F0 55 AA 52 08 00 /* Set page 0 */
-				15 00 00 00 00 00 02 B2 58
-				15 00 00 00 00 00 02 65 00
-				05 00 00 00 00 00 02 38 00
-				05 01 00 00 00 00 02 2C 00];
+				39 00 00 00 00 00 02 B2 58
+				39 00 00 00 00 00 02 65 00
+				39 00 00 00 00 00 02 38 00
+				39 00 00 00 00 00 02 2C 00
+				/* HBM Mode 700 nit */
+				39 01 00 00 00 00 05 51 0F 8F 00 00];
 			mi,mdss-dsi-hbm-fod-off-command = [
 				/* Dimming Off */
-				15 00 00 00 00 00 02 53 20
+				39 01 00 00 00 00 02 53 20
 				/* Normal Mode */
 				/* parameter will be updated base on last brightness */
 				39 01 00 00 00 00 05 51 07 FF 00 00];
@@ -470,20 +470,20 @@
 			/* aod mode -> hbm on for fingerprint unlock */
 			mi,mdss-dsi-hbm-fod-on-command = [
 				/* Dimming Off */
-				15 00 00 00 00 00 02 53 20
-				/* HBM Mode 700 nit */
-				39 01 00 00 00 00 05 51 0F 8F 00 00
+				39 01 00 00 00 00 02 53 20
 				/* Aod to Normal */
-				39 00 00 00 00 00 06 F0 55 AA 52 08 00 /* Set page 0 */
-				15 00 00 00 00 00 02 B2 58
-				15 00 00 00 00 00 02 65 00
-				05 00 00 00 00 00 02 38 00
-				05 01 00 00 00 00 02 2C 00
+				39 00 00 00 00 00 06 F0 55 AA 52 08 00
+				39 00 00 00 00 00 02 B2 58
+				39 00 00 00 00 00 02 65 00
+				39 00 00 00 00 00 02 38 00
+				39 00 00 00 00 00 02 2C 00
+				/* HBM Mode 700 nit */
+				39 00 00 00 00 00 05 51 0F 8F 00 00
 				/* Enter 90Hz */
-				15 01 00 00 00 00 02 2F 02];
+				39 01 00 00 00 00 02 2F 02];
 			mi,mdss-dsi-hbm-fod-off-command = [
 				/* Dimming Off */
-				15 00 00 00 00 00 02 53 20
+				39 01 00 00 00 00 02 53 20
 				/* Normal Mode */
 				/* parameter will be updated base on last brightness */
 				39 01 00 00 00 00 05 51 07 FF 00 00];
