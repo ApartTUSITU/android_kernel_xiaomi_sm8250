@@ -365,6 +365,7 @@ And public attribution of xiaomi platforms(like J1 and so and)
 		mi,pd-battery-warm-th = <480>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
+		mi,pd-power-max = <33>; /*charge power max : 33W */
 	};
 
 	lmi_batterydata: qcom,battery-data {
@@ -395,6 +396,7 @@ And public attribution of xiaomi platforms(like J1 and so and)
 
 &pm8150b_pdphy {
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <33>; /*charge power max : 33W */
 };
 
 &smb1390 {

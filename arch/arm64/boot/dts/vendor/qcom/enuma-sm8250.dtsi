@@ -1008,6 +1008,7 @@ this file is for attribution only of enuma
 		//mi,cell-vol-high-threshold-mv = <4448>;
 		//mi,cell-vol-max-threshold-mv = <4477>;
 		mi,chg-enable-k81;
+		mi,pd-power-max = <67>; /*charge power max : 67W */
 	};
 
 	dual-FuelGauge{
@@ -1041,6 +1042,7 @@ this file is for attribution only of enuma
 
 &pm8150b_pdphy {
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <67>; /*charge power max : 67W */
 };
 
 &smb1390 {

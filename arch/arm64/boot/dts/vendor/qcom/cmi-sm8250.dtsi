@@ -66,6 +66,7 @@ this file is for attribution only of cmi
 		mi,cell-vol-max-threshold-mv = <4477>;
 		mi,pd-battery-warm-th = <480>;
 		mi,cp-sec-enable;
+		mi,pd-power-max = <50>; /*charge power max : 50W */
 	};
 
 	wc_dc {
@@ -568,6 +569,7 @@ this file is for attribution only of cmi
 &pm8150b_pdphy {
 	vbus-supply = <&ext_5v_boost>;
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <50>; /*charge power max : 50W */
 };
 
 &smb1390 {

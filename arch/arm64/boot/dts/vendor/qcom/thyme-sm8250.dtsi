@@ -541,6 +541,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 		mi,pd-battery-warm-th = <450>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
+		mi,pd-power-max = <33>; /*charge power max : 33W */
 	};
 
 	wc_dc {
@@ -633,6 +634,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 &pm8150b_pdphy {
 	vbus-supply = <&ext_5v_boost>;
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <33>; /*charge power max : 33W */
 };
 
 &smb1390 {

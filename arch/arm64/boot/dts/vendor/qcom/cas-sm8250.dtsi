@@ -77,6 +77,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 		mi,cell-vol-max-threshold-mv = <4477>;
 		mi,pd-battery-warm-th = <480>;
 		mi,cp-sec-enable;
+		mi,pd-power-max = <120>; /*charge power max : 120W */
 	};
 
 	wc_dc {
@@ -473,6 +474,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 
 &pm8150b_pdphy {
 	vbus-supply = <&ext_5v_boost>;
+	mi,pd-power-max = <120>; /*charge power max : 120W */
 };
 
 &smb1396 {

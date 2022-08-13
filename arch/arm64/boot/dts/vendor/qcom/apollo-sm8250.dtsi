@@ -682,6 +682,7 @@ this file is for attribution only of apollo
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
 		mi,therm-level-threshold = <12>;
+		mi,pd-power-max = <33>; /*charge power max : 33W */
 	};
 
 	apollo_batterydata: qcom,battery-data {
@@ -712,6 +713,7 @@ this file is for attribution only of apollo
 
 &pm8150b_pdphy {
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <33>; /*charge power max : 33W */
 };
 
 &smb1390 {
