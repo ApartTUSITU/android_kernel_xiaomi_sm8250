@@ -1064,7 +1064,7 @@ And public attribution of xiaomi platforms(like L3A and so and)
 		irq-gpio = <&tlmm 129 0>;
 		vib_mode = < 0 >;   /*mode:   RAM mode->0; CONT mode -> 1*/
 		vib_f0_pre = < 1700 >;
-		vib_f0_cali_percen = < 7 >;
+		vib_f0_cali_percen = < 9 >;
 		vib_cont_drv_lev = < 38 >;
 		vib_cont_drv_lvl_ov = < 50 >;
 		vib_cont_td = < 0x009A >;
