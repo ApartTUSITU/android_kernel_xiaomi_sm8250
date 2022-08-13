@@ -412,6 +412,7 @@
 	mi,mdss-dsi-panel-fod-dimlayer-enabled;
 	mi,mdss-panel-delay-before-fod-hbm-on;
 	mi,mdss-panel-delay-before-fod-hbm-off;
+	mi,mdss-panel-fod-skip-nolp;
 
 	mi,mdss-dsi-dimlayer-brightness-alpha-lut-item-count = <21>;
 	mi,mdss-dsi-dimlayer-brightness-alpha-lut =

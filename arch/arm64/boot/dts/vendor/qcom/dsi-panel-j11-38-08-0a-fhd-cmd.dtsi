@@ -131,6 +131,7 @@
 	mi,mdss-panel-delay-before-fod-hbm-on;
 	mi,mdss-panel-delay-before-fod-hbm-off;
 	mi,mdss-panel-delay-after-fod-hbm-off;
+	mi,mdss-panel-fod-skip-nolp;
 
 	/* gamma update setting  */
 	mi,mdss-dsi-greenish-update-gamma-flag;
