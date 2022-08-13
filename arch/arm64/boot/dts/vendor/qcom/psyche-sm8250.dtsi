@@ -359,8 +359,8 @@ And public attribution of xiaomi platforms(like L3A and so and)
 		charger_name = "quaternary_chg";
 		/* bank <bit-idx> <flags: active-low> */
 		//irq-gpios = <&tlmm 55 0x2002>;
-		interrupt-parent = <&tlmm>;
-		interrupts = <64 0x2002>;
+		//interrupt-parent = <&tlmm>;
+		//interrupts = <64 0x2002>;
 
 		//interrupt-parent = <&tlmm>;
 		//interrupts = <55 0x2002>;
