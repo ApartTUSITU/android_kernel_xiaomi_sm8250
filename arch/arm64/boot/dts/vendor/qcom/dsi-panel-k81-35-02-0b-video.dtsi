@@ -73,8 +73,8 @@
 				qcom,mdss-dsi-panel-width = <800>; // 1600/2
 				qcom,mdss-dsi-panel-height = <2560>;
 				qcom,mdss-dsi-h-pulse-width = <20>;
-				qcom,mdss-dsi-h-back-porch = <20>;
-				qcom,mdss-dsi-h-front-porch = <64>;
+				qcom,mdss-dsi-h-back-porch = <26>;
+				qcom,mdss-dsi-h-front-porch = <100>;
 				qcom,mdss-dsi-h-sync-skew = <0>;
 				qcom,mdss-dsi-v-pulse-width = <4>;
 				qcom,mdss-dsi-v-back-porch = <168>;
