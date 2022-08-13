@@ -619,6 +619,17 @@
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
 
+&dsi_l11r_38_08_0a_dsc_cmd {
+        qcom,panel-supply-entries = <&dsi_panel_k11a_pwr_supply_vci>;
+        qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+        qcom,mdss-dsi-bl-min-level = <1>;
+        qcom,mdss-dsi-bl-max-level = <2047>;
+        qcom,mdss-brightness-max-level = <2047>;
+        qcom,mdss-brightness-init-level = <536>;
+        qcom,platform-te-gpio = <&tlmm 66 0>;
+        qcom,platform-reset-gpio = <&tlmm 12 0>;
+};
+
 &dsi_j1u_42_02_0b_dsc_cmd {
         qcom,panel-supply-entries = <&dsi_panel_pwr_supply_vci>;
         qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
