@@ -150,6 +150,9 @@
 
 #define QPNP_PON_BUFFER_SIZE			9
 
+#define QPNP_PON_SET_PS_HOLD			0x2
+#define QPNP_PON_SET_POWER_KEY			0x80
+
 #define QPNP_POFF_REASON_UVLO			13
 
 enum qpnp_pon_version {
@@ -227,6 +230,7 @@ struct qpnp_pon {
 	bool			resin_pon_reset;
 	ktime_t			kpdpwr_last_release_time;
 	bool			log_kpd_event;
+	ktime_t			time_kpdpwr_bark;
 };
 
 static int pon_ship_mode_en;
@@ -778,6 +782,60 @@ int qpnp_pon_is_warm_reset(void)
 	return _qpnp_pon_is_warm_reset(sys_reset_dev);
 }
 EXPORT_SYMBOL(qpnp_pon_is_warm_reset);
+
+int qpnp_pon_is_ps_hold_reset(void)
+{
+	struct qpnp_pon *pon = sys_reset_dev;
+	int rc;
+	int reg = 0;
+
+	if (!pon)
+		return 0;
+
+	rc = regmap_read(pon->regmap, QPNP_POFF_REASON1(pon), &reg);
+	if (rc) {
+		dev_err(pon->dev,
+				"Unable to read addr=%x, rc(%d)\n",
+				QPNP_POFF_REASON1(pon), rc);
+		return 0;
+	}
+
+	dev_info(pon->dev, "hw_reset reason1 is 0x%x\n", reg);
+
+	/* The bit 1 is 1, means by PS_HOLD/MSM controlled shutdown */
+	if (reg & QPNP_PON_SET_PS_HOLD)
+		return 1;
+	return 0;
+}
+EXPORT_SYMBOL(qpnp_pon_is_ps_hold_reset);
+
+int qpnp_pon_is_lpk(void)
+{
+	struct qpnp_pon *pon = sys_reset_dev;
+	int rc;
+	int reg = 0;
+
+	if (!pon)
+		return 0;
+
+	rc = regmap_read(pon->regmap, QPNP_POFF_REASON1(pon), &reg);
+	if (rc) {
+		dev_err(pon->dev,
+				"Unable to read addr=%x, rc(%d)\n",
+				QPNP_POFF_REASON1(pon), rc);
+		return 0;
+	}
+
+	dev_info(pon->dev,
+		"hw_reset reason1 is 0x%x\n", reg);
+
+	/* The bit 7 is 1, means the off reason is powerkey */
+	if (reg & QPNP_PON_SET_POWER_KEY)
+		return 1;
+
+	return 0;
+}
+EXPORT_SYMBOL(qpnp_pon_is_lpk);
 
 /**
  * qpnp_pon_wd_config() - configure the watch dog behavior for warm reset
@@ -2189,6 +2247,66 @@ static int qpnp_pon_read_hardware_info(struct qpnp_pon *pon, bool sys_reset)
 	return 0;
 }
 
+static int debug_pon_on_off_reg(struct qpnp_pon *pon)
+{
+	int rc = 0;
+	uint pon_sts = 0;
+	int i = 0;
+	char str_buf[256] = "";
+	char reg[16] = "";
+
+	for (i = QPNP_PON_REASON1(pon); i <= QPNP_S3_RESET_REASON(pon) + 1; i++) {
+		rc = regmap_read(pon->regmap, i, &pon_sts);
+		if (rc) {
+			dev_err(pon->dev,
+					"Unable to read PON_RESASON1 reg rc: %d\n",
+					rc);
+			return rc;
+		}
+		snprintf(reg, sizeof(reg), "0x%x:0x%x ", i, pon_sts);
+		strlcat(str_buf, reg, sizeof(str_buf));
+	}
+
+	if (to_spmi_device(pon->dev->parent)->usid)
+		goto print_log;
+
+	rc = regmap_read(pon->regmap, QPNP_PON_KPDPWR_S2_CNTL(pon), &pon_sts);
+	if (rc) {
+		dev_err(pon->dev,
+				"Unable to read PON_RESASON1 reg rc: %d\n",
+				rc);
+		return rc;
+	}
+	snprintf(reg, sizeof(reg), "0x%x:0x%x ", QPNP_PON_KPDPWR_S2_CNTL(pon), pon_sts);
+	strlcat(str_buf, reg, sizeof(str_buf));
+
+	rc = regmap_read(pon->regmap, QPNP_PON_KPDPWR_RESIN_S2_CNTL(pon), &pon_sts);
+	if (rc) {
+		dev_err(pon->dev,
+				"Unable to read PON_RESASON1 reg rc: %d\n",
+				rc);
+		return rc;
+	}
+	snprintf(reg, sizeof(reg), "0x%x:0x%x ", QPNP_PON_KPDPWR_RESIN_S2_CNTL(pon), pon_sts);
+	strlcat(str_buf, reg, sizeof(str_buf));
+
+	rc = regmap_read(pon->regmap, QPNP_PON_PS_HOLD_RST_CTL(pon), &pon_sts);
+	if (rc) {
+		dev_err(pon->dev,
+				"Unable to read PON_RESASON1 reg rc: %d\n",
+				rc);
+		return rc;
+	}
+	snprintf(reg, sizeof(reg), "0x%x:0x%x ", QPNP_PON_PS_HOLD_RST_CTL(pon), pon_sts);
+	strlcat(str_buf, reg, sizeof(str_buf));
+
+print_log:
+	strlcat(str_buf, "\n", sizeof(str_buf));
+	pr_info("%s\n", str_buf);
+
+	return rc;
+}
+
 static int qpnp_pon_parse_power_off_type(struct qpnp_pon *pon,
 					 const char *prop, int *val)
 {
@@ -2397,6 +2515,7 @@ static int qpnp_pon_probe(struct platform_device *pdev)
 	if (modem_reset)
 		modem_reset_dev = pon;
 
+	debug_pon_on_off_reg(pon);
 	qpnp_pon_debugfs_init(pon);
 
 	return 0;

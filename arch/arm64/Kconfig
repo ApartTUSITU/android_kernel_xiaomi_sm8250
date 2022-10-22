@@ -1668,6 +1668,13 @@ config BUILD_ARM64_DT_OVERLAY
 	  This option enables support for DT overlay compilation.
 	  Enabling this option sets required flags to add DT
 	  overlay in the compilation.
+
+config BOOT_INFO
+	bool "Boot information from bootloader"
+	default y if BOARD_XIAOMI
+	help
+	  On embedded linux device, we try to collect more information from
+	  bootloader to kernel. eg. powerup reason.
 endmenu
 
 config COMPAT
