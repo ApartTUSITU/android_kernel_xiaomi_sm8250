@@ -300,6 +300,9 @@ char * const migratetype_names[MIGRATE_TYPES] = {
 	"CMA",
 #endif
 	"HighAtomic",
+#ifdef CONFIG_EMERGENCY_MEMORY
+	"Emergency",
+#endif
 #ifdef CONFIG_MEMORY_ISOLATION
 	"Isolate",
 #endif
@@ -2596,6 +2599,41 @@ static bool unreserve_highatomic_pageblock(const struct alloc_context *ac,
 	return false;
 }
 
+#ifdef CONFIG_EMERGENCY_MEMORY
+/* Initialization of the migration type MIGRATE_EMERGENCY */
+void __init emergency_mm_init(void)
+{
+	/*
+	 * If  pageblock_order < MAX_ORDER - 1 ,then allocating a few pageblocks may
+	 * cause the buddy system to merge two pageblocks of different migration types,
+	 * for example, MIGRATE_EMERGENCY and MIGRATE_MOVABLE.
+	 */
+	if (pageblock_order == MAX_ORDER - 1) {
+		int nid = 0;
+		pr_info("start to setup MIGRATE_EMERGENCY reserved memory.");
+		for_each_online_node(nid) {
+			pg_data_t *pgdat = NODE_DATA(nid);
+			struct zone *zone = &pgdat->node_zones[ZONE_NORMAL];
+			while (zone->nr_reserved_emergency < MAX_MANAGED_EMERGENCY) {
+				struct page *page = alloc_pages(___GFP_MOVABLE, pageblock_order);
+				if (page == NULL) {
+				 	pr_warn("node id %d MIGRATE_EMERGENCY reserved "
+						"pages failed, reserved %d pages.",
+						nid, zone->nr_reserved_emergency);
+					break;
+				}
+				set_pageblock_migratetype(page, MIGRATE_EMERGENCY);
+				__free_pages(page, pageblock_order);
+				zone->nr_reserved_emergency += pageblock_nr_pages;
+			}
+			pr_info("node id %d MIGRATE_EMERGENCY reserved %d pages.",
+				nid, zone->nr_reserved_emergency);
+
+		}
+	}
+}
+#endif
+
 /*
  * Try finding a free buddy page on the fallback list and put it on the free
  * list of requested migratetype, possibly along with other pages from the same
@@ -3471,6 +3509,13 @@ bool __zone_watermark_ok(struct zone *z, unsigned int order, unsigned long mark,
 
 	if (alloc_flags & ALLOC_HIGH)
 		min -= min / 2;
+#ifdef CONFIG_EMERGENCY_MEMORY
+	/*
+	 * If the migration type MIGRATE_EMERGENCY enable,then subtract
+	 * reserved pages.
+	 */
+	free_pages -= z->nr_reserved_emergency;
+#endif
 
 	if (unlikely(alloc_harder)) {
 		/*
@@ -3628,6 +3673,50 @@ alloc_flags_nofragment(struct zone *zone, gfp_t gfp_mask)
 #endif /* CONFIG_ZONE_DMA32 */
 	return alloc_flags;
 }
+
+#ifdef CONFIG_EMERGENCY_MEMORY
+/*
+ * get_emergency_page_from_freelist allocates pages in reserved memory
+ * in the migration type MIGRATE_EMERGENCY.
+ */
+static struct page *get_emergency_page_from_freelist(gfp_t gfp_mask, unsigned int order,
+			int alloc_flags, const struct alloc_context *ac, int migratetype)
+{
+	struct page *page = NULL;
+
+	if (ac->high_zoneidx >= ZONE_NORMAL) {
+		struct zoneref *z = ac->preferred_zoneref;
+		struct pglist_data *pgdat = NODE_DATA(zonelist_node_idx(z));
+		struct zone *zone = &pgdat->node_zones[ZONE_NORMAL];
+		unsigned long flags;
+
+		if (cpusets_enabled() &&
+			(alloc_flags & ALLOC_CPUSET) &&
+			!__cpuset_zone_allowed(zone, gfp_mask))
+			return NULL;
+
+		spin_lock_irqsave(&zone->lock, flags);
+		do {
+			page = __rmqueue_smallest(zone, order, migratetype);
+		} while (page && check_new_pages(page, order));
+
+		spin_unlock(&zone->lock);
+
+		if (page) {
+			__mod_zone_freepage_state(zone, -(1 << order),
+						  get_pcppage_migratetype(page));
+
+			__count_zid_vm_events(PGALLOC, page_zonenum(page), 1 << order);
+			zone_statistics(z->zone, zone);
+			prep_new_page(page, order, gfp_mask, alloc_flags);
+		}
+		local_irq_restore(flags);
+	}
+
+	return page;
+
+}
+#endif
 
 /*
  * get_page_from_freelist goes through the zonelist trying to allocate
@@ -4840,6 +4929,18 @@ nopage:
 		goto retry;
 	}
 fail:
+#ifdef CONFIG_EMERGENCY_MEMORY
+	if (!(gfp_mask & __GFP_NOWARN) && !costly_order) {
+		/*
+		 * If this allocation belongs to non-costly non-NOWARN page allocation,
+		 * then uses the reserved memory in the migration type MIGRATE_EMERGENCY.
+		 */
+		page = get_emergency_page_from_freelist(gfp_mask, order, alloc_flags, ac,
+			 MIGRATE_EMERGENCY);
+		if (page)
+			goto got_pg;
+	}
+#endif
 	warn_alloc(gfp_mask, ac->nodemask,
 			"page allocation failure: order:%u", order);
 got_pg:
@@ -5408,6 +5509,9 @@ static void show_migration_types(unsigned char type)
 		[MIGRATE_HIGHATOMIC]	= 'H',
 #ifdef CONFIG_CMA
 		[MIGRATE_CMA]		= 'C',
+#endif
+#ifdef CONFIG_EMERGENCY_MEMORY
+		[MIGRATE_EMERGENCY]  = 'G',
 #endif
 #ifdef CONFIG_MEMORY_ISOLATION
 		[MIGRATE_ISOLATE]	= 'I',

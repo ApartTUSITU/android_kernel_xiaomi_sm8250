@@ -874,3 +874,12 @@ config MEMFD_ASHMEM_SHIM
 	  now memfds passed to them.
 
 	  Unless you are running Android, say N.
+
+config EMERGENCY_MEMORY
+	bool "Enable emergency memory"
+	default y if BOARD_XIAOMI
+	help
+	 This enables the migration type MIGRATE_EMERGENCY which reserves
+	 a small amount of memory for non-costly non-NOWARN page allocation
+	 failure.
+
