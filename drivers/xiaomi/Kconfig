@@ -49,6 +49,8 @@ config SF_BINDER
 	help
 	  Xiaomi restore surfaceflinger binder priority FIFO
 
+source "drivers/xiaomi/fragmention/Kconfig"
+
 endif
 
 endmenu

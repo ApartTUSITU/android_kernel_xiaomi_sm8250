@@ -1,0 +1,4 @@
+config MI_FRAGMENTION
+	bool "Xiaomi memory fragmention test"
+	help
+	  Say Y to enable MIUI Memory fragmentize simulate test
