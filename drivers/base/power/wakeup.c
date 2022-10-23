@@ -1044,6 +1044,31 @@ void pm_wakep_autosleep_enabled(bool set)
 
 static struct dentry *wakeup_sources_stats_dentry;
 
+#ifdef CONFIG_XM_POWER_DEBUG
+void global_print_active_locks_debug(struct wakeup_source *ws)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&ws->lock, flags);
+	if (ws->active)
+		pr_info("active wake lock: %s, last_time: %lld\n",
+			ws->name, ktime_to_ms(ws->last_time));
+	spin_unlock_irqrestore(&ws->lock, flags);
+}
+
+void global_print_active_locks(void)
+{
+	struct wakeup_source *ws;
+	int srcuidx;
+
+	srcuidx = srcu_read_lock(&wakeup_srcu);
+	list_for_each_entry_rcu(ws, &wakeup_sources, entry)
+		global_print_active_locks_debug(ws);
+	srcu_read_unlock(&wakeup_srcu, srcuidx);
+
+}
+#endif
+
 /**
  * print_wakeup_source_stats - Print wakeup source statistics information.
  * @m: seq_file to print the statistics into.
