@@ -125,8 +125,10 @@ module_param_named(print_parsed_dt, print_parsed_dt, bool, 0664);
 static bool sleep_disabled;
 module_param_named(sleep_disabled, sleep_disabled, bool, 0664);
 
+#ifdef CONFIG_XIAOMI_MIUI
 static bool sleep_disabled_dev;
 module_param_named(sleep_disabled_dev, sleep_disabled_dev, bool, 0664);
+#endif
 
 /**
  * msm_cpuidle_get_deep_idle_latency - Get deep idle latency value
@@ -149,6 +151,7 @@ uint32_t register_system_pm_ops(struct system_pm_ops *pm_ops)
 	return 0;
 }
 
+#ifdef CONFIG_XIAOMI_MIUI
 /**
  * device type for disable lpm
  *   type     event    bitmap
@@ -179,6 +182,13 @@ void lpm_disable_for_dev(bool on, char event_dev)
 	}
 }
 EXPORT_SYMBOL(lpm_disable_for_dev);
+#else
+void lpm_disable_for_dev(bool on, char event_dev)
+{
+	// Do nothing
+}
+EXPORT_SYMBOL(lpm_disable_for_dev);
+#endif
 
 static uint32_t least_cluster_latency(struct lpm_cluster *cluster,
 					struct latency_level *lat_level)
@@ -738,7 +748,11 @@ static int cpu_power_select(struct cpuidle_device *dev,
 	uint32_t min_residency, max_residency;
 	struct power_params *pwr_params;
 
+#ifdef CONFIG_XIAOMI_MIUI
 	if (lpm_disallowed(sleep_us, dev->cpu, cpu) || sleep_disabled_dev)
+#else
+	if (lpm_disallowed(sleep_us, dev->cpu, cpu))
+#endif
 		goto done_select;
 
 	idx_restrict = cpu->nlevels + 1;
