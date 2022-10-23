@@ -493,6 +493,46 @@ static ssize_t debounce_us_store(struct device *dev,
 }
 static DEVICE_ATTR_RW(debounce_us);
 
+static ssize_t pshold_reboot_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	struct qpnp_pon *pon = dev_get_drvdata(dev);
+	int val;
+	int rc;
+
+	rc = regmap_read(pon->regmap, QPNP_PON_PS_HOLD_RST_CTL(pon), &val);
+	if (rc) {
+		pr_err("Unable to read pon_dbc_ctl rc=%d\n", rc);
+		return rc;
+	}
+	val &= QPNP_PON_POWER_OFF_MASK;
+
+	return snprintf(buf, QPNP_PON_BUFFER_SIZE, "%d\n", val);
+}
+
+static ssize_t pshold_reboot_store(struct device *dev,
+				struct device_attribute *attr,
+				const char *buf, size_t size)
+{
+	u32 value;
+	int rc;
+
+	if (size > QPNP_PON_BUFFER_SIZE)
+		return -EINVAL;
+
+	rc = kstrtou32(buf, 10, &value);
+	if (rc)
+		return rc;
+
+	rc = qpnp_pon_system_pwr_off(value);
+	if (rc < 0)
+		return rc;
+
+	return size;
+}
+
+static DEVICE_ATTR_RW(pshold_reboot);
+
 static int qpnp_pon_reset_config(struct qpnp_pon *pon,
 				 enum pon_power_off_type type)
 {
@@ -2510,6 +2550,15 @@ static int qpnp_pon_probe(struct platform_device *pdev)
 		return rc;
 	}
 
+	if (!to_spmi_device(pon->dev->parent)->usid) {
+		rc = device_create_file(dev, &dev_attr_pshold_reboot);
+		if (rc) {
+			dev_err(dev, "sysfs pshold reboot file creation failed, rc=%d\n",
+				 rc);
+			return rc;
+		}
+	}
+
 	if (sys_reset)
 		sys_reset_dev = pon;
 	if (modem_reset)
@@ -2527,6 +2576,9 @@ static int qpnp_pon_remove(struct platform_device *pdev)
 	unsigned long flags;
 
 	device_remove_file(&pdev->dev, &dev_attr_debounce_us);
+
+	if (!to_spmi_device(pon->dev->parent)->usid)
+		device_remove_file(&pdev->dev, &dev_attr_pshold_reboot);
 
 	cancel_delayed_work_sync(&pon->bark_work);
 
