@@ -124,4 +124,6 @@ source "drivers/staging/axis-fifo/Kconfig"
 
 source "drivers/staging/qcacld-3.0/Kconfig"
 
+source "drivers/staging/cam-reclaim/Kconfig"
+
 endif # STAGING
