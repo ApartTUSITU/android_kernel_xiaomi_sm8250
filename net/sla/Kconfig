@@ -1,0 +1,12 @@
+menu "SLA Configuration"
+	depends on NET && INET && NETFILTER
+
+config SLA_STAIC_COLLECT
+	tristate "SLA Statistics collector"
+	depends on NETFILTER
+	default y if BOARD_XIAOMI
+	---help---
+	  QTI Smart Link Aggregation for Web Browsing
+
+endmenu
+
