@@ -11,8 +11,7 @@
 struct step_chg_jeita_param {
 	u32			psy_prop;
 	char			*prop_name;
-	int			rise_hys;
-	int			fall_hys;
+	int			hysteresis;
 	bool			use_bms;
 };
 
