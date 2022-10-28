@@ -23,6 +23,7 @@
 #include "dsi_display.h"
 #include "dsi_panel_mi.h"
 #include "clone_cooling_device.h"
+#include "mi_disp_lhbm.h"
 
 #define BL_NODE_NAME_SIZE 32
 #define HDR10_PLUS_VSIF_TYPE_CODE      0x81
@@ -796,15 +797,76 @@ void sde_crtc_fod_ui_ready(struct dsi_display *display, int type, int value)
 
 	if (type == 2) /* ICON */
 	{
-		if (value == 0)
-			display->panel->mi_cfg.fod_ui_ready &= ~0x02;
-		else if (value == 1)
-			display->panel->mi_cfg.fod_ui_ready |= 0x02;
+		if (display->panel->mi_cfg.local_hbm_enabled) {
+			if (value == 0)
+				display->panel->mi_cfg.fod_ui_ready &= ~0x07;
+			else if (value == 1) {
+				if (display->panel->mi_cfg.lhbm_target == LOCAL_LHBM_TARGET_BRIGHTNESS_WHITE_110NIT)
+					display->panel->mi_cfg.fod_ui_ready |= 0x07;
+				else if (display->panel->mi_cfg.lhbm_target == LOCAL_LHBM_TARGET_BRIGHTNESS_WHITE_1000NIT
+					|| display->panel->mi_cfg.lhbm_target == LOCAL_LHBM_TARGET_BRIGHTNESS_GREEN_500NIT)
+					display->panel->mi_cfg.fod_ui_ready |= 0x03;
+			}
+
+		} else {
+			if (value == 0)
+				display->panel->mi_cfg.fod_ui_ready &= ~0x02;
+			else if (value == 1)
+				display->panel->mi_cfg.fod_ui_ready |= 0x02;
+		}
 
 	}
 
 	SDE_INFO("fod_ui_ready notify=%d", display->panel->mi_cfg.fod_ui_ready);
 	sysfs_notify(&display->drm_conn->kdev->kobj, NULL, "fod_ui_ready");
+}
+
+int mi_sde_connector_gir_fence(struct drm_connector *connector)
+{
+	int rc = 0;
+	struct sde_connector *c_conn;
+	struct dsi_display *dsi_display;
+	struct dsi_panel_mi_cfg *mi_cfg;
+
+	if (!connector) {
+		SDE_ERROR("invalid connector ptr\n");
+		return -EINVAL;
+	}
+
+	c_conn = to_sde_connector(connector);
+
+	if (c_conn->connector_type != DRM_MODE_CONNECTOR_DSI)
+		return 0;
+
+	dsi_display = (struct dsi_display *) c_conn->display;
+	if (!dsi_display || !dsi_display->panel) {
+		SDE_ERROR("invalid display/panel ptr\n");
+		return -EINVAL;
+	}
+
+	if (strncmp(dsi_display->display_type, "primary", 7))
+		return -EINVAL;
+
+	mi_cfg = &dsi_display->panel->mi_cfg;
+	mutex_lock(&dsi_display->panel->panel_lock);
+	if (mi_cfg->request_gir_status == true && mi_cfg->gir_enabled == false) {
+		SDE_ATRACE_BEGIN("DISP_FEATURE_GIR_ON");
+		SDE_INFO("mi-dsi-panel: gir on\n");
+		dsi_panel_tx_cmd_set(dsi_display->panel, DSI_CMD_SET_MI_GIR_ON);
+		sde_encoder_wait_for_event(c_conn->encoder,MSM_ENC_VBLANK);
+		SDE_ATRACE_END("DISP_FEATURE_GIR_ON");
+		mi_cfg->gir_enabled = true;
+	} else if (mi_cfg->request_gir_status == false && mi_cfg->gir_enabled == true) {
+		SDE_ATRACE_BEGIN("DISP_FEATURE_GIR_OFF");
+		SDE_INFO("mi-dsi-panel: gir off\n");
+		dsi_panel_tx_cmd_set(dsi_display->panel, DSI_CMD_SET_MI_GIR_OFF);
+		sde_encoder_wait_for_event(c_conn->encoder,MSM_ENC_VBLANK);
+		SDE_ATRACE_END("DISP_FEATURE_GIR_OFF");
+		mi_cfg->gir_enabled = false;
+	}
+	mutex_unlock(&dsi_display->panel->panel_lock);
+
+	return rc;
 }
 
 static int _sde_connector_mi_dimlayer_hbm_fence(struct drm_connector *connector)
@@ -819,6 +881,8 @@ static int _sde_connector_mi_dimlayer_hbm_fence(struct drm_connector *connector)
 	static bool last_layer_aod_flag;
 	bool crc_off_after_delay_of_hbm_on = false;
 	struct dsi_panel_mi_cfg *mi_cfg;
+	bool anim;
+	static bool last_anim = false;
 
 	if (!connector) {
 		SDE_ERROR("invalid argument\n");
@@ -949,6 +1013,16 @@ static int _sde_connector_mi_dimlayer_hbm_fence(struct drm_connector *connector)
 		}
 	}
 
+	anim = c_conn->mi_dimlayer_state.mi_dimlayer_type & MI_LAYER_FOD_ANIM;
+	if (last_anim != anim) {
+		if (anim) {
+			mi_cfg->fod_anim_layer_enabled = true;
+		} else {
+			mi_cfg->fod_anim_layer_enabled = false;
+		}
+	}
+	last_anim = anim;
+
 	return rc;
 }
 
@@ -1054,6 +1128,8 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 	params.hdr_meta = &c_state->hdr_meta;
 
 	SDE_EVT32_VERBOSE(connector->base.id);
+
+	mi_sde_connector_gir_fence(connector);
 
 	/* fingerprint hbm fence */
 	_sde_connector_mi_dimlayer_hbm_fence(connector);
@@ -1161,6 +1237,10 @@ void sde_connector_helper_bridge_enable(struct drm_connector *connector)
 		sde_encoder_wait_for_event(c_conn->encoder,
 				MSM_ENC_TX_COMPLETE);
 	c_conn->allow_bl_update = true;
+
+	if (display->panel->mi_cfg.pending_lhbm_state) {
+		mi_disp_set_fod_queue_work(1, false);
+	}
 
 	if (c_conn->bl_device) {
 		c_conn->bl_device->props.power = FB_BLANK_UNBLANK;

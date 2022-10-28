@@ -37,6 +37,8 @@
 
 DEFINE_MUTEX(dsi_display_clk_mutex);
 
+extern int mi_disp_lhbm_attach_primary_dsi_display(struct dsi_display *display);
+
 u8 dbgfs_tx_cmd_buf[SZ_4K];
 static char dsi_display_primary[MAX_CMDLINE_PARAM_LEN];
 static char dsi_display_secondary[MAX_CMDLINE_PARAM_LEN];
@@ -792,6 +794,7 @@ int dsi_display_check_status(struct drm_connector *connector, void *display,
 					bool te_check_override)
 {
 	struct dsi_display *dsi_display = display;
+	struct drm_panel_esd_config *config;
 	struct dsi_panel *panel;
 	u32 status_mode;
 	int rc = 0x1, ret;
@@ -843,6 +846,12 @@ int dsi_display_check_status(struct drm_connector *connector, void *display,
 	dsi_display_mask_ctrl_error_interrupts(dsi_display, mask, true);
 
 	if (status_mode == ESD_MODE_REG_READ) {
+		config = &(panel->esd_config);
+		if (config->offset_cmd.count != 0) {
+			rc = dsi_panel_write_cmd_set(panel, &config->offset_cmd);
+			DSI_DEBUG("%s: read reg offset command rc = %d\n",__func__, rc);
+		}
+
 		rc = dsi_display_status_reg_read(dsi_display);
 	} else if (status_mode == ESD_MODE_SW_BTA) {
 		rc = dsi_display_status_bta_request(dsi_display);
@@ -5657,6 +5666,12 @@ static int dsi_display_bind(struct device *dev,
 	/* register te irq handler */
 	dsi_display_register_te_irq(display);
 
+	dsi_panel_procfs_init(display->panel);
+
+	rc = mi_disp_lhbm_attach_primary_dsi_display(display);
+	if (rc)
+		DSI_ERR("lhbm attach primary_dsi_display fail\n");
+
 	goto error;
 
 error_host_deinit:
@@ -5704,6 +5719,8 @@ static void dsi_display_unbind(struct device *dev,
 	}
 
 	mutex_lock(&display->display_lock);
+
+	dsi_panel_procfs_deinit(display->panel);
 
 	rc = dsi_panel_drv_deinit(display->panel);
 	if (rc)
@@ -8082,6 +8099,30 @@ int dsi_display_enable(struct dsi_display *display)
 				DSI_ERR("[%s] failed to update DC para, rc=%d\n",
 					display->name, rc);
 			}
+		}
+
+		rc = mi_dsi_panel_read_and_update_dc_param_v2(display->panel);
+		if (rc) {
+			DSI_ERR("[%s] failed to read DC para, rc=%d\n",
+				display->name, rc);
+		}
+
+		rc = mi_dsi_panel_read_and_update_gir_param(display->panel);
+		if (rc) {
+			DSI_ERR("[%s] failed to read and update gir  para, rc=%d\n",
+				display->name, rc);
+		}
+
+		rc = mi_dsi_panel_read_and_update_lhbm_green_500nit_param(display->panel);
+		if (rc) {
+			DSI_ERR("[%s] failed to read and update fod lhbm green 500nit  para, rc=%d\n",
+				display->name, rc);
+		}
+
+		rc = mi_dsi_panel_read_lhbm_white_param(display->panel);
+		if (rc) {
+			DSI_ERR("[%s] failed to read fod lhbm white para, rc=%d\n",
+				display->name, rc);
 		}
 
 		if (display->panel->mi_cfg.is_tddi_flag) {

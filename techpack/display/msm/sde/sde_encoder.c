@@ -5109,6 +5109,8 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 	struct dsi_display_mode adj_mode;
 	ktime_t wakeup_time;
 	unsigned int i;
+	struct sde_kms *sde_kms = NULL;
+	struct msm_drm_private *priv = NULL;
 
 	if (!drm_enc) {
 		SDE_ERROR("invalid encoder\n");
@@ -5160,6 +5162,10 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 		dsi_panel_match_fps_pen_setting(dsi_display->panel, &adj_mode);
 		mutex_unlock(&dsi_display->panel->panel_lock);
 	}
+
+	priv = sde_enc->base.dev->dev_private;
+	if (priv)
+		sde_kms = to_sde_kms(priv->kms);
 
 	SDE_ATRACE_END("encoder_kickoff");
 }
