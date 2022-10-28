@@ -2805,19 +2805,6 @@ static int dsi_display_broadcast_cmd(struct dsi_display *display,
 		goto error;
 	}
 
-	display_for_each_ctrl(i, display) {
-		ctrl = &display->ctrl[i];
-		if (ctrl == m_ctrl)
-			continue;
-
-		rc = dsi_ctrl_clear_slave_dma_status(ctrl->ctrl, flags);
-		if (rc) {
-			DSI_ERR("[%s] clear interrupt status failed, rc=%d\n",
-				display->name, rc);
-			goto error;
-		}
-	}
-
 error:
 	dsi_display_mask_overflow(display, m_flags, false);
 	return rc;

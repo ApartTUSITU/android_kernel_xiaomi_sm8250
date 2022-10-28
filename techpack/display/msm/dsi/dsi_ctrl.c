@@ -3280,56 +3280,6 @@ void dsi_ctrl_mask_overflow(struct dsi_ctrl *dsi_ctrl, bool enable)
 }
 
 /**
- * dsi_ctrl_clear_slave_dma_status -   API to clear slave DMA status
- * @dsi_ctrl:                   DSI controller handle.
- * @flags:                      Modifiers
- */
-int dsi_ctrl_clear_slave_dma_status(struct dsi_ctrl *dsi_ctrl, u32 flags)
-{
-	struct dsi_ctrl_hw_ops dsi_hw_ops;
-	u32 status;
-	u32 mask = DSI_CMD_MODE_DMA_DONE;
-	int rc = 0, wait_for_done = 5;
-
-	if (!dsi_ctrl) {
-		DSI_CTRL_ERR(dsi_ctrl, "Invalid params\n");
-		return -EINVAL;
-	}
-
-	/* Return if this is not the last command */
-	if (!(flags & DSI_CTRL_CMD_LAST_COMMAND))
-		return rc;
-
-	SDE_EVT32(dsi_ctrl->cell_index, SDE_EVTLOG_FUNC_ENTRY);
-
-	mutex_lock(&dsi_ctrl->ctrl_lock);
-
-	dsi_hw_ops = dsi_ctrl->hw.ops;
-
-	while (wait_for_done > 0) {
-		status = dsi_hw_ops.get_interrupt_status(&dsi_ctrl->hw);
-		if (status & mask) {
-			status |= (DSI_CMD_MODE_DMA_DONE | DSI_BTA_DONE);
-			dsi_hw_ops.clear_interrupt_status(&dsi_ctrl->hw,
-				status);
-			SDE_EVT32(dsi_ctrl->cell_index, status);
-			wait_for_done = 1;
-			break;
-		}
-		udelay(10);
-		wait_for_done--;
-	}
-
-	if (wait_for_done == 0)
-		DSI_CTRL_ERR(dsi_ctrl,
-				"DSI1 CMD_MODE_DMA_DONE failed\n");
-
-	mutex_unlock(&dsi_ctrl->ctrl_lock);
-
-	return rc;
-}
-
-/**
  * dsi_ctrl_cmd_tx_trigger() - Trigger a deferred command.
  * @dsi_ctrl:              DSI controller handle.
  * @flags:                 Modifiers.
