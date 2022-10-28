@@ -36,6 +36,8 @@
 
 #define MAX_VSYNC_COUNT                   200
 
+extern struct frame_stat fm_stat;
+
 enum doze_bkl {
 	DOZE_TO_NORMAL = 0,
 	DOZE_BRIGHTNESS_HBM,
@@ -86,6 +88,11 @@ struct dc_cfg {
 	u32 update_d2_index;
 	u8 enter_dc_lut[75];
 	u8 exit_dc_lut[75];
+};
+
+struct lockdowninfo_cfg {
+	u8 lockdowninfo[16];
+	bool lockdowninfo_read_done;
 };
 
 struct greenish_gamma_cfg {
@@ -157,6 +164,11 @@ struct dsi_panel_mi_cfg {
 
 	bool dynamic_elvss_enabled;
 
+	int esd_err_irq_gpio;
+	int esd_err_irq;
+	int esd_err_irq_flags;
+	bool esd_err_enabled;
+
 	/* elvss dimming info */
 	bool elvss_dimming_check_enable;
 	u32 elvss_dimming_read_len;
@@ -215,8 +227,12 @@ struct dsi_panel_mi_cfg {
 	bool smart_fps_restore;
 	u32 smart_fps_max_framerate;
 	u32 smart_fps_value;
+	u32 idle_fps;
+	struct lockdowninfo_cfg lockdowninfo_read;
+	bool idle_mode_flag;
 
 	bool dither_enabled;
+	int current_tp_code_fps;
 };
 
 struct dsi_read_config {
@@ -240,10 +256,15 @@ struct calc_hw_vsync {
 	u64 measured_fps_x1000;
 };
 
+int dsi_panel_parse_esd_gpio_config(struct dsi_panel *panel);
+
 int dsi_panel_parse_mi_config(struct dsi_panel *panel,
 				struct device_node *of_node);
 
 void display_utc_time_marker(const char *format, ...);
+
+int dsi_panel_esd_irq_ctrl(struct dsi_panel *panel,
+				bool enable);
 
 int dsi_panel_write_cmd_set(struct dsi_panel *panel,
 				struct dsi_panel_cmd_set *cmd_sets);
@@ -286,10 +307,15 @@ int dsi_panel_read_greenish_gamma_setting(struct dsi_panel *panel);
 
 int dsi_panel_update_greenish_gamma_setting(struct dsi_panel *panel);
 
+int dsi_panel_match_fps_pen_setting(struct dsi_panel *panel,
+				struct dsi_display_mode *adj_mode);
+
 int dsi_panel_set_thermal_hbm_disabled(struct dsi_panel *panel,
 				bool thermal_hbm_disabled);
 int dsi_panel_get_thermal_hbm_disabled(struct dsi_panel *panel,
 				bool *thermal_hbm_disabled);
+
+int dsi_panel_lockdowninfo_param_read(struct dsi_panel *panel);
 
 struct calc_hw_vsync *get_hw_calc_vsync_struct(int dsi_display_type);
 ssize_t calc_hw_vsync_info(struct dsi_panel *panel,

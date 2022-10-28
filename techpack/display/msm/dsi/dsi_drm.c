@@ -16,6 +16,8 @@
 #include <linux/pm_wakeup.h>
 #include "msm_drv.h"
 #include "dsi_defs.h"
+#include "sde_encoder.h"
+#include "dsi_mi_feature.h"
 
 #define to_dsi_bridge(x)     container_of((x), struct dsi_bridge, base)
 #define to_dsi_state(x)      container_of((x), struct dsi_connector_state, base)
@@ -342,6 +344,11 @@ static void dsi_bridge_enable(struct drm_bridge *bridge)
 			sde_connector_schedule_status_work(display->drm_conn,
 				true);
 	}
+
+	rc = dsi_display_esd_irq_ctrl(c_bridge->display, true);
+	if (rc)
+		DSI_ERR("[%d] DSI display enable esd irq failed, rc=%d\n",
+				c_bridge->id, rc);
 }
 
 static void dsi_bridge_disable(struct drm_bridge *bridge)
@@ -349,18 +356,40 @@ static void dsi_bridge_disable(struct drm_bridge *bridge)
 	int rc = 0;
 	int private_flags;
 	struct dsi_display *display;
+	struct mi_drm_notifier notify_data;
+	struct dsi_panel_mi_cfg *mi_cfg = NULL;
+	int power_mode = 0;
 	struct dsi_bridge *c_bridge = to_dsi_bridge(bridge);
 
 	if (!bridge) {
 		DSI_ERR("Invalid params\n");
 		return;
 	}
+
+	mi_cfg = &c_bridge->display->panel->mi_cfg;
+
+	if (mi_cfg->fod_dimlayer_enabled) {
+		power_mode = sde_connector_get_lp(c_bridge->display->drm_conn);
+	} else {
+		power_mode = MI_DRM_BLANK_POWERDOWN;
+	}
+
+	notify_data.data = &power_mode;
+	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
+	mi_drm_notifier_call_chain(MI_DRM_PRE_EVENT_BLANK, &notify_data);
+
 	display = c_bridge->display;
 	private_flags =
 		bridge->encoder->crtc->state->adjusted_mode.private_flags;
 
 	if (display)
 		display->enabled = false;
+
+	rc = dsi_display_esd_irq_ctrl(c_bridge->display, false);
+	if (rc) {
+		DSI_ERR("[%d] DSI display disable esd irq failed, rc=%d\n",
+				c_bridge->id, rc);
+	}
 
 	if (display && display->drm_conn) {
 		display->poms_pending =

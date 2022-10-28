@@ -5104,6 +5104,9 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 {
 	struct sde_encoder_virt *sde_enc;
 	struct sde_encoder_phys *phys;
+	struct dsi_bridge *bridge = NULL;
+	struct dsi_display *dsi_display = NULL;
+	struct dsi_display_mode adj_mode;
 	ktime_t wakeup_time;
 	unsigned int i;
 
@@ -5120,6 +5123,20 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 	if (is_error)
 		_sde_encoder_reset_ctl_hw(drm_enc);
 
+	if (sde_enc->disp_info.intf_type == DRM_MODE_CONNECTOR_DSI
+		&& drm_enc->bridge)
+		bridge = container_of(drm_enc->bridge, struct dsi_bridge, base);
+	if (bridge) {
+		adj_mode = bridge->dsi_mode;
+		dsi_display = bridge->display;
+		if (dsi_display && dsi_display->panel
+			&& dsi_display->panel->host_config.phy_type == DSI_PHY_TYPE_CPHY
+			&& adj_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR) {
+			mutex_lock(&dsi_display->panel->panel_lock);
+			sde_encoder_vid_wait_for_active(drm_enc);
+		}
+	}
+
 	/* All phys encs are ready to go, trigger the kickoff */
 	_sde_encoder_kickoff_phys(sde_enc);
 
@@ -5135,6 +5152,13 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 		SDE_EVT32_VERBOSE(ktime_to_ms(wakeup_time));
 		mod_timer(&sde_enc->vsync_event_timer,
 				nsecs_to_jiffies(ktime_to_ns(wakeup_time)));
+	}
+
+	if (dsi_display && dsi_display->panel
+		&& dsi_display->panel->host_config.phy_type == DSI_PHY_TYPE_CPHY
+		&& adj_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR) {
+		dsi_panel_match_fps_pen_setting(dsi_display->panel, &adj_mode);
+		mutex_unlock(&dsi_display->panel->panel_lock);
 	}
 
 	SDE_ATRACE_END("encoder_kickoff");
@@ -5940,6 +5964,37 @@ struct drm_encoder *sde_encoder_init(
 		struct msm_display_info *disp_info)
 {
 	return sde_encoder_init_with_ops(dev, disp_info, NULL);
+}
+
+int sde_encoder_vid_wait_for_active(
+			struct drm_encoder *drm_enc)
+{
+	struct drm_display_mode mode;
+	struct sde_encoder_virt *sde_enc = NULL;
+	u32 ln_cnt, min_ln_cnt, active_mark_region;
+	u32 i, retry = 15;
+	if (!drm_enc) {
+		SDE_ERROR("invalid encoder\n");
+		return -EINVAL;
+	}
+	sde_enc = to_sde_encoder_virt(drm_enc);
+	for (i = 0; i < sde_enc->num_phys_encs; i++) {
+		struct sde_encoder_phys *phys = sde_enc->phys_encs[i];
+		if (!phys || (phys->ops.is_master && !phys->ops.is_master(phys)))
+			continue;
+		mode = phys->cached_mode;
+		min_ln_cnt = (mode.vtotal - mode.vsync_start) +
+			(mode.vsync_end - mode.vsync_start);
+		active_mark_region = mode.vdisplay + min_ln_cnt - mode.vdisplay / 4;
+		while (retry) {
+			ln_cnt = phys->ops.get_line_count(phys);
+			if ((ln_cnt > min_ln_cnt) && (ln_cnt < active_mark_region))
+				return 0;
+			udelay(2000);
+			retry--;
+		}
+	}
+	return -EINVAL;
 }
 
 int sde_encoder_wait_for_event(struct drm_encoder *drm_enc,

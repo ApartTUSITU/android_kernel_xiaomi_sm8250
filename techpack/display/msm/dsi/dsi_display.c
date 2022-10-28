@@ -14,6 +14,7 @@
 #include "msm_mmu.h"
 #include "dsi_display.h"
 #include "dsi_panel.h"
+#include "dsi_panel_mi.h"
 #include "dsi_ctrl.h"
 #include "dsi_ctrl_hw.h"
 #include "dsi_drm.h"
@@ -8081,6 +8082,13 @@ int dsi_display_enable(struct dsi_display *display)
 				DSI_ERR("[%s] failed to update DC para, rc=%d\n",
 					display->name, rc);
 			}
+		}
+
+		if (display->panel->mi_cfg.is_tddi_flag) {
+			rc = dsi_panel_lockdowninfo_param_read(display->panel);
+			if (!rc)
+				DSI_ERR("[%s] failed to read lockdowninfo para, rc=%d\n",
+					display->name, rc);
 		}
 
 		return 0;

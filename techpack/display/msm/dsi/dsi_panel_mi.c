@@ -31,7 +31,6 @@
 
 #define to_dsi_display(x) container_of(x, struct dsi_display, host)
 
-extern struct frame_stat fm_stat;
 static struct dsi_read_config g_dsi_read_cfg;
 struct dsi_panel *g_panel;
 static struct dsi_panel_cmd_set gamma_cmd_set[DSI_CMD_SET_MI_GAMMA_SWITCH_MAX];
@@ -238,6 +237,8 @@ static int dsi_panel_parse_smart_fps_config(struct dsi_panel *panel,
 	struct dsi_parser_utils *utils = &panel->utils;
 	struct dsi_panel_mi_cfg *mi_cfg = &panel->mi_cfg;
 
+	mi_cfg->idle_mode_flag = true;
+
 	mi_cfg->smart_fps_support = utils->read_bool(of_node,
 			"mi,mdss-dsi-pan-enable-smart-fps");
 
@@ -257,6 +258,14 @@ static int dsi_panel_parse_smart_fps_config(struct dsi_panel *panel,
 			}
 		}
 	}
+
+	rc = utils->read_u32(of_node,
+			"mi,mdss-panel-idle-fps", &mi_cfg->idle_fps);
+	if (rc) {
+		mi_cfg->idle_fps = 0;
+		pr_info("mi,mdss-panel-idle-fps not defined\n");
+	} else
+		pr_info("idle fps is %d\n", mi_cfg->idle_fps);
 
 	return rc;
 }
@@ -282,6 +291,30 @@ static int dsi_panel_parse_elvss_dimming_config(struct dsi_panel *panel,
 					&mi_cfg->update_hbm_fod_off_index);
 	if (rc)
 		pr_err("failed to get mi,mdss-dsi-elvss-dimming-update-hbm-fod-off-index\n");
+
+	return rc;
+}
+
+int dsi_panel_parse_esd_gpio_config(struct dsi_panel *panel)
+{
+	int rc = 0;
+	struct dsi_parser_utils *utils = &panel->utils;
+	struct dsi_panel_mi_cfg *mi_cfg = &panel->mi_cfg;
+
+	mi_cfg->esd_err_irq_gpio = of_get_named_gpio_flags(
+			utils->data, "mi,esd-err-irq-gpio",
+			0, (enum of_gpio_flags *)&(mi_cfg->esd_err_irq_flags));
+	if (gpio_is_valid(mi_cfg->esd_err_irq_gpio)) {
+		mi_cfg->esd_err_irq = gpio_to_irq(mi_cfg->esd_err_irq_gpio);
+		rc = gpio_request(mi_cfg->esd_err_irq_gpio, "esd_err_irq_gpio");
+		if (rc)
+			pr_err("Failed to request esd irq gpio %d, rc=%d\n",
+				mi_cfg->esd_err_irq_gpio, rc);
+		else
+			gpio_direction_input(mi_cfg->esd_err_irq_gpio);
+	} else {
+		rc = -EINVAL;
+	}
 
 	return rc;
 }
@@ -621,6 +654,50 @@ void display_utc_time_marker(const char *format, ...)
 
 	va_end(args);
 }
+
+int dsi_panel_esd_irq_ctrl(struct dsi_panel *panel,
+				bool enable)
+{
+	struct dsi_panel_mi_cfg *mi_cfg;
+	struct irq_desc *desc;
+
+	if (!panel || !panel->panel_initialized) {
+		pr_err("Panel not ready!\n");
+		return -EINVAL;
+	}
+
+	mutex_lock(&panel->panel_lock);
+
+	mi_cfg = &panel->mi_cfg;
+	if (gpio_is_valid(mi_cfg->esd_err_irq_gpio)) {
+		if (mi_cfg->esd_err_irq) {
+			if (enable) {
+				if (!mi_cfg->esd_err_enabled) {
+					desc = irq_to_desc(mi_cfg->esd_err_irq);
+					if (!irq_settings_is_level(desc))
+						desc->istate &= ~IRQS_PENDING;
+					//enable_irq_wake(mi_cfg->esd_err_irq);
+					enable_irq(mi_cfg->esd_err_irq);
+					mi_cfg->esd_err_enabled = true;
+					pr_info("panel esd irq is enable\n");
+				}
+			} else {
+				if (mi_cfg->esd_err_enabled) {
+					//disable_irq_wake(mi_cfg->esd_err_irq);
+					disable_irq_nosync(mi_cfg->esd_err_irq);
+					mi_cfg->esd_err_enabled = false;
+					pr_info("panel esd irq is disable\n");
+				}
+			}
+		}
+	} else {
+		pr_info("panel esd irq gpio invalid\n");
+	}
+
+	mutex_unlock(&panel->panel_lock);
+	return 0;
+}
+
 
 int dsi_panel_update_elvss_dimming(struct dsi_panel *panel)
 {
@@ -1020,6 +1097,44 @@ int dsi_panel_update_greenish_gamma_setting(struct dsi_panel *panel)
 
 error:
 	mutex_unlock(&panel->panel_lock);
+	return retval;
+}
+
+int dsi_panel_match_fps_pen_setting(struct dsi_panel *panel,
+				struct dsi_display_mode *adj_mode)
+{
+	int rc = 0;
+	int retval = 0;
+	struct dsi_display_mode_priv_info *priv_info;
+
+	if (!panel || !panel->cur_mode || !panel->cur_mode->priv_info || !adj_mode) {
+		pr_err("invalid params\n");
+		return -EAGAIN;
+	}
+
+	priv_info = panel->cur_mode->priv_info;
+
+	if (!priv_info->cmd_sets[DSI_CMD_SET_DISP_PEN_120HZ].count) {
+		pr_debug("DSI_CMD_SET_DISP_PEN_120HZ not defined, return\n");
+		return 0;
+	}
+
+	/* match fps(120/60/30Hz) pen seeting cmd */
+	if (adj_mode->timing.refresh_rate == 120)
+		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_PEN_120HZ);
+	else if (adj_mode->timing.refresh_rate == 60)
+		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_PEN_60HZ);
+	else if (adj_mode->timing.refresh_rate == 30)
+		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_PEN_30HZ);
+
+	if (rc) {
+		pr_err("Failed to send DSI_CMD_SET_DISP_PEN_120HZ command\n");
+		retval = -EAGAIN;
+		goto error;
+	} else
+		pr_info("%s: refresh_rate[%d]\n", __func__, adj_mode->timing.refresh_rate);
+
+error:
 	return retval;
 }
 
@@ -2307,59 +2422,118 @@ ssize_t dsi_panel_get_doze_brightness(struct dsi_panel *panel, char *buf)
 	return count;
 }
 
+int dsi_panel_lockdowninfo_param_read(struct dsi_panel *panel)
+{
+	int rc = 0;
+	int i = 0;
+	struct dsi_panel_mi_cfg *mi_cfg;
+	struct dsi_panel_cmd_set *cmd_sets;
+	struct dsi_read_config ld_read_config;
+	struct dsi_panel_cmd_set read_cmd_set = {0};
+
+	if (!panel || !panel->cur_mode || !panel->cur_mode->priv_info) {
+		pr_err("invalid params\n");
+		return -EINVAL;
+	}
+
+	if (!panel->panel_initialized) {
+		pr_err("panel not initialized\n");
+		return -EINVAL;
+	}
+
+	mutex_lock(&panel->panel_lock);
+
+	mi_cfg = &panel->mi_cfg;
+	cmd_sets = &panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_MI_READ_LOCKDOWN_INFO];
+	if (cmd_sets->cmds) {
+		read_cmd_set.cmds = cmd_sets->cmds;
+		read_cmd_set.count = 1;
+		read_cmd_set.state = cmd_sets->state;
+		rc = dsi_panel_write_cmd_set(panel, &read_cmd_set);
+		if (rc) {
+			pr_err("[%s] failed to send cmds, rc=%d\n", panel->name, rc);
+			rc = -EIO;
+			goto done;
+		}
+
+		pr_info("[%s]", panel->name);
+		if (strcmp(panel->name, "xiaomi 42 02 0a video mode dual dsi cphy panel")) {
+
+			ld_read_config.is_read = 1;
+			ld_read_config.cmds_rlen = 8;
+			ld_read_config.read_cmd = read_cmd_set;
+			ld_read_config.read_cmd.cmds = &read_cmd_set.cmds[1];
+			rc = dsi_panel_read_cmd_set(panel, &ld_read_config);
+			if (rc <= 0) {
+				pr_err("[%s] failed to read cmds, rc=%d\n", panel->name, rc);
+				rc = -EIO;
+				goto done;
+			}
+
+			for (i = 0; i < 8; i++) {
+				pr_info("0x%x", ld_read_config.rbuf[i]);
+				mi_cfg->lockdowninfo_read.lockdowninfo[i] = ld_read_config.rbuf[i];
+			}
+
+			if (!strcmp(panel->name, "xiaomi 37 02 0b video mode dsc dsi panel")) {
+				mi_cfg->lockdowninfo_read.lockdowninfo[7] = 0x01;
+				pr_info("plockdowninfo[7] = 0x%x\n",
+					mi_cfg->lockdowninfo_read.lockdowninfo[7]);
+			}
+			mi_cfg->lockdowninfo_read.lockdowninfo_read_done = 1;
+		} else {
+			for (i = 0; i < 8; i++) {
+				ld_read_config.is_read = 1;
+				ld_read_config.cmds_rlen = 1;
+				ld_read_config.read_cmd = read_cmd_set;
+				ld_read_config.read_cmd.cmds = &read_cmd_set.cmds[i+1];
+				rc = dsi_panel_read_cmd_set(panel, &ld_read_config);
+				if (rc <= 0) {
+					pr_err("[%s] failed to read, rc=%d\n", panel->name, rc);
+					rc = -EIO;
+					goto done;
+				}
+
+				pr_info("0x%x", ld_read_config.rbuf[0]);
+				mi_cfg->lockdowninfo_read.lockdowninfo[i] = ld_read_config.rbuf[0];
+			}
+			mi_cfg->lockdowninfo_read.lockdowninfo_read_done = 1;
+
+			rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_LCD_HBM_L3_ON);
+
+		}
+	}
+
+done:
+	mutex_unlock(&panel->panel_lock);
+	return rc;
+
+}
+
 ssize_t dsi_panel_lockdown_info_read(unsigned char *plockdowninfo)
 {
 	int rc = 0;
 	int i = 0;
-	struct dsi_read_config ld_read_config;
-	struct dsi_panel_cmd_set cmd_sets = {0};
+	static int count;
 
 	if (!g_panel || !plockdowninfo) {
 		pr_err("invalid params\n");
 		return -EINVAL;
 	}
 
-	while (!g_panel->cur_mode || !g_panel->cur_mode->priv_info || !g_panel->panel_initialized) {
+	while (!g_panel->mi_cfg.lockdowninfo_read.lockdowninfo_read_done && count < 500) {
 		pr_debug("[%s][%s] waitting for panel priv_info initialized!\n", __func__, g_panel->name);
 		msleep_interruptible(1000);
+		count++;
 	}
 
-	mutex_lock(&g_panel->panel_lock);
-	if (g_panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_MI_READ_LOCKDOWN_INFO].cmds) {
-		cmd_sets.cmds = g_panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_MI_READ_LOCKDOWN_INFO].cmds;
-		cmd_sets.count = 1;
-		cmd_sets.state = g_panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_MI_READ_LOCKDOWN_INFO].state;
-		rc = dsi_panel_write_cmd_set(g_panel, &cmd_sets);
-		if (rc) {
-			pr_err("[%s][%s] failed to send cmds, rc=%d\n", __func__, g_panel->name, rc);
-			rc = -EIO;
-			goto done;
-		}
-
-		ld_read_config.is_read = 1;
-		ld_read_config.cmds_rlen = 8;
-		ld_read_config.read_cmd = cmd_sets;
-		ld_read_config.read_cmd.cmds = &cmd_sets.cmds[1];
-		rc = dsi_panel_read_cmd_set(g_panel, &ld_read_config);
-		if (rc <= 0) {
-			pr_err("[%s][%s] failed to read cmds, rc=%d\n", __func__, g_panel->name, rc);
-			rc = -EIO;
-			goto done;
-		}
-
-		for (i = 0; i < 8; i++) {
-			pr_info("[%s][%d]0x%x", __func__, __LINE__, ld_read_config.rbuf[i]);
-			plockdowninfo[i] = ld_read_config.rbuf[i];
-		}
-
-		if (!strcmp(g_panel->name, "xiaomi 37 02 0b video mode dsc dsi panel")) {
-			plockdowninfo[7] = 0x01;
-			pr_info("[%s] plockdowninfo[7] = 0x%x\n", __func__, plockdowninfo[7]);
-		}
+	for (i = 0; i < 8; i++) {
+		pr_info("0x%x",  g_panel->mi_cfg.lockdowninfo_read.lockdowninfo[i]);
+		plockdowninfo[i] = g_panel->mi_cfg.lockdowninfo_read.lockdowninfo[i];
 	}
 
-done:
-	mutex_unlock(&g_panel->panel_lock);
+	rc = plockdowninfo[0];
+
 	return rc;
 }
 EXPORT_SYMBOL(dsi_panel_lockdown_info_read);
@@ -3083,6 +3257,14 @@ int dsi_panel_set_disp_param(struct dsi_panel *panel, u32 param)
 	case DISPPARAM_DITHER_OFF:
 		pr_info("dither off\n");
 		mi_cfg->dither_enabled = false;
+		break;
+	case DISPPARAM_DFPS_IDLE_ON:
+		pr_info("idle on\n");
+		panel->mi_cfg.idle_mode_flag = true;
+		break;
+	case DISPPARAM_DFPS_IDLE_OFF:
+		pr_info("idle off\n");
+		panel->mi_cfg.idle_mode_flag = false;
 		break;
 	case DISPPARAM_SET_THERMAL_HBM_DISABLE:
 		pr_info("set thermal hbm disable\n");

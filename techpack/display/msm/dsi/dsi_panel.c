@@ -17,6 +17,7 @@
 #include "dsi_mi_feature.h"
 #include "dsi_display.h"
 #include "xiaomi_frame_stat.h"
+#include "dsi_mi_feature.h"
 
 /**
  * topology is currently defined by a set of following 3 values:
@@ -1363,6 +1364,9 @@ static int dsi_panel_parse_misc_host_config(struct dsi_host_common_cfg *host,
 	host->phy_type = panel_cphy_mode ? DSI_PHY_TYPE_CPHY
 						: DSI_PHY_TYPE_DPHY;
 
+	host->cphy_strength = utils->read_bool(utils->data,
+					"qcom,mdss-dsi-cphy-strength");
+
 	rc = utils->read_u32(utils->data, "qcom,mdss-dsi-dma-schedule-line",
 				  &line_no);
 	if (rc)
@@ -2025,6 +2029,9 @@ const char *cmd_set_prop_map[DSI_CMD_SET_MAX] = {
 	"mi,mdss-dsi-greenish-gamma-set-command",
 	"mi,mdss-dsi-black-setting-command",
 	"mi,mdss-dsi-read-lockdown-info-command",
+	"qcom,mdss-dsi-dispparam-pen-120hz-command",
+	"qcom,mdss-dsi-dispparam-pen-60hz-command",
+	"qcom,mdss-dsi-dispparam-pen-30hz-command",
 	/* xiaomi add end */
 };
 
@@ -2120,6 +2127,9 @@ const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
 	"mi,mdss-dsi-greenish-gamma-set-command-state",
 	"mi,mdss-dsi-black-setting-command-state",
 	"mi,mdss-dsi-read-lockdown-info-command-state",
+	"qcom,mdss-dsi-dispparam-pen-120hz-command-state",
+	"qcom,mdss-dsi-dispparam-pen-60hz-command-state",
+	"qcom,mdss-dsi-dispparam-pen-30hz-command-state",
 	/* xiaomi add end */
 };
 
@@ -3564,6 +3574,11 @@ static int dsi_panel_parse_esd_config(struct dsi_panel *panel)
 	esd_config = &panel->esd_config;
 	esd_config->status_mode = ESD_MODE_MAX;
 
+	/* esd check using gpio irq method has high priority */
+	rc = dsi_panel_parse_esd_gpio_config(panel);
+	if (!rc)
+		return 0;
+
 	esd_config->esd_enabled = utils->read_bool(utils->data,
 		"qcom,esd-check-enabled");
 
@@ -4901,6 +4916,14 @@ int dsi_panel_post_enable(struct dsi_panel *panel)
 		goto error;
 	}
 error:
+	if (panel->host_config.phy_type == DSI_PHY_TYPE_CPHY) {
+		rc = dsi_panel_match_fps_pen_setting(panel, panel->cur_mode);
+		if (rc) {
+			DSI_ERR("[%s] failed to update TP fps code setting, rc=%d\n",
+				panel->name, rc);
+		}
+	}
+
 	mutex_unlock(&panel->panel_lock);
 
 	if (panel->mi_cfg.gamma_update_flag) {

@@ -37,7 +37,7 @@ void frame_stat_notify(int data)
 void calc_fps(u64 duration, int input_event)
 {
 	ktime_t current_time_us;
-	u64 fps, diff_us, diff, curr_fps;
+	u64 fps, diff_us, diff, curr_fps, idle_fps;
 
 	if (!g_panel->mi_cfg.smart_fps_support || !fm_stat.enabled)
 		return;
@@ -50,14 +50,15 @@ void calc_fps(u64 duration, int input_event)
 		goto exit;
 	}
 
+	idle_fps = g_panel->mi_cfg.idle_fps ? (u64)g_panel->mi_cfg.idle_fps : IDLE_FPS;
 	current_time_us = ktime_get();
 	if (fm_stat.idle_status) {
-		if (fm_stat.last_fps != IDLE_FPS) {
+		if (fm_stat.last_fps != (u64)idle_fps) {
 			if (g_panel->panel_mode == DSI_OP_CMD_MODE)
 				/* video panel will directly notify SDM */
-				frame_stat_notify(IDLE_FPS);
+				frame_stat_notify((int)idle_fps);
 
-			fm_stat.last_fps = IDLE_FPS;
+			fm_stat.last_fps = (u64)idle_fps;
 			pr_debug("%s: exit fps calc due to idle mode\n", __func__);
 		}
 		goto exit;
@@ -80,8 +81,8 @@ void calc_fps(u64 duration, int input_event)
 				 __func__, diff/NANO_TO_MICRO, fm_stat.skip_count);
 			if (fm_stat.skip_count > LONG_INTERVAL_FRAME_COUNT) {
 				/* Sometime  app refresh in low fps, here set 50hz */
-				frame_stat_notify(IDLE_FPS);
-				fm_stat.last_fps = IDLE_FPS;
+				frame_stat_notify((u64)idle_fps);
+				fm_stat.last_fps = (u64)idle_fps;
 			}
 			goto exit;
 		} else
