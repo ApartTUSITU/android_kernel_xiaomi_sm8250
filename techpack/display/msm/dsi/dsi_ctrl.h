@@ -239,8 +239,6 @@ struct dsi_ctrl_interrupts {
  *                           insert null packet.
  * @modeupdated:	  Boolean to send new roi if mode is updated.
  * @split_link_supported: Boolean to check if hw supports split link.
- * @cmd_mode:		Boolean to indicate if panel is running in
-			command mode.
  */
 struct dsi_ctrl {
 	struct platform_device *pdev;
@@ -301,7 +299,6 @@ struct dsi_ctrl {
 	bool null_insertion_enabled;
 	bool modeupdated;
 	bool split_link_supported;
-	bool cmd_mode;
 };
 
 /**

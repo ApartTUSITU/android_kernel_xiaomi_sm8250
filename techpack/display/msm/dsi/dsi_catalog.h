@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
  */
 
 #ifndef _DSI_CATALOG_H_
@@ -270,9 +270,4 @@ void dsi_phy_hw_v4_0_dyn_refresh_pipe_delay(struct dsi_phy_hw *phy,
 
 int dsi_phy_hw_v4_0_cache_phy_timings(struct dsi_phy_per_lane_cfgs *timings,
 				      u32 *dst, u32 size);
-
-int dsi_ctrl_hw_22_map_mdp_regs(struct platform_device *pdev,
-		struct dsi_ctrl_hw *ctrl);
-
-u32 dsi_ctrl_hw_22_log_line_count(struct dsi_ctrl_hw *ctrl, bool cmd_mode);
 #endif /* _DSI_CATALOG_H_ */
