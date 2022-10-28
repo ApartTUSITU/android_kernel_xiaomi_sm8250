@@ -307,9 +307,44 @@ struct sde_encoder_virt {
 	bool elevated_ahb_vote;
 	struct pm_qos_request pm_qos_cpu_req;
 	struct msm_mode_info mode_info;
+	bool prepare_kickoff;
+	bool ready_kickoff;
 };
 
 #define to_sde_encoder_virt(x) container_of(x, struct sde_encoder_virt, base)
+
+bool get_sde_encoder_virt_prepare_kickoff(struct drm_connector *connector)
+{
+	struct sde_encoder_virt *sde_enc;
+
+	sde_enc = to_sde_encoder_virt(connector->encoder);
+	return sde_enc->prepare_kickoff;
+}
+
+bool get_sde_encoder_virt_ready_kickoff(struct drm_connector *connector)
+{
+	struct sde_encoder_virt *sde_enc;
+
+	sde_enc = to_sde_encoder_virt(connector->encoder);
+	return sde_enc->ready_kickoff;
+}
+
+void set_sde_encoder_virt_prepare_kickoff(struct drm_connector *connector,bool enable)
+{
+	struct sde_encoder_virt *sde_enc;
+
+	sde_enc = to_sde_encoder_virt(connector->encoder);
+	sde_enc->prepare_kickoff = enable;
+}
+
+void set_sde_encoder_virt_ready_kickoff(struct drm_connector *connector,bool enable)
+{
+	struct sde_encoder_virt *sde_enc;
+
+	sde_enc = to_sde_encoder_virt(connector->encoder);
+	sde_enc->ready_kickoff = enable;
+}
+
 
 void sde_encoder_uidle_enable(struct drm_encoder *drm_enc, bool enable)
 {
@@ -4516,24 +4551,19 @@ static void _sde_encoder_setup_dither(struct sde_encoder_phys *phys)
 		return;
 
 	c_conn = to_sde_connector(phys->connector);
-	if(c_conn->connector_type != DRM_MODE_CONNECTOR_DSI){
-		SDE_DEBUG("connector type is not  dsi, return\n");
-		return;
-	}
-	dsi_display = (struct dsi_display *) c_conn->display;
-	if (!dsi_display || !dsi_display->panel) {
-		SDE_ERROR("invalid display/panel\n");
-		return;
-	}
+	if (c_conn->connector_type == DRM_MODE_CONNECTOR_DSI) {
+		dsi_display = (struct dsi_display *) c_conn->display;
+		if (!dsi_display || !dsi_display->panel) {
+			SDE_ERROR("invalid display/panel\n");
+			return;
+		}
 
-	mi_cfg = &dsi_display->panel->mi_cfg;
-	if (!mi_cfg) {
-		SDE_ERROR("invalid mi_cfg\n");
-		return;
+		mi_cfg = &dsi_display->panel->mi_cfg;
+		if (!mi_cfg->dither_enabled) {
+			SDE_DEBUG("dither_enabled = %d\n", mi_cfg->dither_enabled);
+			return;
+		}
 	}
-
-	if (!mi_cfg->dither_enabled)
-		return;
 
 	topology = sde_connector_get_topology_name(phys->connector);
 	if ((topology == SDE_RM_TOPOLOGY_PPSPLIT) &&
@@ -5057,6 +5087,9 @@ int sde_encoder_prepare_for_kickoff(struct drm_encoder *drm_enc,
 				sde_enc->cur_master, sde_kms->qdss_enabled);
 
 end:
+	if (sde_enc->ready_kickoff)
+		sde_enc->prepare_kickoff = true;
+
 	SDE_ATRACE_END("sde_encoder_prepare_for_kickoff");
 	return ret;
 }
@@ -5132,7 +5165,8 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 		adj_mode = bridge->dsi_mode;
 		dsi_display = bridge->display;
 		if (dsi_display && dsi_display->panel
-			&& dsi_display->panel->host_config.phy_type == DSI_PHY_TYPE_CPHY
+			&& (dsi_display->panel->host_config.phy_type == DSI_PHY_TYPE_CPHY
+			    || dsi_display->panel->mi_cfg.panel_id == 0x4C38314100420400)
 			&& adj_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR) {
 			mutex_lock(&dsi_display->panel->panel_lock);
 			sde_encoder_vid_wait_for_active(drm_enc);
@@ -5157,15 +5191,18 @@ void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
 	}
 
 	if (dsi_display && dsi_display->panel
-		&& dsi_display->panel->host_config.phy_type == DSI_PHY_TYPE_CPHY
+		&& (dsi_display->panel->host_config.phy_type == DSI_PHY_TYPE_CPHY
+		    || dsi_display->panel->mi_cfg.panel_id == 0x4C38314100420400)
 		&& adj_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR) {
 		dsi_panel_match_fps_pen_setting(dsi_display->panel, &adj_mode);
 		mutex_unlock(&dsi_display->panel->panel_lock);
 	}
 
 	priv = sde_enc->base.dev->dev_private;
-	if (priv)
+	if (priv) {
 		sde_kms = to_sde_kms(priv->kms);
+		sde_kms_kickoff_count(sde_kms);
+	}
 
 	SDE_ATRACE_END("encoder_kickoff");
 }

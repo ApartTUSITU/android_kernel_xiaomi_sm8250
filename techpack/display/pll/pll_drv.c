@@ -227,6 +227,7 @@ static int mdss_pll_probe(struct platform_device *pdev)
 	int rc = 0;
 	const char *label;
 	struct mdss_pll_resources *pll_res;
+	bool ssc_disable;
 
 	if (!pdev->dev.of_node) {
 		pr_err("MDSS pll driver only supports device tree probe\n");
@@ -255,6 +256,13 @@ static int mdss_pll_probe(struct platform_device *pdev)
 
 	pll_res->ssc_en = of_property_read_bool(pdev->dev.of_node,
 						"qcom,dsi-pll-ssc-en");
+
+	ssc_disable = of_property_read_bool(pdev->dev.of_node,
+						"qcom,dsi-pll-ssc-disable");
+	if (pll_res->ssc_en == true && ssc_disable == true) {
+		pll_res->ssc_en = false;
+		pr_info("ssc disable due to qcom,dsi-pll-ssc-disable is defined\n");
+	}
 
 	if (pll_res->ssc_en) {
 		pr_info("%s: label=%s PLL SSC enabled\n", __func__, label);

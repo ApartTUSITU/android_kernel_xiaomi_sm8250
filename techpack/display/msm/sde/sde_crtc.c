@@ -3217,6 +3217,8 @@ static void sde_crtc_atomic_begin(struct drm_crtc *crtc,
 	struct sde_splash_display *splash_display;
 	bool cont_splash_enabled = false;
 	size_t i;
+	uint32_t fod_sync_info;
+	struct sde_crtc_state *cstate;
 
 	if (!crtc) {
 		SDE_ERROR("invalid crtc\n");
@@ -3303,8 +3305,14 @@ static void sde_crtc_atomic_begin(struct drm_crtc *crtc,
 	}
 
 	if (sde_kms_is_cp_operation_allowed(sde_kms) &&
-			(cont_splash_enabled || sde_crtc->enabled))
+			(cont_splash_enabled || sde_crtc->enabled)) {
+
+		cstate = to_sde_crtc_state(crtc->state);
+		fod_sync_info = sde_crtc_get_mi_fod_sync_info(cstate);
+		sde_crtc->mi_dimlayer_type = fod_sync_info;
+
 		sde_cp_crtc_apply_properties(crtc);
+	}
 
 	/*
 	 * PP_DONE irq is only used by command mode for now.

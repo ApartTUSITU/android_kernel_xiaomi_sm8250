@@ -1,6 +1,6 @@
 #include "mi_disp_lhbm.h"
 
-struct disp_lhbm *g_disp_lhbm;
+struct disp_lhbm *g_disp_lhbm = NULL;
 static atomic_t fod_work_status = ATOMIC_INIT(FOD_WORK_INIT);
 static atomic_t touch_current_status = ATOMIC_INIT(-1);
 static atomic_t touch_last_status = ATOMIC_INIT(-1);
@@ -234,35 +234,35 @@ int mi_disp_set_fod_queue_work(u32 fod_btn, bool from_touch)
 				LHBM_TAG, atomic_read(&touch_current_status), fod_btn);
 			atomic_set(&touch_last_status, fod_btn);
 			return 0;
-		}
+		} else {
+			if (ignore_fod_btn) {
+				if (fod_btn == 1) {
+					return 0;
+				} else {
+					ignore_fod_btn = false;
+					pr_info("%s clear ignore state\n", LHBM_TAG);
+					return 0;
+				}
+			}
 
-		if (ignore_fod_btn) {
-			if (fod_btn == 1)
+			if (atomic_read(&touch_current_status) == fod_btn) {
+				pr_debug("%s from touch fod_btn(%d), skip\n", LHBM_TAG, fod_btn);
 				return 0;
+			} else {
+				mutex_lock(&display->display_lock);
+				if (display->panel->power_mode == SDE_MODE_DPMS_ON && atomic_read(&touch_current_status) == 0
+							&& fod_btn == 1 && !mi_cfg->fod_anim_layer_enabled) {
+					pr_info("%s ignore fod_btn due to fod anim is disable!\n", LHBM_TAG);
+					ignore_fod_btn = true;
+					mutex_unlock(&display->display_lock);
+					return 0;
+				}
+				mutex_unlock(&display->display_lock);
 
-			ignore_fod_btn = false;
-			pr_info("%s clear ignore state\n", LHBM_TAG);
-			return 0;
+				atomic_set(&touch_last_status, fod_btn);
+				pr_debug("%s from touch fod_btn=%d\n", LHBM_TAG, fod_btn);
+			}
 		}
-
-		if (atomic_read(&touch_current_status) == fod_btn) {
-			pr_debug("%s from touch fod_btn(%d), skip\n", LHBM_TAG, fod_btn);
-			return 0;
-		}
-
-		mutex_lock(&display->display_lock);
-		if (display->panel->power_mode == SDE_MODE_DPMS_ON
-					&& atomic_read(&touch_current_status) == 0
-					&& fod_btn == 1 && !mi_cfg->fod_anim_layer_enabled) {
-			pr_info("%s ignore fod_btn due to fod anim is disable!\n", LHBM_TAG);
-			ignore_fod_btn = true;
-			mutex_unlock(&display->display_lock);
-			return 0;
-		}
-		mutex_unlock(&display->display_lock);
-
-		atomic_set(&touch_last_status, fod_btn);
-		pr_debug("%s from touch fod_btn=%d\n", LHBM_TAG, fod_btn);
 	}
 
 	fp_status = display->panel->mi_cfg.fp_status;

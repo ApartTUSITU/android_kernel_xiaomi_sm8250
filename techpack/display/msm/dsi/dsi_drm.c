@@ -382,14 +382,14 @@ static void dsi_bridge_disable(struct drm_bridge *bridge)
 	private_flags =
 		bridge->encoder->crtc->state->adjusted_mode.private_flags;
 
-	if (display)
-		display->enabled = false;
-
 	rc = dsi_display_esd_irq_ctrl(c_bridge->display, false);
 	if (rc) {
 		DSI_ERR("[%d] DSI display disable esd irq failed, rc=%d\n",
 				c_bridge->id, rc);
 	}
+
+	if (display)
+		display->enabled = false;
 
 	if (display && display->drm_conn) {
 		display->poms_pending =

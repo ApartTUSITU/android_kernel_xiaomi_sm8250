@@ -46,6 +46,7 @@ enum doze_bkl {
 	DOZE_TO_NORMAL = 0,
 	DOZE_BRIGHTNESS_HBM,
 	DOZE_BRIGHTNESS_LBM,
+	DOZE_BRIGHTNESS_MAX,
 };
 
 enum bkl_dimming_state {
@@ -188,6 +189,7 @@ struct dsi_panel_mi_cfg {
 	 */
 	bool bl_is_big_endian;
 	u32 last_bl_level;
+	u32 last_nonzero_bl_level;
 
 	/* indicate refresh frequency Fps gpio */
 	int disp_rate_gpio;
@@ -247,6 +249,8 @@ struct dsi_panel_mi_cfg {
 	bool thermal_hbm_disabled;
 	bool fod_hbm_enabled;
 	bool fod_hbm_layer_enabled;
+	bool fod_skip_nolp;
+	bool fod_to_nolp;
 	u32 doze_brightness_state;
 	u32 unset_doze_brightness;
 	u32 fod_off_dimming_delay;
@@ -271,6 +275,8 @@ struct dsi_panel_mi_cfg {
 	u32 max_brightness_clone;
 	u32 aod_backlight;
 	uint32_t doze_brightness;
+	bool bl_wait_frame;
+	bool bl_enable;
 	bool is_tddi_flag;
 	bool tddi_doubleclick_flag;
 	bool panel_dead_flag;
@@ -351,6 +357,20 @@ struct calc_hw_vsync {
 	u64 measured_fps_x1000;
 };
 
+static inline const char *get_doze_brightness_name(__u32 doze_brightness)
+{
+	switch (doze_brightness) {
+	case DOZE_TO_NORMAL:
+		return "doze_to_normal";
+	case DOZE_BRIGHTNESS_HBM:
+		return "doze_brightness_high";
+	case DOZE_BRIGHTNESS_LBM:
+		return "doze_brightness_low";
+	default:
+		return "Unknown";
+	}
+}
+
 int dsi_panel_parse_esd_gpio_config(struct dsi_panel *panel);
 
 int dsi_panel_parse_mi_config(struct dsi_panel *panel,
@@ -361,6 +381,9 @@ void display_utc_time_marker(const char *format, ...);
 int dsi_panel_esd_irq_ctrl(struct dsi_panel *panel,
 				bool enable);
 
+int dsi_panel_esd_irq_ctrl_locked(struct dsi_panel *panel,
+			bool enable);
+
 int dsi_panel_write_cmd_set(struct dsi_panel *panel,
 				struct dsi_panel_cmd_set *cmd_sets);
 
@@ -370,6 +393,8 @@ int dsi_panel_read_cmd_set(struct dsi_panel *panel,
 int dsi_panel_write_mipi_reg(struct dsi_panel *panel, char *buf);
 
 ssize_t dsi_panel_read_mipi_reg(struct dsi_panel *panel, char *buf);
+
+bool dsi_panel_is_need_tx_cmd(u32 param);
 
 int dsi_panel_set_disp_param(struct dsi_panel *panel, u32 param);
 

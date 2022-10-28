@@ -76,7 +76,7 @@ static int bd_cdev_set_cur_brightness_clone(struct thermal_cooling_device *cdev,
 		return -EINVAL;
 
 	brightness_lvl = cdev_clone->panel->mi_cfg.max_brightness_clone - state;
-	if (brightness_lvl == bd->thermal_brightness_limit)
+	if (brightness_lvl == bd->thermal_brightness_clone_limit)
 		return 0;
 	bd->thermal_brightness_clone_limit = brightness_lvl;
 	SDE_INFO("backup_brightness_clone[%d], thermal limit[%d]\n", bd->props.brightness_clone_backup, bd->thermal_brightness_clone_limit);
@@ -121,8 +121,8 @@ int backlight_clone_cdev_register(struct sde_clone_cdev *cdev_clone,
 		pr_err("Cooling device register failed\n");
 		return -EINVAL;
 	}
-
-	display_clone_count++;
+	else
+		display_clone_count++;
 
 	return 0;
 }
