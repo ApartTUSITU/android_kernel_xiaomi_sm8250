@@ -2577,7 +2577,7 @@ static int fts_ts_suspend(struct device *dev)
 	ts_data->fod_point_released = false;
 #if FTS_GESTURE_EN
 	if (fts_gesture_suspend(ts_data->client) == 0) {
-		if(ts_data->fod_status == -1 || ts_data->fod_status == 100){
+		if(!ts_data->aod_status &&(ts_data->fod_status == -1 || ts_data->fod_status == 100)){
 			fts_fod_reg_write(ts_data->client, FTS_REG_GESTURE_FOD_ON, false);
 		}
 		ts_data->suspended = true;
