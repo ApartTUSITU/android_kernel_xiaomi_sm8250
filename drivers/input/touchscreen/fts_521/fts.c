@@ -5895,7 +5895,8 @@ static int fts_set_cur_value(int mode, int value)
 		MI_TOUCH_LOGE(1, "%s %s: don't support\n", tag, __func__);
 	}
 
-	queue_work(fts_info->touch_feature_wq, &fts_info->cmd_update_work);
+	queue_delayed_work(fts_info->touch_feature_wq, &fts_info->cmd_update_delay_work,
+			   msecs_to_jiffies(1));
 
 	return 0;
 }
@@ -5986,7 +5987,9 @@ static int fts_set_mode_long_value(int mode, int len, int *buf)
 			}
 			mutex_unlock(&scr_info->palm_lock);
 #endif
-			schedule_work(&fts_info->grip_mode_work);
+			/*schedule_work(&fts_info->grip_mode_work);*/
+			queue_delayed_work(fts_info->touch_feature_wq, &fts_info->cmd_update_delay_work,
+			   msecs_to_jiffies(1));
 		}
 	}
 	return 0;
@@ -6156,6 +6159,8 @@ static void fts_resume_work(struct work_struct *work)
 		info->palm_sensor_changed = true;
 	}
 #endif
+	queue_delayed_work(info->touch_feature_wq, &info->cmd_update_delay_work,
+			   msecs_to_jiffies(100));
 }
 
 /**
@@ -7886,9 +7891,11 @@ static int fts_probe(struct spi_device *client)
 		MI_TOUCH_LOGE(1, "%s %s: Cannot create touch feature work thread\n", tag, __func__);
 		goto ProbeErrorExit_8;
 	}
-	INIT_WORK(&info->cmd_update_work, fts_cmd_update_work);
+	/*INIT_WORK(&info->cmd_update_work, fts_cmd_update_work);*/
 	INIT_WORK(&info->switch_mode_work, fts_switch_mode_work);
-	INIT_WORK(&info->grip_mode_work, fts_grip_mode_work);
+	/*INIT_WORK(&info->grip_mode_work, fts_grip_mode_work);*/
+	INIT_DELAYED_WORK(&info->grip_mode_delay_work, fts_grip_mode_work);
+	INIT_DELAYED_WORK(&info->cmd_update_delay_work, fts_cmd_update_work);
 	mutex_init(&info->cmd_update_mutex);
 	memset(&xiaomi_touch_interfaces, 0x00, sizeof(struct xiaomi_touch_interface));
 	xiaomi_touch_interfaces.getModeValue = fts_get_mode_value;

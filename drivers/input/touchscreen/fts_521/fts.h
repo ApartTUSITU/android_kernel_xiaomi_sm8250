@@ -410,6 +410,8 @@ struct fts_ts_info {
 	int orientation;
 	struct work_struct switch_mode_work;
 	struct work_struct grip_mode_work;
+	struct delayed_work grip_mode_delay_work;
+	struct delayed_work cmd_update_delay_work;
 	bool big_area_fod;
 	struct delayed_work power_supply_work;
 	int charging_status;
