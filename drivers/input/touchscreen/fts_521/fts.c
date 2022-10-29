@@ -5702,6 +5702,9 @@ static void fts_update_touchmode_data(void)
 	u8 get_value[7] = {0x0,};
 	int temp_value = 0;
 
+	if (fts_info->sensor_sleep)
+		return;
+
 	ret = wait_event_interruptible_timeout(fts_info->wait_queue, !(fts_info->irq_status ||
 	fts_info->touch_id),  msecs_to_jiffies(500));
 
