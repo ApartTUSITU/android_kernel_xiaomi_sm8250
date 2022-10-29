@@ -1377,6 +1377,8 @@ source "drivers/input/touchscreen/fts_spi/Kconfig"
 
 source "drivers/input/touchscreen/goodix_driver_gt9886/Kconfig"
 
+source "drivers/input/touchscreen/goodix_9916/Kconfig"
+
 config INPUT_PRESS_NDT
 	bool "ndt"
 	depends on I2C
