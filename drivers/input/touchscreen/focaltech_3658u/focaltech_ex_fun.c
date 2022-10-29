@@ -482,6 +482,74 @@ proc_read_err:
 }
 #endif
 
+static ssize_t fts_fw_version_read(struct file *filp,
+			char __user *buf, size_t count, loff_t *pos)
+{
+	int ret = 0, cnt = 0;
+	char tmp[PROC_BUF_SIZE];
+	struct fts_ts_data *ts_data = fts_data;
+	u8 fwver = 0;
+
+	if (*pos != 0)
+		return 0;
+
+	mutex_lock(&ts_data->input_dev->mutex);
+
+#if FTS_ESDCHECK_EN
+	fts_esdcheck_proc_busy(1);
+#endif
+	ret = fts_read_reg(FTS_REG_FW_VER, &fwver);
+#if FTS_ESDCHECK_EN
+	fts_esdcheck_proc_busy(0);
+#endif
+	if ((ret < 0) || (fwver == 0xFF) || (fwver == 0x00))
+		cnt = snprintf(tmp, PROC_BUF_SIZE, "get tp fw version fail!\n");
+	else
+		cnt = snprintf(tmp, PROC_BUF_SIZE, "%02x\n", fwver);
+	mutex_unlock(&ts_data->input_dev->mutex);
+
+	ret = copy_to_user(buf, tmp, cnt);
+	*pos += cnt;
+	if (ret != 0)
+		return 0;
+	else
+		return cnt;
+}
+
+static const struct file_operations tp_fw_version_fops = {
+	.read = fts_fw_version_read,
+};
+
+
+static ssize_t fts_lockdown_info_read(struct file *filp,
+			char __user *buf, size_t count, loff_t *pos)
+{
+	int cnt = 0, ret = 0;
+	char tmp[PROC_BUF_SIZE];
+	struct fts_ts_data *ts_data = fts_data;
+
+	if (*pos != 0)
+		return 0;
+
+	cnt = snprintf(tmp, PROC_BUF_SIZE,
+			"0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x\n",
+			ts_data->lockdown_info[0], ts_data->lockdown_info[1],
+			ts_data->lockdown_info[2], ts_data->lockdown_info[3],
+			ts_data->lockdown_info[4], ts_data->lockdown_info[5],
+			ts_data->lockdown_info[6], ts_data->lockdown_info[7]);
+	ret = copy_to_user(buf, tmp, cnt);
+	*pos += cnt;
+	if (ret != 0)
+		return 0;
+	else
+		return cnt;
+}
+
+static const struct file_operations tp_lockdown_info_fops = {
+	.read = fts_lockdown_info_read,
+};
+
+
 int fts_create_proc(struct fts_ts_data *ts_data)
 {
 	struct ftxxxx_proc *proc = &ts_data->proc;
@@ -489,6 +557,20 @@ int fts_create_proc(struct fts_ts_data *ts_data)
 	proc->proc_entry = proc_create(PROC_NAME, 0777, NULL, &fts_proc_fops);
 	if (proc->proc_entry == NULL) {
 		FTS_ERROR("create proc entry fail");
+		return -ENOMEM;
+	}
+
+	proc->tp_lockdown_info_proc = proc_create("tp_lockdown_info",
+						0444, NULL, &tp_lockdown_info_fops);
+	if (proc->tp_lockdown_info_proc == NULL) {
+		FTS_ERROR("tp_lockdown_info proc create failed");
+		return -ENOMEM;
+	}
+
+	proc->tp_fw_version_proc = proc_create("tp_fw_version",
+						0444, NULL, &tp_fw_version_fops);
+	if (proc->tp_fw_version_proc == NULL) {
+		FTS_ERROR("tp_fw_version proc create failed");
 		return -ENOMEM;
 	}
 
@@ -502,7 +584,13 @@ void fts_remove_proc(struct fts_ts_data *ts_data)
 
 	if (proc->proc_entry)
 		proc_remove(proc->proc_entry);
+	if (proc->tp_fw_version_proc)
+		proc_remove(proc->tp_fw_version_proc);
+	if (proc->tp_lockdown_info_proc)
+		proc_remove(proc->tp_lockdown_info_proc);
 	proc->proc_entry = NULL;
+	proc->tp_fw_version_proc = NULL;
+	proc->tp_lockdown_info_proc = NULL;
 }
 
 
@@ -1074,7 +1162,7 @@ static ssize_t fts_log_level_show(
 
 	mutex_lock(&input_dev->mutex);
 	count += snprintf(buf + count, PAGE_SIZE, "log level:%d\n",
-					fts_data->log_level);
+					  fts_data->log_level);
 	mutex_unlock(&input_dev->mutex);
 
 	return count;
@@ -1097,6 +1185,24 @@ static ssize_t fts_log_level_store(
 
 	return count;
 }
+
+static ssize_t fts_lockdown_info_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	int count = 0;
+	struct fts_ts_data *ts_data = fts_data;
+
+	FTS_FUNC_ENTER();
+	count = snprintf(buf, PAGE_SIZE,
+			"0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x\n",
+			ts_data->lockdown_info[0], ts_data->lockdown_info[1],
+			ts_data->lockdown_info[2], ts_data->lockdown_info[3],
+			ts_data->lockdown_info[4], ts_data->lockdown_info[5],
+			ts_data->lockdown_info[6], ts_data->lockdown_info[7]);
+	FTS_FUNC_EXIT();
+	return count;
+}
+
 
 /* get the fw version  example:cat fw_version */
 static DEVICE_ATTR(fts_fw_version, S_IRUGO | S_IWUSR, fts_tpfwver_show, fts_tpfwver_store);
@@ -1125,6 +1231,7 @@ static DEVICE_ATTR(fts_irq, S_IRUGO | S_IWUSR, fts_irq_show, fts_irq_store);
 static DEVICE_ATTR(fts_boot_mode, S_IRUGO | S_IWUSR, fts_bootmode_show, fts_bootmode_store);
 static DEVICE_ATTR(fts_touch_point, S_IRUGO | S_IWUSR, fts_tpbuf_show, fts_tpbuf_store);
 static DEVICE_ATTR(fts_log_level, S_IRUGO | S_IWUSR, fts_log_level_show, fts_log_level_store);
+static DEVICE_ATTR(fts_lockdown_info, S_IRUGO, fts_lockdown_info_show, NULL);
 
 /* add your attr in here*/
 static struct attribute *fts_attributes[] = {
@@ -1139,6 +1246,7 @@ static struct attribute *fts_attributes[] = {
 	&dev_attr_fts_boot_mode.attr,
 	&dev_attr_fts_touch_point.attr,
 	&dev_attr_fts_log_level.attr,
+	&dev_attr_fts_lockdown_info.attr,
 	NULL
 };
 

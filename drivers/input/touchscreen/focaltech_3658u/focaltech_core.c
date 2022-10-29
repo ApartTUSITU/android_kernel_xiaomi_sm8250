@@ -503,16 +503,26 @@ static int fts_input_report_b(struct fts_ts_data *data)
 			touchs |= BIT(events[i].id);
 			data->touchs |= BIT(events[i].id);
 
+			if ((data->log_level >= 2) ||
+				((1 == data->log_level) && (FTS_TOUCH_DOWN == events[i].flag))) {
+				FTS_DEBUG("[B]P%d DOWN!", events[i].id);
+			}
 		} else {
 			uppoint++;
 			input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, false);
 			data->touchs &= ~BIT(events[i].id);
+			if (data->log_level >= 1) {
+				FTS_DEBUG("[B]P%d UP!", events[i].id);
+			}
 		}
 	}
 
 	if (unlikely(data->touchs ^ touchs)) {
 		for (i = 0; i < max_touch_num; i++)  {
 			if (BIT(i) & (data->touchs ^ touchs)) {
+				if (data->log_level >= 1) {
+					FTS_DEBUG("[B]P%d UP!", i);
+				}
 				va_reported = true;
 				input_mt_slot(data->input_dev, i);
 				input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, false);
@@ -524,6 +534,9 @@ static int fts_input_report_b(struct fts_ts_data *data)
 	if (va_reported) {
 		/* touchs==0, there's no point but key */
 		if (EVENT_NO_DOWN(data) || (!touchs)) {
+			if (data->log_level >= 1) {
+				FTS_DEBUG("[B]Points All Up!");
+			}
 			input_report_key(data->input_dev, BTN_TOUCH, 0);
 			lpm_disable_for_dev(false, LPM_EVENT_INPUT);
 		} else {
@@ -566,6 +579,13 @@ static int fts_input_report_a(struct fts_ts_data *data)
 
 			input_mt_sync(data->input_dev);
 
+			if ((data->log_level >= 2) ||
+				((1 == data->log_level) && (FTS_TOUCH_DOWN == events[i].flag))) {
+				FTS_DEBUG("[A]P%d(%d, %d)[p:%d,tm:%d] DOWN!",
+						  events[i].id,
+						  events[i].x, events[i].y,
+						  events[i].p, events[i].area);
+			}
 			touchs++;
 		}
 	}
@@ -578,6 +598,9 @@ static int fts_input_report_a(struct fts_ts_data *data)
 
 	if (va_reported) {
 		if (EVENT_NO_DOWN(data)) {
+			if (data->log_level >= 1) {
+				FTS_DEBUG("[A]Points All Up!");
+			}
 			input_report_key(data->input_dev, BTN_TOUCH, 0);
 			input_mt_sync(data->input_dev);
 		} else {
@@ -616,6 +639,7 @@ static int fts_read_touchdata(struct fts_ts_data *data)
 			return 1;
 		}
 	}
+
 
 	if (data->log_level >= 3) {
 		fts_show_touch_buffer(buf, data->pnt_buf_size);
@@ -672,7 +696,7 @@ static int fts_read_parse_touchdata(struct fts_ts_data *data)
 		events[i].y = (buf[FTS_TOUCH_PRE_POS + base] & 0x0F) +
 				(buf[FTS_TOUCH_Y_L_POS + base] << 4) +
 				((buf[FTS_TOUCH_Y_H_POS + base] & 0x0F) << 12);
-
+		/*fw report 16x, dts report 10x*/
 		events[i].x = events[i].x * 10 / 16;
 		events[i].y = events[i].y * 10 / 16;
 		events[i].flag = buf[FTS_TOUCH_EVENT_POS + base] >> 6;
@@ -1378,8 +1402,107 @@ static void fts_ts_late_resume(struct early_suspend *handler)
 }
 #endif
 
+static void tpdbg_shutdown(struct fts_ts_data *ts_data, bool enable)
+{
+	if (enable) {
+		ts_data->poweroff_on_sleep = true;
+		cancel_work_sync(&fts_data->resume_work);
+		fts_ts_suspend(&ts_data->client->dev);
+	} else {
+		fts_ts_resume(&ts_data->client->dev);
+	}
+}
+
+static void tpdbg_suspend(struct fts_ts_data *ts_data, bool enable)
+{
+	if (enable) {
+		cancel_work_sync(&fts_data->resume_work);
+		fts_ts_suspend(&ts_data->client->dev);
+	} else {
+		fts_ts_resume(&ts_data->client->dev);
+	}
+}
+
+static int tpdbg_open(struct inode *inode, struct file *file)
+{
+	file->private_data = inode->i_private;
+
+	return 0;
+}
+
+static ssize_t tpdbg_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
+{
+
+	const char *str = "cmd support as below:\n \
+				\necho \"irq-disable\" or \"irq-enable\" to ctrl irq\n \
+				\necho \"tp-suspend-en\" or \"tp-suspend-off\" to ctrl panel in or off suspend status\n \
+				\necho \"tp-sd-en\" or \"tp-sd-off\" to ctrl panel in or off sleep status\n";
+
+	loff_t pos = *ppos;
+	int len = strlen(str);
+
+	if (pos < 0)
+		return -EINVAL;
+	if (pos >= len)
+		return 0;
+
+	if (copy_to_user(buf, str, len))
+		return -EFAULT;
+
+	*ppos = pos + len;
+
+	return len;
+}
+
+static ssize_t tpdbg_write(struct file *file, const char __user *buf, size_t size, loff_t *ppos)
+{
+	struct fts_ts_data *ts_data = file->private_data;
+	char *cmd = kzalloc(size, GFP_KERNEL);
+	int ret = size;
+
+	if (!cmd)
+		return -ENOMEM;
+	if (copy_from_user(cmd, buf, size)) {
+		ret = -EFAULT;
+		goto out;
+	}
+
+	if (!strncmp(cmd, "irq-disable", 11))
+		fts_irq_disable();
+	else if (!strncmp(cmd, "irq-enable", 10))
+		fts_irq_enable();
+	else if (!strncmp(cmd, "tp-suspend-en", 13))
+		tpdbg_suspend(ts_data, true);
+	else if (!strncmp(cmd, "tp-suspend-off", 14))
+		tpdbg_suspend(ts_data, false);
+	else if (!strncmp(cmd, "tp-sd-en", 8))
+		tpdbg_shutdown(ts_data, true);
+	else if (!strncmp(cmd, "tp-sd-off", 9)) {
+		tpdbg_shutdown(ts_data, false);
+	}
+out:
+	kfree(cmd);
+
+	return ret;
+}
+
+static int tpdbg_release(struct inode *inode, struct file *file)
+{
+	file->private_data = NULL;
+
+	return 0;
+}
+
+static const struct file_operations tpdbg_operations = {
+	.owner = THIS_MODULE,
+	.open = tpdbg_open,
+	.read = tpdbg_read,
+	.write = tpdbg_write,
+	.release = tpdbg_release,
+};
+
 static int fts_power_supply_event(struct notifier_block *nb,
-				unsigned long event, void *ptr)
+			  unsigned long event, void *ptr)
 {
 	struct fts_ts_data *ts_data =
 		container_of(nb, struct fts_ts_data, power_supply_notifier);
@@ -1515,6 +1638,15 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 		FTS_ERROR("create sysfs node fail");
 	}
 
+	ts_data->tpdbg_dentry = debugfs_create_dir("tp_debug", NULL);
+	if (IS_ERR_OR_NULL(ts_data->tpdbg_dentry)) {
+		FTS_ERROR("create tp_debug dir fail");
+	}
+	if (IS_ERR_OR_NULL(debugfs_create_file("switch_state", 0660,
+				ts_data->tpdbg_dentry, ts_data, &tpdbg_operations))) {
+		FTS_ERROR("create switch_state fail");
+	}
+
 #if FTS_POINT_REPORT_CHECK_EN
 	ret = fts_point_report_check_init(ts_data);
 	if (ret) {
@@ -1624,6 +1756,7 @@ static int fts_ts_remove_entry(struct fts_ts_data *ts_data)
 	fts_point_report_check_exit(ts_data);
 #endif
 
+	debugfs_remove_recursive(ts_data->tpdbg_dentry);
 	fts_remove_proc(ts_data);
 	fts_remove_sysfs(ts_data);
 	fts_ex_mode_exit(ts_data);
@@ -1700,19 +1833,15 @@ static int fts_ts_suspend(struct device *dev)
 		update_palm_sensor_value(0);
 		fts_palm_sensor_cmd(0);
 	}
-
-	if (ts_data->gesture_cmd_delay) {
-		ts_data->gesture_mode = ts_data->gesture_status != 0 ? ENABLE : DISABLE;
-		FTS_INFO("suspended gesture state:0x%02X, write cmd:0x%02X",
-			ts_data->gesture_status, ts_data->gesture_cmd);
-		ts_data->gesture_cmd_delay = false;
-	}
 #endif
 
 #if FTS_ESDCHECK_EN
 	fts_esdcheck_suspend();
 #endif
 
+#ifdef CONFIG_FACTORY_BUILD
+	ts_data->poweroff_on_sleep = true;
+#endif
 	if (ts_data->gesture_mode && !ts_data->poweroff_on_sleep) {
 		fts_gesture_suspend(ts_data);
 	} else {
@@ -2085,32 +2214,16 @@ static void fts_update_touchmode_data(struct fts_ts_data *ts_data)
 
 static void fts_update_gesture_state(struct fts_ts_data *ts_data, int bit, bool enable)
 {
-	u8 cmd_shift = 0;
-
-	if (GESTURE_DOUBLETAP == bit)
-		cmd_shift = FTS_GESTURE_DOUBLETAP;
-	else if (GESTURE_AOD == bit)
-		cmd_shift = FTS_GESTURE_AOD;
-
-	mutex_lock(&ts_data->input_dev->mutex);
-	if (enable) {
-		ts_data->gesture_status |= 1 << bit;
-		ts_data->gesture_cmd |= 1 << cmd_shift;
-	} else {
-		ts_data->gesture_status &= ~(1 << bit);
-		ts_data->gesture_cmd &= ~(1 << cmd_shift);
-	}
-
 	if (ts_data->suspended) {
-		FTS_ERROR("TP is suspended, delay update gesture state!");
-		ts_data->gesture_cmd_delay = true;
-		FTS_INFO("delay gesture state:0x%02X, delay write cmd:0x%02X",
-			ts_data->gesture_status, ts_data->gesture_cmd);
-		mutex_unlock(&ts_data->input_dev->mutex);
+		FTS_ERROR("TP is suspended, do not update gesture state");
 		return;
 	}
-
-	FTS_INFO("gesture state:0x%02X, write cmd:0x%02X", ts_data->gesture_status, ts_data->gesture_cmd);
+	mutex_lock(&ts_data->input_dev->mutex);
+	if (enable)
+		ts_data->gesture_status |= 1 << bit;
+	else
+		ts_data->gesture_status &= ~(1 << bit);
+	FTS_INFO("gesture state:0x%02X", ts_data->gesture_status);
 	ts_data->gesture_mode = ts_data->gesture_status != 0 ? ENABLE : DISABLE;
 	mutex_unlock(&ts_data->input_dev->mutex);
 }
@@ -2275,6 +2388,7 @@ static int fts_ts_probe(struct spi_device *spi)
 	ts_data->dev = &spi->dev;
 	ts_data->log_level = 1;
 	ts_data->poweroff_on_sleep = false;
+
 	ts_data->bus_type = BUS_TYPE_SPI_V2;
 	spi_set_drvdata(spi, ts_data);
 
