@@ -10,7 +10,7 @@
  * GNU General Public License for more details.
  */
 
-qcom,psyche {
+qcom,munch {
 	/* j1 jeita, step charge and other important charging parameters */
 	qcom,fastchg-current-ma = <12400>;
 	qcom,jeita-fcc-ranges = <(-100)  0  1000000
@@ -42,5 +42,5 @@ qcom,psyche {
 	qcom,use-ext-gauge;
 	qcom,max-voltage-uv = <4490000>;//for fv
 	qcom,batt-id-kohm = <100>;
-	qcom,battery-type = "L10A_profile";
+	qcom,battery-type = "L11R_profile";
 };
