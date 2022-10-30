@@ -111,6 +111,8 @@ struct backlight_device {
 	struct thermal_cooling_device *cdev;
 	/* Thermally limited max brightness */
 	int thermal_brightness_limit;
+	/* Thermally limited max brightness clone for 8192 hbm*/
+	int thermal_brightness_clone_limit;
 	/* User brightness request */
 	int usr_brightness_req;
 
