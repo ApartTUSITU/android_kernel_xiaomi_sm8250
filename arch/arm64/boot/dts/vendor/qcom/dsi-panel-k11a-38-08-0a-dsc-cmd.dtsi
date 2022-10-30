@@ -22,7 +22,8 @@
 		qcom,mdss-dsi-lane-3-state;
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
-		qcom,mdss-dsi-reset-sequence = <0 10>, <1 10>;
+		qcom,mdss-dsi-reset-sequence = <0 12>, <1 10>;
+		qcom,mdss-dsi-reset-powerdown-delay = <10>;
 		qcom,mdss-pan-physical-width-dimension = <70>;
 		qcom,mdss-pan-physical-height-dimension = <155>;
 		qcom,mdss-dsi-te-pin-select = <1>;
