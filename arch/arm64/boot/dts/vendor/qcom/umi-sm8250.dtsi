@@ -243,7 +243,7 @@ And public attribution of xiaomi platforms(like J2 and so and)
 		fts,fod-x-size = <238>;
 		fts,fod-y-size = <238>;
 		fts,default-fw-name = "st_fts_j2.ftb";
-		fts,config-array-size = <2>;
+		fts,config-array-size = <3>;
 		fts,dump-click-count;
 		fts,support-fod;
 		fts,touch-up-threshold-min = <40>;
@@ -297,6 +297,12 @@ And public attribution of xiaomi platforms(like J2 and so and)
 			fts,tp-vendor = <0x42>;
 			fts,tp-module = <1>;
 			fts,fw-name = "st_fts_j2_2.ftb";
+			fts,limit-name = "stm_fts_production_limits_2.csv";
+		};
+		fts,cfg_2{
+			fts,tp-vendor = <0x42>;
+			fts,tp-module = <2>;
+			fts,fw-name = "st_fts_j2_3.ftb";
 			fts,limit-name = "stm_fts_production_limits_2.csv";
 		};
 	};
