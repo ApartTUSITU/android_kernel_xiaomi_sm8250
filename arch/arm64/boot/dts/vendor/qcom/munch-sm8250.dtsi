@@ -254,9 +254,9 @@ And public attribution of xiaomi platforms(like L11R and so and)
 		ti,bq2597x,bat-ucp-alarm-disable;
 		ti,bq2597x,bat-ucp-disable;
 
-		ti,bq2597x,bus-ovp-alarm-disable;
+		/*ti,bq2597x,bus-ovp-alarm-disable;
 		ti,bq2597x,bus-ocp-disable;
-		ti,bq2597x,bus-ocp-alarm-disable;
+		ti,bq2597x,bus-ocp-alarm-disable;*/
 		ti,bq2597x,bat-therm-disable;
 		ti,bq2597x,bus-therm-disable;
 		ti,bq2597x,die-therm-disable;
@@ -428,9 +428,10 @@ And public attribution of xiaomi platforms(like L11R and so and)
 
 		ti,bq2597x,bat-ucp-disable;
 
-		ti,bq2597x,bus-ovp-alarm-disable;
+		/*ti,bq2597x,bus-ovp-alarm-disable;
 		ti,bq2597x,bus-ocp-disable;
 		ti,bq2597x,bus-ocp-alarm-disable;
+		*/
 		ti,bq2597x,bat-therm-disable;
 		ti,bq2597x,bus-therm-disable;
 		ti,bq2597x,die-therm-disable;
