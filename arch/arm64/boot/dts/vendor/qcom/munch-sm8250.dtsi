@@ -77,12 +77,12 @@ And public attribution of xiaomi platforms(like L11R and so and)
 		aw86927_vib_cont_bst_brk_gain = < 0x05 >;
 		aw86927_vib_cont_brk_gain = < 0x08 >;
 		aw86927_vib_d2s_gain = < 0x04 >;
-		aw86927_vib_trig_config = < 0 0 0 1 0 2 0 0
-					    0 0 0 1 0 2 0 0
-					    0 0 0 1 0 2 0 0 >;
-		aw86927_vib_bst_vol_default = < 0x58 >;
-		aw86927_vib_bst_vol_ram = < 0x58 >;
-		aw86927_vib_bst_vol_rtp = < 0x58 >;
+		aw86927_vib_trig_config = < 1 0 1 1 1 2 0 0
+					    1 0 0 1 0 2 0 0
+					    1 0 0 1 0 2 0 0 >;
+		aw86927_vib_bst_vol_default = < 0x47 >;
+		aw86927_vib_bst_vol_ram = < 0x47 >;
+		aw86927_vib_bst_vol_rtp = < 0x47 >;
 		/*--------------------common--------------------*/
 		vib_effect_id_boundary = < 10 >;
 		vib_effect_max = < 197 >; /*vib_effect_max must bigger than vib_effect_id*/
