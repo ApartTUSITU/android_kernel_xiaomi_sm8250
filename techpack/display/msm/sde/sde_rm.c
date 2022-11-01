@@ -2068,11 +2068,47 @@ void sde_rm_release(struct sde_rm *rm, struct drm_encoder *enc, bool nxt)
 	} else {
 		SDE_DEBUG("release rsvp[s%de%d]\n", rsvp->seq,
 				rsvp->enc_id);
+		SDE_EVT32(rsvp, rsvp->seq, rsvp->enc_id, nxt, DRMID(enc), DRMID(conn));
 		_sde_rm_release_rsvp(rm, rsvp, conn);
 	}
 
 end:
 	mutex_unlock(&rm->rm_lock);
+}
+
+static void _sde_rm_check_and_modify_commit_rsvps(
+		struct sde_rm *rm,
+		struct sde_rm_rsvp *rsvp)
+{
+
+	struct sde_rm_hw_blk *blk;
+	enum sde_hw_blk_type type;
+	bool modify = false;
+
+	if (!rsvp)
+		return;
+	for (type = 0; type < SDE_HW_BLK_MAX; type++) {
+		list_for_each_entry(blk, &rm->hw_blks[type], list) {
+			if (blk->rsvp_nxt &&  blk->rsvp_nxt->enc_id == rsvp->enc_id
+					 && blk->rsvp_nxt != rsvp) {
+				pr_err("rsvp :%x blk->rsvp_nxt :%x, enc_id: %x type :%x\n",
+					rsvp, blk->rsvp_nxt, blk->rsvp_nxt->enc_id , type);
+				SDE_EVT32(rsvp, blk->rsvp_nxt, blk->rsvp_nxt->enc_id , type);
+				modify = true;
+			}
+		}
+	}
+
+	if (modify) {
+		for (type = 0; type < SDE_HW_BLK_MAX; type++) {
+			list_for_each_entry(blk, &rm->hw_blks[type], list) {
+				if (blk->rsvp_nxt && blk->rsvp_nxt->enc_id
+						 == rsvp->enc_id) {
+					blk->rsvp_nxt = rsvp;
+				}
+			}
+		}
+	}
 }
 
 static int _sde_rm_commit_rsvp(
@@ -2083,6 +2119,8 @@ static int _sde_rm_commit_rsvp(
 	struct sde_rm_hw_blk *blk;
 	enum sde_hw_blk_type type;
 	int ret = 0;
+
+	_sde_rm_check_and_modify_commit_rsvps(rm, rsvp);
 
 	/* Swap next rsvp to be the active */
 	for (type = 0; type < SDE_HW_BLK_MAX; type++) {

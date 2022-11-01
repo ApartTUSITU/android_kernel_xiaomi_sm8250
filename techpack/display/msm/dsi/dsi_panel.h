@@ -20,6 +20,7 @@
 #include "dsi_pwr.h"
 #include "dsi_parser.h"
 #include "msm_drv.h"
+#include "dsi_panel_mi.h"
 
 #define MAX_BL_LEVEL 4096
 #define MAX_BL_SCALE_LEVEL 1024
@@ -119,6 +120,7 @@ struct dsi_backlight_config {
 	u32 bl_min_level;
 	u32 bl_max_level;
 	u32 brightness_max_level;
+	u32 brightness_init_level;
 	u32 bl_level;
 	u32 bl_scale;
 	u32 bl_scale_sv;
@@ -223,6 +225,7 @@ struct dsi_panel {
 
 	bool sync_broadcast_en;
 
+	struct dsi_panel_mi_cfg mi_cfg;
 	int panel_test_gpio;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
@@ -331,6 +334,8 @@ int dsi_panel_switch(struct dsi_panel *panel);
 
 int dsi_panel_post_switch(struct dsi_panel *panel);
 
+int dsi_panel_dc_switch(struct dsi_panel *panel);
+
 void dsi_dsc_pclk_param_calc(struct msm_display_dsc_info *dsc, int intf_width);
 
 void dsi_panel_bl_handoff(struct dsi_panel *panel);
@@ -357,4 +362,9 @@ int dsi_panel_create_cmd_packets(const char *data, u32 length, u32 count,
 void dsi_panel_destroy_cmd_packets(struct dsi_panel_cmd_set *set);
 
 void dsi_panel_dealloc_cmd_packets(struct dsi_panel_cmd_set *set);
+
+int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
+				enum dsi_cmd_set_type type);
+int dsi_panel_update_backlight(struct dsi_panel *panel,
+				u32 bl_lvl);
 #endif /* _DSI_PANEL_H_ */

@@ -42,15 +42,19 @@
 #include "sde_power_handle.h"
 #include "sde_core_perf.h"
 #include "sde_trace.h"
+#include "xiaomi_frame_stat.h"
 
 #define SDE_PSTATES_MAX (SDE_STAGE_MAX * 4)
 #define SDE_MULTIRECT_PLANE_MAX (SDE_STAGE_MAX * 2)
+#define IDLE_TIMEOUT_DEFAULT (1100)
 
 struct sde_crtc_custom_events {
 	u32 event;
 	int (*func)(struct drm_crtc *crtc, bool en,
 			struct sde_irq_callback *irq);
 };
+
+extern struct frame_stat fm_stat;
 
 static int sde_crtc_power_interrupt_handler(struct drm_crtc *crtc_drm,
 	bool en, struct sde_irq_callback *ad_irq);
@@ -2249,6 +2253,14 @@ static void sde_crtc_frame_event_cb(void *data, u32 event)
 	kthread_queue_work(&priv->event_thread[crtc_id].worker, &fevent->work);
 }
 
+static void _sde_crtc_mi_update_state(struct sde_crtc_state *cstate, enum mi_dimlayer_type dimlayer_state)
+{
+	int i = 0;
+
+	for (i = 0; i < cstate->num_connectors; i++)
+		sde_connector_mi_update_dimlayer_state(cstate->connectors[i], dimlayer_state);
+}
+
 void sde_crtc_prepare_commit(struct drm_crtc *crtc,
 		struct drm_crtc_state *old_state)
 {
@@ -2480,11 +2492,13 @@ static void sde_crtc_frame_event_work(struct kthread_work *work)
 		SDE_ATRACE_END("signal_release_fence");
 	}
 
-	if (fevent->event & SDE_ENCODER_FRAME_EVENT_SIGNAL_RETIRE_FENCE)
+	if (fevent->event & SDE_ENCODER_FRAME_EVENT_SIGNAL_RETIRE_FENCE) {
 		/* this api should be called without spin_lock */
 		_sde_crtc_retire_event(fevent->connector, fevent->ts,
 				(fevent->event & SDE_ENCODER_FRAME_EVENT_ERROR)
 				? SDE_FENCE_SIGNAL_ERROR : SDE_FENCE_SIGNAL);
+		frame_stat_collector(0, RETIRE_FENCE_TS);
+	}
 
 	if (fevent->event & SDE_ENCODER_FRAME_EVENT_PANEL_DEAD)
 		SDE_ERROR("crtc%d ts:%lld received panel dead event\n",
@@ -2541,6 +2555,7 @@ void _sde_crtc_clear_dim_layers_v1(struct drm_crtc_state *state)
 		memset(&cstate->dim_layer[i], 0, sizeof(cstate->dim_layer[i]));
 
 	cstate->num_dim_layers = 0;
+	cstate->num_dim_layers_bank = 0;
 }
 
 /**
@@ -2589,6 +2604,7 @@ static void _sde_crtc_set_dim_layer_v1(struct drm_crtc *crtc,
 
 	/* populate from user space */
 	cstate->num_dim_layers = count;
+	cstate->num_dim_layers_bank = count;
 	for (i = 0; i < count; i++) {
 		user_cfg = &dim_layer_v1.layer_cfg[i];
 
@@ -3257,11 +3273,20 @@ static void sde_crtc_atomic_begin(struct drm_crtc *crtc,
 	_sde_crtc_blend_setup(crtc, old_state, true);
 	_sde_crtc_dest_scaler_setup(crtc);
 
+	if (g_panel->mi_cfg.smart_fps_support
+		&& sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
+					MSM_DISPLAY_CMD_MODE) &&
+		kthread_cancel_delayed_work_sync(&sde_crtc->idle_notify_work_cmd_mode)) {
+		pr_debug("idle notify work cancelled");
+	}
+
 	/* cancel the idle notify delayed work */
 	if (sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
 					MSM_DISPLAY_VIDEO_MODE) &&
 		kthread_cancel_delayed_work_sync(&sde_crtc->idle_notify_work))
 		SDE_DEBUG("idle notify work cancelled\n");
+
+	fm_stat.idle_status = false;
 
 	/*
 	 * Since CP properties use AXI buffer to program the
@@ -3305,6 +3330,10 @@ static void sde_crtc_atomic_flush(struct drm_crtc *crtc,
 	struct sde_crtc_state *cstate;
 	struct sde_kms *sde_kms;
 	int idle_time = 0;
+	static bool idle_time_enable = false;
+	ktime_t get_input_fence_ts;
+	ktime_t now;
+	s64 duration;
 
 	if (!crtc || !crtc->dev || !crtc->dev->dev_private) {
 		SDE_ERROR("invalid crtc\n");
@@ -3342,6 +3371,11 @@ static void sde_crtc_atomic_flush(struct drm_crtc *crtc,
 
 	event_thread = &priv->event_thread[crtc->index];
 	idle_time = sde_crtc_get_property(cstate, CRTC_PROP_IDLE_TIMEOUT);
+	if (!idle_time && idle_time_enable) {
+		idle_time = IDLE_TIMEOUT_DEFAULT;
+		idle_time_enable = false;
+	} else
+		idle_time_enable = true;
 
 	/*
 	 * If no mixers has been allocated in sde_crtc_atomic_check(),
@@ -3372,7 +3406,20 @@ static void sde_crtc_atomic_flush(struct drm_crtc *crtc,
 	}
 
 	/* wait for acquire fences before anything else is done */
+	now = ktime_get();
 	_sde_crtc_wait_for_fences(crtc);
+	get_input_fence_ts = ktime_get();
+	duration = ktime_to_ns(ktime_sub(get_input_fence_ts, now));
+	frame_stat_collector(duration, GET_INPUT_FENCE_TS);
+
+	if(g_panel->mi_cfg.smart_fps_support
+		&& sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
+							MSM_DISPLAY_CMD_MODE)) {
+		kthread_queue_delayed_work(&event_thread->worker,
+					&sde_crtc->idle_notify_work_cmd_mode,
+					msecs_to_jiffies(IDLE_TIMEOUT_DEFAULT));
+		pr_debug("schedule idle notify work\n");
+	}
 
 	/* schedule the idle notify delayed work */
 	if (idle_time && sde_encoder_check_curr_mode(
@@ -3631,6 +3678,7 @@ void sde_crtc_commit_kickoff(struct drm_crtc *crtc,
 	unsigned long flags;
 	enum sde_crtc_idle_pc_state idle_pc_state;
 	struct sde_encoder_kickoff_params params = { 0 };
+	uint32_t fod_sync_info;
 
 	if (!crtc) {
 		SDE_ERROR("invalid argument\n");
@@ -3659,6 +3707,9 @@ void sde_crtc_commit_kickoff(struct drm_crtc *crtc,
 	SDE_ATRACE_BEGIN("crtc_commit");
 
 	idle_pc_state = sde_crtc_get_property(cstate, CRTC_PROP_IDLE_PC_STATE);
+
+	fod_sync_info = sde_crtc_get_mi_fod_sync_info(cstate);
+	_sde_crtc_mi_update_state(cstate, fod_sync_info);
 
 	list_for_each_entry(encoder, &dev->mode_config.encoder_list, head) {
 		if (encoder->crtc != crtc)
@@ -4964,6 +5015,157 @@ end:
 	return rc;
 }
 
+static uint32_t get_current_brightness(struct sde_crtc_state *cstate)
+{
+	int i;
+	uint32_t brightness;
+	for (i = 0; i < cstate->num_connectors; i++) {
+		sde_connector_mi_get_current_backlight(cstate->connectors[i], &brightness);
+	}
+	return brightness;
+}
+
+static uint32_t get_current_alpha(struct sde_crtc_state *cstate, uint32_t brightness)
+{
+	int i;
+	uint32_t alpha;
+	for (i = 0; i < cstate->num_connectors; i++) {
+		sde_connector_mi_get_current_alpha(cstate->connectors[i], brightness, &alpha);
+	}
+	return alpha;
+}
+
+static uint32_t _sde_crtc_config_mi_dim_layer_lapha(struct sde_crtc_state *cstate)
+{
+	uint32_t alpha, current_brightness;
+
+	current_brightness = get_current_brightness(cstate);
+	if(cstate->mi_state.dimlayer_backlight_stash == current_brightness)
+		return cstate->mi_state.dimlayer_alpha_stash;
+
+	alpha = get_current_alpha(cstate, current_brightness) & 0x000000FF;
+	cstate->mi_state.dimlayer_backlight_stash = current_brightness;
+	cstate->mi_state.dimlayer_alpha_stash = alpha;
+
+	return alpha;
+}
+
+void _sde_crtc_config_mi_dim_layer(struct sde_crtc *sde_crtc, struct sde_crtc_state *cstate,
+				struct drm_crtc_state *drm_state, uint32_t dim_layer_stage)
+{
+	uint32_t alpha;
+	struct sde_hw_mixer *lm;
+	struct sde_crtc_mixer *mixer;
+	struct drm_display_mode *display_mode = &drm_state->adjusted_mode;
+	alpha = _sde_crtc_config_mi_dim_layer_lapha(cstate);
+	mixer = sde_crtc->mixers;
+	lm = mixer->hw_lm;
+
+	cstate->mi_state.mi_dim_layer = cstate->dim_layer;
+	if (lm && lm->ops.setup_dim_layer) {
+		if (cstate->num_dim_layers_bank <= SDE_MAX_DIM_LAYERS) {
+			cstate->dim_layer[cstate->num_dim_layers_bank].flags = SDE_DRM_DIM_LAYER_INCLUSIVE;
+			cstate->dim_layer[cstate->num_dim_layers_bank].stage = dim_layer_stage + SDE_STAGE_0;
+			cstate->dim_layer[cstate->num_dim_layers_bank].rect.x = 0x0;
+			cstate->dim_layer[cstate->num_dim_layers_bank].rect.y = 0x0;
+			cstate->dim_layer[cstate->num_dim_layers_bank].rect.w = display_mode->hdisplay;
+			cstate->dim_layer[cstate->num_dim_layers_bank].rect.h = display_mode->vdisplay;
+			cstate->dim_layer[cstate->num_dim_layers_bank].color_fill = (struct sde_mdss_color) {0x0, 0x0, 0x0, alpha};
+			cstate->num_dim_layers = cstate->num_dim_layers_bank + 1;
+			_sde_crtc_mi_update_state(cstate, MI_DIMLAYER_FOD_ICON);
+		} else {
+			SDE_ERROR("invalid number of dim_layers:%d", cstate->num_dim_layers);
+		}
+	}
+}
+
+int sde_crtc_mi_atomic_check(struct sde_crtc *sde_crtc, struct sde_crtc_state *cstate,
+		void *pstates, int cnt)
+{
+	uint32_t i;
+	uint32_t mi_plane;
+
+	uint32_t dim_layer_stage = 0x0;
+	uint32_t mi_aodlayer_index = 0x0;
+	uint32_t mi_iconlayer_index = 0x0;
+	uint32_t mi_pressed_Iconlayer_index = 0x0;
+	bool mi_dimlayer_switch_enable = true;
+	int max_stage = 0;
+	struct plane_state *pstates_ = (struct plane_state *)pstates;
+
+	/* dimlayer switch for FOD and DC function */
+	if (!mi_dimlayer_switch_enable)
+		return 0;
+
+	for (i = 0; i < cnt; i++) {
+		mi_plane = sde_plane_get_mi_layer_info(pstates_[i].drm_pstate);
+
+		switch (mi_plane) {
+		case MI_LAYER_FOD_HBM_OVERLAY:
+			mi_pressed_Iconlayer_index = i;
+			break;
+		case MI_LAYER_FOD_ICON:
+			mi_iconlayer_index = i;
+			break;
+		case MI_LAYER_AOD:
+			mi_aodlayer_index = i;
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/* Create mi dim layer under index layer */
+	if (mi_pressed_Iconlayer_index > 0) {
+		dim_layer_stage = pstates_[mi_pressed_Iconlayer_index].stage;
+		for (i = 0; i < cnt; i++) {
+			if (pstates_[i].stage >= dim_layer_stage) {
+				pstates_[i].stage++;
+				pstates_[i].sde_pstate->stage++;
+				if (pstates_[i].stage > max_stage)
+					max_stage = pstates_[i].stage;
+			}
+		}
+
+		/* do not use same stage */
+		for (i = 0; i < cstate->num_dim_layers; i++) {
+			if (cstate->dim_layer[i].stage >= dim_layer_stage &&
+				cstate->dim_layer[i].stage <= max_stage)
+				cstate->dim_layer[i].stage++;
+		}
+	} else if ((mi_iconlayer_index > 0)) {
+		for (i = 0; i < cnt; i++) {
+			if (pstates_[i].stage > dim_layer_stage)
+				dim_layer_stage = pstates_[i].stage;
+		}
+
+		/* do not use same stage */
+		for (i = 0; i < cstate->num_dim_layers; i++) {
+			if (cstate->dim_layer[i].stage > dim_layer_stage )
+				cstate->dim_layer[i].stage = dim_layer_stage++;
+		}
+
+		dim_layer_stage++;
+	}
+
+	if (dim_layer_stage > SDE_STAGE_MAX - SDE_STAGE_0) {
+		SDE_ERROR(" > %d plane stages assigned\n", SDE_STAGE_MAX - SDE_STAGE_0);
+		return 0;
+	 }
+
+	if (dim_layer_stage > 0x0 && cstate->mi_state.mi_dim_layer == NULL) {
+		SDE_ATRACE_BEGIN("dimlayer_show");
+		_sde_crtc_config_mi_dim_layer(sde_crtc, cstate, &cstate->base, dim_layer_stage);
+		SDE_ATRACE_END("dimlayer_show");
+	} else {
+		cstate->mi_state.mi_dim_layer = NULL;
+		_sde_crtc_mi_update_state(cstate, MI_DIMLAYER_NULL);
+	}
+
+	return 0;
+}
+
 /**
  * sde_crtc_get_num_datapath - get the number of datapath active
  *				of primary connector
@@ -5114,6 +5316,10 @@ static void sde_crtc_install_properties(struct drm_crtc *crtc,
 		SDE_ERROR("failed to allocate info memory\n");
 		return;
 	}
+
+	/* mi properties */
+	msm_property_install_range(&sde_crtc->property_info, "mi_fod_sync_info",
+		0x0, 0, U32_MAX, 0, CRCT_PROP_MI_FOD_SYNC_INFO);
 
 	/* range properties */
 	msm_property_install_range(&sde_crtc->property_info,
@@ -6300,6 +6506,7 @@ static void __sde_crtc_idle_notify_work(struct kthread_work *work)
 		event.length = sizeof(u32);
 		msm_mode_object_event_notify(&crtc->base, crtc->dev,
 				&event, (u8 *)&ret);
+		fm_stat.idle_status = true;
 
 		SDE_DEBUG("crtc[%d]: idle timeout notified\n", crtc->base.id);
 	}
@@ -6337,6 +6544,20 @@ static void __sde_crtc_early_wakeup_work(struct kthread_work *work)
 	priv = dev->dev_private;
 	sde_kms = to_sde_kms(priv->kms);
 	sde_kms_trigger_early_wakeup(sde_kms, crtc);
+}
+
+static void __sde_crtc_idle_notify_work_cmd_mode(struct kthread_work *work)
+{
+	struct sde_crtc *sde_crtc = container_of(work, struct sde_crtc,
+				idle_notify_work_cmd_mode.work);
+
+	if (!sde_crtc) {
+		SDE_ERROR("invalid sde crtc\n");
+	} else {
+		fm_stat.idle_status = true;
+		calc_fps(0,0);
+		pr_debug("idle timeout notified cmd mode\n");
+	}
 }
 
 /* initialize crtc */
@@ -6433,6 +6654,8 @@ struct drm_crtc *sde_crtc_init(struct drm_device *dev, struct drm_plane *plane)
 					__sde_crtc_idle_notify_work);
 	kthread_init_work(&sde_crtc->early_wakeup_work,
 					__sde_crtc_early_wakeup_work);
+	kthread_init_delayed_work(&sde_crtc->idle_notify_work_cmd_mode,
+					__sde_crtc_idle_notify_work_cmd_mode);
 
 	SDE_DEBUG("crtc=%d new_llcc=%d, old_llcc=%d\n",
 		crtc->base.id,
@@ -6662,6 +6885,14 @@ static int sde_crtc_idle_interrupt_handler(struct drm_crtc *crtc_drm,
 	bool en, struct sde_irq_callback *irq)
 {
 	return 0;
+}
+
+uint32_t sde_crtc_get_mi_fod_sync_info(struct sde_crtc_state *cstate)
+{
+	if (!cstate)
+		return 0;
+
+	return sde_crtc_get_property(cstate, CRCT_PROP_MI_FOD_SYNC_INFO);;
 }
 
 /**

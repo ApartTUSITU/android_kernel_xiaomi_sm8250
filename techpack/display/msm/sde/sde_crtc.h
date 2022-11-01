@@ -354,6 +354,7 @@ struct sde_crtc {
 	u32 misr_frame_count;
 	struct kthread_delayed_work idle_notify_work;
 	struct kthread_work early_wakeup_work;
+	struct kthread_delayed_work idle_notify_work_cmd_mode;
 
 	struct sde_power_event *power_event;
 
@@ -388,6 +389,50 @@ struct sde_crtc {
 #define to_sde_crtc(x) container_of(x, struct sde_crtc, base)
 
 /**
+ * enum sde_crtc_mi_layer_type: type of mi layer
+ * @MI_LAYER_FOD_PRESSED_ICON: FOD touched icon layer
+ * @MI_LAYER_FOD_ICON: FOD untouch icon layer
+ * @MI_LAYER_AOD: AOD layer
+ */
+enum sde_crtc_mi_layer_type {
+	MI_LAYER_NULL = 0x0,
+	MI_LAYER_FOD_HBM_OVERLAY = 0x1,
+	MI_LAYER_FOD_ICON = 0x2,
+	MI_LAYER_AOD = 0x4,
+	MI_LAYER_MAX,
+};
+
+/**
+ * sde_crtc_mi_dc_backlight - mi dc backlight
+ * @mi_dc_bl_state: dc backlihgt state
+ * @mi_dc_backlight_level: last backlight stash
+ * @mi_dc_layer_alpha: dc dim layer alpha
+ */
+typedef struct sde_crtc_mi_dc_backlight
+{
+	uint8_t mi_dc_bl_state;
+	int32_t mi_dc_bl_level;
+	int32_t mi_dc_bl_layer_alpha;
+} sde_crtc_mi_dc_backlight;
+
+typedef struct sde_crtc_mi_layer
+{
+	int32_t layer_index;
+	enum sde_crtc_mi_layer_type last_state;
+} sde_crtc_mi_layer;
+
+/**
+ * sde_crtc_mi_state - mi crtc state
+ * @mi_dim_layer: dim layer added by Mi
+ */
+struct sde_crtc_mi_state {
+	struct sde_hw_dim_layer *mi_dim_layer;
+	struct sde_crtc_mi_layer mi_layer;
+	uint32_t dimlayer_backlight_stash;
+	uint8_t  dimlayer_alpha_stash;
+};
+
+/**
  * struct sde_crtc_state - sde container for atomic crtc state
  * @base: Base drm crtc state structure
  * @connectors    : Currently associated drm connectors
@@ -415,6 +460,7 @@ struct sde_crtc {
  * @scl3_lut_cfg: QSEED3 lut config
  * @new_perf: new performance state being requested
  * @secure_session: Indicates the type of secure session
+ * @mi_state: Mi part of crtc state
  */
 struct sde_crtc_state {
 	struct drm_crtc_state base;
@@ -445,6 +491,9 @@ struct sde_crtc_state {
 
 	struct sde_core_perf_params new_perf;
 	int secure_session;
+	/* Mi crtc state */
+	struct sde_crtc_mi_state mi_state;
+	uint32_t num_dim_layers_bank;
 };
 
 enum sde_crtc_irq_state {
@@ -865,6 +914,25 @@ void sde_crtc_misr_setup(struct drm_crtc *crtc, bool enable, u32 frame_count);
  */
 void sde_crtc_get_misr_info(struct drm_crtc *crtc,
 		struct sde_crtc_misr_info *crtc_misr_info);
+
+/**
+ * sde_crtc_mi_atomic_check - to do crtc mi atomic check
+ * @crtc: Pointer to sde crtc state structure
+ * @cstate: Pointer to sde crtc state structure
+ * @pstates: Pointer to sde plane state structure
+ * @cnt: plane refence count
+ */
+int sde_crtc_mi_atomic_check(struct sde_crtc *sde_crtc, struct sde_crtc_state *cstate,
+		void *pstates, int cnt);
+
+/**
+ * sde_crtc_mi_atomic_check - to do crtc mi atomic check
+ * @crtc: Pointer to sde crtc state structure
+ * @cstate: Pointer to sde crtc state structure
+ * @pstates: Pointer to sde plane state structure
+ * @cnt: plane refence count
+ */
+uint32_t sde_crtc_get_mi_fod_sync_info(struct sde_crtc_state *cstate);
 
 /**
  * sde_crtc_get_num_datapath - get the number of datapath active

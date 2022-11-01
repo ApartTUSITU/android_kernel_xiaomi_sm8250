@@ -73,6 +73,9 @@ struct msm_gem_vma;
 
 #define TEARDOWN_DEADLOCK_RETRY_MAX 5
 
+extern atomic_t resume_pending;
+extern wait_queue_head_t resume_wait_q;
+
 struct msm_file_private {
 	rwlock_t queuelock;
 	struct list_head submitqueues;
@@ -128,6 +131,7 @@ enum msm_mdp_plane_property {
 	PLANE_PROP_SRC_CONFIG,
 	PLANE_PROP_FB_TRANSLATION_MODE,
 	PLANE_PROP_MULTIRECT_MODE,
+	PLANE_PROP_MI_LAYER_INFO,
 
 	/* total # of properties */
 	PLANE_PROP_COUNT
@@ -164,6 +168,7 @@ enum msm_mdp_crtc_property {
 	CRTC_PROP_CAPTURE_OUTPUT,
 
 	CRTC_PROP_IDLE_PC_STATE,
+	CRCT_PROP_MI_FOD_SYNC_INFO,
 
 	/* total # of properties */
 	CRTC_PROP_COUNT
@@ -712,6 +717,8 @@ struct msm_drm_private {
 	bool shutdown_in_progress;
 
 	struct msm_idle idle;
+
+	ktime_t  complete_commit_time;
 };
 
 /* get struct msm_kms * from drm_device * */
