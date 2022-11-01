@@ -680,7 +680,15 @@ int msm_vidc_calculate_input_buffer_count(struct msm_vidc_inst *inst)
 	fmt->count_min_host = fmt->count_actual =
 		fmt->count_min + extra_buff_count;
 
-	s_vpr_h(inst->sid, "%s: input min %d min_host %d actual %d\n",
+	if (is_grid_session(inst)) {
+                fmt->count_min = fmt->count_min_host =
+			MIN_INPUT_BUFFERS;
+                s_vpr_h(inst->sid,
+			"%s: update HEIC input buffer count to 4\n",
+			__func__);
+        }
+
+        s_vpr_h(inst->sid, "%s: input min %d min_host %d actual %d\n",
 		__func__, fmt->count_min,
 		fmt->count_min_host, fmt->count_actual);
 
