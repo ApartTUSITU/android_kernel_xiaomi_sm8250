@@ -1,0 +1,4 @@
+config AIROHA_GPS
+	tristate "Airoha GPS Support"
+	help
+		Airoha GPS Support
