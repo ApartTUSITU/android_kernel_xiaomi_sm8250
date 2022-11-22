@@ -1,3 +1,6 @@
+soong_namespace {
+}
+
 cc_binary_host {
     name: "unifdef",
     srcs: ["scripts/unifdef.c"],
