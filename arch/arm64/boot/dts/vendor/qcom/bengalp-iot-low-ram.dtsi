@@ -23,6 +23,8 @@
 
 /delete-node/ &secure_display_memory;
 
+/delete-node/ &disp_rdump_memory;
+
 &reserved_memory {
 	hyp_mem: hyp_region@45700000 {
 		compatible = "removed-dma-pool";
