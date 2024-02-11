@@ -2418,6 +2418,7 @@
 		qcom,support-shutdown;
 		qcom,pil-force-shutdown;
 		qcom,esoc-skip-restart-for-mdm-crash;
+		qcom,ignore-ssr-failure;
 		pinctrl-names = "mdm_active", "mdm_suspend";
 		pinctrl-0 = <&ap2mdm_active &mdm2ap_active>;
 		pinctrl-1 = <&ap2mdm_sleep &mdm2ap_sleep>;
