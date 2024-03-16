@@ -8469,9 +8469,15 @@ static int ufs_get_device_desc(struct ufs_hba *hba,
 {
 	int err;
 	size_t buff_len;
+#ifdef CONFIG_MACH_XIAOMI_SM8250
+	u8 model_index;
+#else
 	u8 model_index, lun;
+#endif
 	u8 *desc_buf;
+#ifndef CONFIG_MACH_XIAOMI_SM8250
 	u32 d_lu_wb_buf_alloc;
+#endif
 
 	buff_len = max_t(size_t, hba->desc_size.dev_desc,
 			 QUERY_DESC_MAX_SIZE + 1);
@@ -8538,7 +8544,9 @@ static int ufs_get_device_desc(struct ufs_hba *hba,
 		}
 	}
 
+#ifndef CONFIG_MACH_XIAOMI_SM8250
 skip_unit_desc:
+#endif
 	/* Zero-pad entire buffer for string termination. */
 	memset(desc_buf, 0, buff_len);
 
