@@ -3283,7 +3283,9 @@ static void sde_crtc_atomic_begin(struct drm_crtc *crtc,
 	}
 
 	/* cancel the idle notify delayed work */
-	if (sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
+	if ((g_panel->mi_cfg.panel_id != 0x4D38324100360200) &&
+		(g_panel->mi_cfg.panel_id != 0x4D38324100420200) &&
+		sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
 					MSM_DISPLAY_VIDEO_MODE) &&
 		kthread_cancel_delayed_work_sync(&sde_crtc->idle_notify_work))
 		SDE_DEBUG("idle notify work cancelled\n");
@@ -3430,7 +3432,9 @@ static void sde_crtc_atomic_flush(struct drm_crtc *crtc,
 	}
 
 	/* schedule the idle notify delayed work */
-	if (g_panel->mi_cfg.idle_mode_flag && idle_time
+	if ((g_panel->mi_cfg.panel_id != 0x4D38324100360200) &&
+		(g_panel->mi_cfg.panel_id != 0x4D38324100420200) &&
+		g_panel->mi_cfg.idle_mode_flag && idle_time
 		&& sde_encoder_check_curr_mode(
 						sde_crtc->mixers[0].encoder,
 						MSM_DISPLAY_VIDEO_MODE)) {

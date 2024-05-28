@@ -230,7 +230,6 @@ struct dsi_panel {
 	bool sync_broadcast_en;
 
 	struct dsi_panel_mi_cfg mi_cfg;
-
 	int panel_test_gpio;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;

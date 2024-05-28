@@ -117,6 +117,7 @@ struct dsi_phy_cfg {
 	u32 data_lanes;
 	unsigned long clk_strength;
 	bool cphy_strength;
+	unsigned long phy_voltage;
 };
 
 struct dsi_phy_hw;

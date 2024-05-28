@@ -537,11 +537,7 @@ static void complete_commit(struct msm_commit *c)
 	kms->funcs->complete_commit(kms, state);
 
 	drm_atomic_state_put(state);
-
-	priv->complete_commit_time = ktime_get()/1000;
-
-	complete_time_generate_event(dev);
-
+	
 	commit_destroy(c);
 }
 

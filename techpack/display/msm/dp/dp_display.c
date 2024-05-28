@@ -2082,6 +2082,7 @@ static int dp_display_post_enable(struct dp_display *dp_display, void *panel)
 	cancel_delayed_work_sync(&dp->hdcp_cb_work);
 	queue_delayed_work(dp->wq, &dp->hdcp_cb_work, HZ);
 
+	DP_INFO("dp audio supported: %d\n", dp_panel->audio_supported);
 	if (dp_panel->audio_supported) {
 		dp_panel->audio->bw_code = dp->link->link_params.bw_code;
 		dp_panel->audio->lane_count = dp->link->link_params.lane_count;

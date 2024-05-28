@@ -3993,14 +3993,3 @@ void sde_kms_trigger_early_wakeup(struct sde_kms *sde_kms,
 		sde_power_scale_reg_bus(&priv->phandle, VOTE_INDEX_HIGH, false);
 	SDE_ATRACE_END("sde_kms_trigger_early_wakeup");
 }
-
-void sde_kms_kickoff_count(struct sde_kms *sde_kms)
-{
-	int i;
-	struct dsi_display *display = NULL;
-
-	if (sde_kms != NULL) {
-		for (i = 0; i < sde_kms->dsi_display_count; ++i)
-			display = sde_kms->dsi_displays[i];
-	}
-}
