@@ -1327,6 +1327,8 @@ And public attribution of xiaomi platforms(like L11R and so and)
 &wlan {
        vdd-wlan-dig-supply = <&pm8150_s6>;
        qcom,vdd-wlan-dig-config = <950000 950000 0 0 1>;
+       vdd-wlan-3antenna-supply = <&pm8150_l16>;
+       qcom,vdd-wlan-3antenna-config = <3024000 3304000 0 0 0>;
 };
 
 &bluetooth {
