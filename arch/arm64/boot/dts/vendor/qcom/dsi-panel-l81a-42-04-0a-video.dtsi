@@ -44,8 +44,8 @@
         qcom,mdss-dsi-mdp-trigger = "none";
         qcom,mdss-dsi-reset-sequence = <0 1>, <1 1>, <0 1>, <1 55>;
         qcom,adjust-timer-wakeup-ms = <1>;
-        qcom,mdss-pan-physical-width-dimension = <1662>;
-        qcom,mdss-pan-physical-height-dimension = <2660>;
+        qcom,mdss-pan-physical-width-dimension = <166>;
+        qcom,mdss-pan-physical-height-dimension = <266>;
         qcom,mdss-dsi-panel-mode-gpio-state = "invalid";
         qcom,mdss-dsi-tx-eot-append;
         qcom,mdss-dsi-rx-eot-ignore;
