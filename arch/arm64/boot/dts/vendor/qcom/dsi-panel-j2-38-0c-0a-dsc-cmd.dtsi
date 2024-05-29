@@ -380,6 +380,7 @@
 };
 
 &dsi_j2_38_0c_0a_dsc_cmd {
+	mi,panel-id = <0x004A32 0x00380c00>;
 	mi,feature-enabled;
 	mi,mdss-dsi-bl-dcs-big-endian-type;
 	mi,mdss-dsi-panel-hbm-51-ctrl-flag;
