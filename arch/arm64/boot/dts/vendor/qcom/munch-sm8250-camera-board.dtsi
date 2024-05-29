@@ -275,11 +275,6 @@
 		qcom,min-dropout-voltage = <100000>;
 };
 
-&pm8150a_l3 {
-	regulator-min-microvolt = <800000>;
-	regulator-max-microvolt = <1210000>;
-};
-
 &L1P {
 	regulator-min-microvolt = <1100000>;
 	regulator-max-microvolt = <1100000>;
