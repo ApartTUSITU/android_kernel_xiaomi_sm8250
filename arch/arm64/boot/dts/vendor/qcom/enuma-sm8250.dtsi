@@ -319,6 +319,8 @@ this file is for attribution only of enuma
 			novatek,display-maker = <0x42>;
 			novatek,fw-name = "novatek_nt36523_k81_fw01.bin";
 			novatek,mp-name = "novatek_nt36523_k81_mp01.bin";
+			novatek,fw-pen-name = "novatek_nt36523_k81_fw01_pen.bin";
+			novatek,mp-pen-name = "novatek_nt36523_k81_mp01_pen.bin";
 		};
 	};
 };
@@ -333,6 +335,7 @@ this file is for attribution only of enuma
 		ktz8866,hwen-gpio = <&tlmm 139 0x00>;
 		ktz8866,enp-gpio = <&tlmm 130 0x00>;
 		ktz8866,enn-gpio = <&tlmm 131 0x00>;
+		ktz8866,panelid-gpio = <&tlmm 38 0x00>;
 	};
 };
 
