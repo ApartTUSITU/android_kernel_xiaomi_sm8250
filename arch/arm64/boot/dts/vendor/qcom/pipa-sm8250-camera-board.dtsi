@@ -1,0 +1,137 @@
+&tlmm {
+	cam_sensor_mclk3_active: cam_sensor_mclk3_active {
+		mux {
+			pins = "gpio97";
+			function = "cam_mclk";
+		};
+
+		config {
+			pins = "gpio97";
+			bias-disable; /* No PULL */
+			drive-strength = <4>; /* 4 MA */
+		};
+	};
+	cam_sensor_mclk3_suspend: cam_sensor_mclk3_suspend {
+		mux {
+			pins = "gpio97";
+			function = "cam_mclk";
+		};
+
+		config {
+			pins = "gpio97";
+			bias-pull-down; /* PULL DOWN */
+			drive-strength = <4>; /* 4 MA */
+		};
+	};
+	cam_sensor_front_active: cam_sensor_front_active {
+		mux {
+			pins = "gpio109", "gpio84";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio109", "gpio84";
+			bias-disable; /* No PULL */
+			drive-strength = <2>; /* 2 MA */
+		};
+	};
+	cam_sensor_front_suspend: cam_sensor_front_suspend {
+		mux {
+			pins = "gpio109", "gpio84";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio109", "gpio84";
+			bias-pull-down; /* PULL DOWN */
+			drive-strength = <2>; /* 2 MA */
+			output-low;
+		};
+	};
+
+	cam_sensor_mclk0_active: cam_sensor_mclk0_active {
+		mux {
+			pins = "gpio94";
+			function = "cam_mclk";
+		};
+
+		config {
+			pins = "gpio94";
+			bias-disable; /* No PULL */
+			drive-strength = <4>; /* 4 MA */
+		};
+	};
+	cam_sensor_mclk0_suspend: cam_sensor_mclk0_suspend {
+		mux {
+			pins = "gpio94";
+			function = "cam_mclk";
+		};
+
+		config {
+			pins = "gpio94";
+			bias-pull-down; /* PULL DOWN */
+			drive-strength = <4>; /* 4 MA */
+		};
+	};
+	cam_sensor_wide_active: cam_sensor_wide_active {
+		mux {
+			pins = "gpio93", "gpio31";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio93", "gpio31";
+			bias-disable; /* No PULL */
+			drive-strength = <2>; /* 2 MA */
+		};
+	};
+	cam_sensor_wide_suspend: cam_sensor_wide_suspend {
+		mux {
+			pins = "gpio93", "gpio31";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio93", "gpio31";
+			bias-pull-down; /* PULL DOWN */
+			drive-strength = <2>; /* 2 MA */
+			output-low;
+		};
+	};
+
+};
+
+&L2C {
+	regulator-min-microvolt = <1200000>;
+	regulator-max-microvolt = <1304000>;
+};
+
+&L3C {
+	regulator-min-microvolt = <800000>;
+	regulator-max-microvolt = <1200000>;
+};
+
+&L7C {
+	regulator-min-microvolt = <2704000>;
+	regulator-max-microvolt = <3304000>;
+};
+
+&cci3_active {
+    config {
+        pins = "gpio107","gpio108";
+        bias-pull-up; /* PULL UP*/
+        drive-strength = <4>; /* 4 MA */
+    };
+};
+
+&cci0_active {
+    config {
+        pins = "gpio101","gpio102";
+        bias-pull-up; /* PULL UP*/
+        drive-strength = <4>; /* 4 MA */
+    };
+};
+
+&sdhc_2 {
+	status = "disabled";
+};

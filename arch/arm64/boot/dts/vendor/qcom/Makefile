@@ -55,6 +55,12 @@ dtbo-$(CONFIG_BOARD_MUNCH) += \
 munch-sm8250-overlay.dtbo-base := kona.dtb kona-v2.dtb kona-v2.1.dtb
 endif
 
+ifeq ($(CONFIG_BOARD_PIPA),y)
+dtbo-$(CONFIG_BOARD_PIPA) += \
+                pipa-sm8250-overlay.dtbo
+pipa-sm8250-overlay.dtbo-base := kona.dtb kona-v2.dtb kona-v2.1.dtb
+endif
+
 ifeq ($(CONFIG_BOARD_PSYCHE),y)
 dtbo-$(CONFIG_BOARD_PSYCHE) += \
                 psyche-sm8250-overlay.dtbo
