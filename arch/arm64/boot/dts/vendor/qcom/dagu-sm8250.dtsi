@@ -352,6 +352,11 @@ And public attribution of xiaomi platforms(like dagu and so and)
 };
 
 
+&sde_dsi {
+	/delete-property/ vdd-supply;
+	/delete-property/ avdd-supply;
+	qcom,dsi-default-panel = <&dsi_k81_42_02_0a_dual_cphy_video>;
+};
 
 &pm8150a_l11 {
 	qcom,init-voltage = <3000000>;
