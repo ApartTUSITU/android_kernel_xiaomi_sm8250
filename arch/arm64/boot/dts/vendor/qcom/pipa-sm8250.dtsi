@@ -392,7 +392,7 @@ And public attribution of xiaomi platforms(like pipa and so and)
 		reg = <0>; //Same as CS ID
 		status = "ok";
 
-		spi-max-frequency = <9600000>;	//4800000,9600000,15000000,19200000
+		spi-max-frequency = <19200000>;	//4800000,9600000,15000000,19200000
 		//novatek,reset-gpio = <&msm_gpio 102 0x00>;
 		novatek,irq-gpio = <&tlmm 39 0x2001>;
 
