@@ -285,6 +285,7 @@ this file is for attribution only of enuma
 
 &qupv3_se4_spi {
 	status = "ok";
+	qcom,rt;
 	pinctrl-0 = <&qupv3_se4_spi_active>;
 	pinctrl-1 = <&qupv3_se4_spi_sleep>;
 	novatek@0 {
