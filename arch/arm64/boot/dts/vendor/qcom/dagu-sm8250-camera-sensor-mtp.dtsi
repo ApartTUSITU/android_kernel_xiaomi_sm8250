@@ -64,6 +64,7 @@
 		status = "ok";
 	};
 
+	/* L81 Wide eeprom */
 	eeprom_wide: qcom,eeprom@0 {
 		cell-index = <0>;
 		compatible = "qcom,eeprom";
@@ -77,6 +78,7 @@
 		status = "ok";
 	};
 
+	/* K81 Wide sensor s5kjn1 */
 	qcom,cam-sensor@0 {
 		cell-index = <0>;
 		compatible = "qcom,cam-sensor";
@@ -121,6 +123,7 @@
 		clock-rates = <19200000>;
 	};
 
+	/* K81 depth eeprom */
 	eeprom_depth: qcom,eeprom@1 {
 		cell-index = <1>;
 		compatible = "qcom,eeprom";
@@ -155,6 +158,7 @@
 		clock-rates = <19200000>;
 	};
 
+	/* K81 Depth sensor ov02b1b */
 	qcom,cam-sensor@1 {
 		cell-index = <1>;
 		compatible = "qcom,cam-sensor";
@@ -198,6 +202,7 @@
 
 &cam_cci1 {
 
+	/* K81 front eeprom */
 	eeprom_front: qcom,eeprom@2 {
 		cell-index = <2>;
 		compatible = "qcom,eeprom";
@@ -211,6 +216,7 @@
 		status = "ok";
 	};
 
+	/* K81 Front sensor imx596 */
 	qcom,cam-sensor@2 {
 		cell-index = <2>;
 		compatible = "qcom,cam-sensor";
