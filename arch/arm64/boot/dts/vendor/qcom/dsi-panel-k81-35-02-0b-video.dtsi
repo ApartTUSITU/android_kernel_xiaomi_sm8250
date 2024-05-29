@@ -358,6 +358,7 @@
 
 
 &dsi_k81_35_02_0b_dual_cphy_video {
+	mi,panel-id = <0x004B3831 0x00350201>;
 	mi,feature-enabled;
 	mi,is-tddi-flag;
 	mi,mdss-panel-on-dimming-delay = <300>;
