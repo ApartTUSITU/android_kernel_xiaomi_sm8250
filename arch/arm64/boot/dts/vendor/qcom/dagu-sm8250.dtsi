@@ -422,7 +422,7 @@ And public attribution of xiaomi platforms(like dagu and so and)
 		//ti,bq2597x,bat-ocp-alarm-threshold = <7500>;
 		ti,bq2597x,bus-ovp-threshold = <12000>;
 		ti,bq2597x,bus-ovp-alarm-threshold = <11000>;
-		ti,bq2597x,bus-ocp-threshold = <3800>;
+		ti,bq2597x,bus-ocp-threshold = <4250>;
 		ti,bq2597x,bus-ocp-alarm-threshold = <3500>;
 
 		//ti,bq2597x,bat-ucp-alarm-threshold = <2000>;
@@ -674,8 +674,8 @@ And public attribution of xiaomi platforms(like dagu and so and)
 		//ti,bq2597x,bat-ocp-alarm-threshold = <7500>;
 		ti,bq2597x,bus-ovp-threshold = <12000>;
 		ti,bq2597x,bus-ovp-alarm-threshold = <11000>;
-		ti,bq2597x,bus-ocp-threshold = <3500>;
-		ti,bq2597x,bus-ocp-alarm-threshold = <3000>;
+		ti,bq2597x,bus-ocp-threshold = <4250>;
+		ti,bq2597x,bus-ocp-alarm-threshold = <3500>;
 		//ti,bq2597x,bat-ucp-alarm-threshold = <2000>;
 		ti,bq2597x,bat-therm-threshold = <0x15>;/*4.1%*/
 		ti,bq2597x,bus-therm-threshold = <0x15>;/*4.1%*/
