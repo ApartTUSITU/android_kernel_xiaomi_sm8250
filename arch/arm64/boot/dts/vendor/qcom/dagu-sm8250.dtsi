@@ -146,7 +146,7 @@ And public attribution of xiaomi platforms(like dagu and so and)
 		qcom,supply-max-voltage = <1832000>;
 		qcom,supply-enable-load = <62000>;
 		qcom,supply-disable-load = <80>;
-		qcom,supply-post-on-sleep = <10>;
+		qcom,supply-post-on-sleep = <2>;
 		qcom,supply-post-off-sleep = <10>;
 	};
 
@@ -159,7 +159,7 @@ And public attribution of xiaomi platforms(like dagu and so and)
 		qcom,supply-disable-load = <100>;
 		qcom,supply-pre-on-sleep = <0>;
 		qcom,supply-pre-off-sleep = <0>;
-		qcom,supply-post-on-sleep = <10>;
+		qcom,supply-post-on-sleep = <2>;
 		qcom,supply-post-off-sleep = <10>;
 	};
 
@@ -172,7 +172,7 @@ And public attribution of xiaomi platforms(like dagu and so and)
 		qcom,supply-disable-load = <100>;
 		qcom,supply-pre-on-sleep = <0>;
 		qcom,supply-pre-off-sleep = <0>;
-		qcom,supply-post-on-sleep = <10>;
+		qcom,supply-post-on-sleep = <0>;
 		qcom,supply-post-off-sleep = <10>;
 	};
 };
