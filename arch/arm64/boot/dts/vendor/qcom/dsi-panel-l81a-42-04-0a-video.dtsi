@@ -42,7 +42,7 @@
         mi,mdss-dsi-panel-max-brightness-clone = <4095>;
         qcom,mdss-dsi-dma-trigger = "trigger_sw";
         qcom,mdss-dsi-mdp-trigger = "none";
-        qcom,mdss-dsi-reset-sequence = <0 55>, <1 55>, <0 55>, <1 55>;
+        qcom,mdss-dsi-reset-sequence = <0 1>, <1 1>, <0 1>, <1 55>;
         qcom,adjust-timer-wakeup-ms = <1>;
         qcom,mdss-pan-physical-width-dimension = <1662>;
         qcom,mdss-pan-physical-height-dimension = <2660>;
