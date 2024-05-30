@@ -1,7 +1,7 @@
 qcom,5119583_xiaomi_M82_p86120aa1_8840mah_averaged_masterslave_apr8th2021 {
 	qcom,profile-revision = <24>;
 	/* #6348184_Xiaomi_M82_8840mAH_averaged_MasterSlave_Dec22nd2022*/
-	qcom,max-voltage-uv = <4470000>;
+	qcom,max-voltage-uv = <4460000>;
 	qcom,fastchg-current-ma = <5900>;
         qcom,jeita-fcc-ranges = <(-100)  0   868000
 				1  50   1736000
@@ -13,7 +13,7 @@ qcom,5119583_xiaomi_M82_p86120aa1_8840mah_averaged_masterslave_apr8th2021 {
 				1   50   4440000
 				51  100  4440000
 				101 150  4440000
-				151 480  4470000
+				151 480  4460000
 				481 600  4100000>;
 //	qcom,step-chg-ranges = <3001000  4150000  6000000
 //				4150001  4230000  6000000

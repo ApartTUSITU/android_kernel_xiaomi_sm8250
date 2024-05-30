@@ -3328,7 +3328,7 @@ And public attribution of xiaomi platforms(like pipa and so and)
 	qcom,sec-charger-config = <0>;
 	qcom,usb-icl-ua = <3000000>;
 	qcom,fcc-max-ua = <5900000>;
-	qcom,fv-max-uv = <4470000>;
+	qcom,fv-max-uv = <4460000>;
 	qcom,non-fcc-fv-max-uv = <4440000>;
 	qcom,dc-icl-ua = <1000000>;
 	qcom,auto-recharge-soc = <99>;
