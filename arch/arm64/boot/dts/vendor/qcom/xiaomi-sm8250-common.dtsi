@@ -515,7 +515,7 @@
 	qcom,mdss-dsi-bl-min-level = <2>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -526,7 +526,7 @@
 	qcom,mdss-dsi-bl-min-level = <2>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -537,7 +537,7 @@
 	qcom,mdss-dsi-bl-min-level = <1>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -548,7 +548,7 @@
 	qcom,mdss-dsi-bl-min-level = <1>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -559,7 +559,7 @@
 	qcom,mdss-dsi-bl-min-level = <1>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -570,7 +570,7 @@
 	qcom,mdss-dsi-bl-min-level = <1>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -592,7 +592,7 @@
         qcom,mdss-dsi-bl-min-level = <1>;
         qcom,mdss-dsi-bl-max-level = <4095>;
         qcom,mdss-brightness-max-level = <4095>;
-        qcom,mdss-brightness-init-level = <536>;
+        qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -603,7 +603,7 @@
         qcom,mdss-dsi-bl-min-level = <1>;
         qcom,mdss-dsi-bl-max-level = <4095>;
         qcom,mdss-brightness-max-level = <4095>;
-        qcom,mdss-brightness-init-level = <536>;
+        qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -614,7 +614,7 @@
         qcom,mdss-dsi-bl-min-level = <1>;
         qcom,mdss-dsi-bl-max-level = <4095>;
         qcom,mdss-brightness-max-level = <4095>;
-        qcom,mdss-brightness-init-level = <536>;
+        qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -625,7 +625,7 @@
         qcom,mdss-dsi-bl-min-level = <1>;
         qcom,mdss-dsi-bl-max-level = <2047>;
         qcom,mdss-brightness-max-level = <2047>;
-        qcom,mdss-brightness-init-level = <536>;
+        qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -636,7 +636,7 @@
         qcom,mdss-dsi-bl-min-level = <1>;
         qcom,mdss-dsi-bl-max-level = <2047>;
         qcom,mdss-brightness-max-level = <2047>;
-        qcom,mdss-brightness-init-level = <536>;
+        qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -647,7 +647,7 @@
         qcom,mdss-dsi-bl-min-level = <1>;
         qcom,mdss-dsi-bl-max-level = <2047>;
         qcom,mdss-brightness-max-level = <2047>;
-        qcom,mdss-brightness-init-level = <536>;
+        qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -658,7 +658,7 @@
 	qcom,mdss-dsi-bl-min-level = <2>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	/*
 	qcom,mdss-dsi-mode-sel-gpio-state = "single_port";
 	qcom,panel-mode-gpio = <&tlmm 7 0>;
@@ -673,7 +673,7 @@
 	qcom,mdss-dsi-bl-min-level = <2>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -752,7 +752,7 @@
 	qcom,mdss-dsi-bl-min-level = <1>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
@@ -763,7 +763,7 @@
 	qcom,mdss-dsi-bl-min-level = <1>;
 	qcom,mdss-dsi-bl-max-level = <2047>;
 	qcom,mdss-brightness-max-level = <2047>;
-	qcom,mdss-brightness-init-level = <536>;
+	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
 };
