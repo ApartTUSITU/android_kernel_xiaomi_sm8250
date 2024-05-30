@@ -86,7 +86,7 @@
 			linux,input-type = <1>;
 			linux,code = <KEY_VOLUMEUP>;
 			gpio-key,wakeup;
-			debounce-interval = <15>;
+			debounce-interval = <32>;
 			linux,can-disable;
 		};
 	};
