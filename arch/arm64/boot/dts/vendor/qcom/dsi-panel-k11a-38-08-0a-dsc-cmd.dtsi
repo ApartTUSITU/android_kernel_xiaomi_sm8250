@@ -165,7 +165,7 @@
 					39 00 00 00 00 00 02 B0 16
 					39 00 00 00 00 00 02 D1 2E
 					39 00 00 00 00 00 03 FC A5 A5
-					39 01 00 00 0C 00 03 F0 A5 A5];
+					39 01 00 00 11 00 03 F0 A5 A5];
 				qcom,mdss-dsi-timing-switch-command-state = "dsi_lp_mode";
 
 				qcom,mdss-dsi-nolp-command = [
