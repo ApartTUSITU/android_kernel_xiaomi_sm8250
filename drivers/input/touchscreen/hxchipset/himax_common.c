@@ -924,7 +924,7 @@ static ssize_t pen_connect_strategy_show(struct device *dev,
 
 static DEVICE_ATTR_RO(pen_connect_strategy);
 
-static int sysfs_node_init()
+static int sysfs_node_init(void)
 {
 	int ret =0;
 	sys_class=class_create(THIS_MODULE,HIMAX_SYS_NODE);
@@ -3510,7 +3510,7 @@ static void himax_tp_mode_recovery(void)
 	I("exit %s\n",__func__);
 }
 
-static void himax_reg_init()
+static void himax_reg_init(void)
 {
 	int ret = -1;
 	uint8_t i = 0;
