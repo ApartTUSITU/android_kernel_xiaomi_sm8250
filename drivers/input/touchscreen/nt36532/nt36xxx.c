@@ -1243,7 +1243,7 @@ nvt_set_pen_enable_out:
 	return ret;
 }
 
-static void release_touch_event() {
+static void release_touch_event(void) {
 	int i = 0;
 
 	if (ts) {
@@ -1264,7 +1264,7 @@ static void release_touch_event() {
 	}
 }
 
-static void release_pen_event() {
+static void release_pen_event(void) {
 	if (ts && ts->pen_input_dev) {
 		input_report_abs(ts->pen_input_dev, ABS_X, 0);
 		input_report_abs(ts->pen_input_dev, ABS_Y, 0);
@@ -2432,7 +2432,7 @@ static void update_touchfeature_value_work(struct work_struct *work) {
 	NVT_LOG("exit");
 }
 
-static void nvt_set_gesture_mode()
+static void nvt_set_gesture_mode(void)
 {
 	NVT_LOG("%s double click wakeup", ts->db_wakeup ? "ENABLE" : "DISABLE");
 	if (ts->ic_state <= NVT_IC_SUSPEND_OUT && ts->ic_state != NVT_IC_INIT ) {
