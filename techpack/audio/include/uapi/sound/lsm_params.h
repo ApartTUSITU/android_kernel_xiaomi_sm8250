@@ -7,7 +7,11 @@
 #include <linux/types.h>
 #include <sound/asound.h>
 
+#if defined(CONFIG_TARGET_PRODUCT_DAGU)
+#define SNDRV_LSM_VERSION SNDRV_PROTOCOL_VERSION(0, 3, 2)
+#else
 #define SNDRV_LSM_VERSION SNDRV_PROTOCOL_VERSION(0, 3, 1)
+#endif
 
 #define LSM_MAX_STAGES_PER_SESSION 2
 #define LSM_STAGE_INDEX_FIRST 0
@@ -34,7 +38,14 @@
 #define LSM_POLLING_ENABLE (7)
 #define LSM_DET_EVENT_TYPE (8)
 #define LSM_LAB_CONTROL (9)
+#if defined(CONFIG_TARGET_PRODUCT_DAGU)
+#define LSM_REG_MULTI_SND_MODEL (10)
+#define LSM_DEREG_MULTI_SND_MODEL (11)
+#define LSM_MULTI_SND_MODEL_CONFIDENCE_LEVELS (12)
+#define LSM_GET_CUSTOM_PARAMS (13)
+#else
 #define LSM_GET_CUSTOM_PARAMS (10)
+#endif
 #define LSM_PARAMS_MAX (LSM_GET_CUSTOM_PARAMS + 1)
 
 #define LSM_EVENT_NON_TIME_STAMP_MODE (0)
@@ -228,6 +239,7 @@ struct lsm_params_info {
  * Member variables applicable only to V2:
  * @instance_id: instance id of the param to which parameter is to be set
  * @stage_idx: detection stage for which the param is applicable
+ * @model_id: an unique number to identify sound models in DSP
  */
 struct lsm_params_info_v2 {
 	__u32 module_id;
@@ -237,6 +249,9 @@ struct lsm_params_info_v2 {
 	uint32_t param_type;
 	__u16 instance_id;
 	__u16 stage_idx;
+#if defined(CONFIG_TARGET_PRODUCT_DAGU)
+	__u32 model_id;
+#endif
 };
 
 /*

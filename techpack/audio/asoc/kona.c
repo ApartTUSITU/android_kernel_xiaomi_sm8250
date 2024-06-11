@@ -2,7 +2,6 @@
 /*
  * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  */
-
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/gpio.h>
@@ -39,6 +38,15 @@
 #include <dt-bindings/sound/audio-codec-port-types.h>
 #include "codecs/bolero/wsa-macro.h"
 #include "kona-port-config.h"
+#include <soc/qcom/socinfo.h>
+#ifdef CONFIG_SND_SOC_TFA9874
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+#include "codecs/tfa9874/inc/tfa_platform_interface_definition.h"
+#else
+#include "codecs/tfa98xx/inc/tfa_platform_interface_definition.h"
+#endif
+#endif
+
 
 #define DRV_NAME "kona-asoc-snd"
 #define __CHIPSET__ "KONA "
@@ -71,7 +79,7 @@
 #define CODEC_EXT_CLK_RATE          9600000
 #define ADSP_STATE_READY_TIMEOUT_MS 3000
 #define DEV_NAME_STR_LEN            32
-#define WCD_MBHC_HS_V_MAX           1600
+#define WCD_MBHC_HS_V_MAX           1700
 
 #define TDM_CHANNEL_MAX		8
 #define DEV_NAME_STR_LEN	32
@@ -87,6 +95,168 @@
 #define WCN_CDC_SLIM_RX_CH_MAX 2
 #define WCN_CDC_SLIM_TX_CH_MAX 2
 #define WCN_CDC_SLIM_TX_CH_MAX_LITO 3
+
+//static atomic_t cs35l41_mclk_rsc_ref;
+#ifdef AUDIO_SM8250_FLAG
+  #if defined (CONFIG_TARGET_PRODUCT_ALIOTH)
+    #define CS35L41_SPEAKER_NAME "cs35l41.1-0040"
+    #define CS35L41_RECEIVER_NAME "cs35l41.1-0041"
+  #else
+    #define CS35L41_SPEAKER_NAME "cs35l41.1-0040"
+    #define CS35L41_RECEIVER_NAME "cs35l41.1-0042"
+  #endif
+#else
+#define CS35L41_SPEAKER_NAME "cs35l41.2-0040"
+#define CS35L41_RECEIVER_NAME "cs35l41.2-0042"
+#endif
+
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+#define TFA98xx_RECEIVER_NAME "tfa98xx.1-0034"
+#define TFA98xx_SPEAKER_NAME "tfa98xx.1-0035"
+static struct snd_soc_dai_link_component tfa98xx_codec_components[]=
+{
+	{
+		.name = TFA98xx_RECEIVER_NAME,
+		.dai_name = "tfa98xx-aif-1-34",
+	},
+
+	{
+		.name = TFA98xx_SPEAKER_NAME,
+		.dai_name = "tfa98xx-aif-1-35",
+	},
+};
+#endif
+
+#if defined(CONFIG_TARGET_PRODUCT_ENUMA) || defined(CONFIG_TARGET_PRODUCT_ELISH)
+struct snd_soc_dai_link_component cs35l41_codec_components[] = {
+       {
+               .name = "cs35l41.1-0040",
+               .dai_name = "cs35l41.1-0040",
+       },
+       {
+               .name = "cs35l41.1-0041",
+               .dai_name = "cs35l41.1-0041",
+       },
+       {
+               .name = "cs35l41.1-0043",
+               .dai_name = "cs35l41.1-0043",
+       },
+       {
+               .name = "cs35l41.1-0042",
+               .dai_name = "cs35l41.1-0042",
+       },
+       {
+               .name = "cs35l41.2-0040",
+               .dai_name = "cs35l41.2-0040",
+       },
+       {
+               .name = "cs35l41.2-0041",
+               .dai_name = "cs35l41.2-0041",
+       },
+       {
+               .name = "cs35l41.2-0043",
+               .dai_name = "cs35l41.2-0043",
+       },
+       {
+               .name = "cs35l41.2-0042",
+               .dai_name = "cs35l41.2-0042",
+       },
+};
+#elif defined(CONFIG_TARGET_PRODUCT_DAGU)
+struct snd_soc_dai_link_component cs35l41_codec_components[] = {
+       {
+               .name = "cs35l41.1-0040",
+               .dai_name = "cs35l41.1-0040",
+       },
+       {
+               .name = "cs35l41.1-0041",
+               .dai_name = "cs35l41.1-0041",
+       },
+       {
+               .name = "cs35l41.3-0041",
+               .dai_name = "cs35l41.3-0041",
+       },
+       {
+               .name = "cs35l41.3-0043",
+               .dai_name = "cs35l41.3-0043",
+       },
+};
+#else
+struct snd_soc_dai_link_component cs35l41_codec_components[] = {
+	{
+		.name = CS35L41_SPEAKER_NAME,
+		//.dai_name = "cs35l41-pcm",
+		.dai_name = CS35L41_SPEAKER_NAME,
+	},
+#ifdef AUDIO_SM8250_FLAG
+	{
+		.name = CS35L41_RECEIVER_NAME,
+		//.dai_name = "cs35l41-pcm",
+		.dai_name = CS35L41_RECEIVER_NAME,
+	},
+#endif
+};
+#endif
+
+#if defined(CONFIG_TARGET_PRODUCT_PIPA)
+struct snd_soc_dai_link_component aw882xx_codec_components[] = {
+       {
+               .name = "aw882xx_smartpa.2-0034",
+               .dai_name = "aw882xx-aif-2-34",
+       },
+       {
+               .name = "aw882xx_smartpa.2-0035",
+               .dai_name = "aw882xx-aif-2-35",
+       },
+       {
+               .name = "aw882xx_smartpa.0-0036",
+               .dai_name = "aw882xx-aif-0-36",
+       },
+       {
+               .name = "aw882xx_smartpa.0-0037",
+               .dai_name = "aw882xx-aif-0-37",
+       },
+};
+#else
+struct snd_soc_dai_link_component aw882xx_codec_components[] = {
+       {
+               .name = "aw882xx_smartpa.0-0036",
+               .dai_name = "aw882xx-aif-0-36",
+       },
+       {
+               .name = "aw882xx_smartpa.0-0037",
+               .dai_name = "aw882xx-aif-0-37",
+       },
+};
+#endif
+
+
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+static struct snd_soc_codec_conf tfa98xx_codec_conf[] = {
+	{
+		.dev_name	= TFA98xx_RECEIVER_NAME,
+		.name_prefix	= "RCV",
+	},
+
+	{
+		.dev_name	= TFA98xx_SPEAKER_NAME,
+		.name_prefix	= "SPK",
+	},
+};
+#else
+static struct snd_soc_codec_conf cs35l41_codec_conf[] = {
+	{
+		.dev_name	= CS35L41_SPEAKER_NAME,
+		.name_prefix	= "SPK",
+	},
+#ifdef AUDIO_SM8250_FLAG
+	{
+		.dev_name	= CS35L41_RECEIVER_NAME,
+		.name_prefix	= "RCV",
+	},
+#endif
+};
+#endif
 
 #define SWR_MAX_SLAVE_DEVICES 6
 
@@ -107,9 +277,16 @@ enum {
 	TDM_7,
 	TDM_PORT_MAX,
 };
-
+#if defined(CONFIG_TARGET_PRODUCT_PSYCHE) || defined(CONFIG_TARGET_PRODUCT_DAGU)
+#define TDM_MAX_SLOTS 4
+#else
 #define TDM_MAX_SLOTS 8
+#endif
+#if defined(CONFIG_TARGET_PRODUCT_ENUMA) || defined(CONFIG_TARGET_PRODUCT_ELISH) || defined(CONFIG_TARGET_PRODUCT_DAGU)
 #define TDM_SLOT_WIDTH_BITS 32
+#else
+#define TDM_SLOT_WIDTH_BITS 32
+#endif
 #define TDM_SLOT_WIDTH_BYTES TDM_SLOT_WIDTH_BITS/8
 
 enum {
@@ -491,7 +668,7 @@ static struct dev_config mi2s_rx_cfg[] = {
 
 static struct dev_config mi2s_tx_cfg[] = {
 	[PRIM_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
-	[SEC_MI2S]  = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
+	[SEC_MI2S]  = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 2},
 	[TERT_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
 	[QUAT_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
 	[QUIN_MI2S] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
@@ -510,7 +687,11 @@ static struct tdm_dev_config pri_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 		{ {0xFFFF} }, /* RX_7 */
 	},
 	{
+#if defined(CONFIG_TARGET_PRODUCT_PSYCHE) || defined(CONFIG_TARGET_PRODUCT_DAGU)
+		{ {0,   4, 0xFFFF} }, /* TX_0 */
+#else
 		{ {0,   4,      8, 12, 0xFFFF} }, /* TX_0 */
+#endif
 		{ {8,  12, 0xFFFF} }, /* TX_1 */
 		{ {16, 20, 0xFFFF} }, /* TX_2 */
 		{ {24, 28, 0xFFFF} }, /* TX_3 */
@@ -546,7 +727,15 @@ static struct tdm_dev_config sec_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 
 static struct tdm_dev_config tert_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* TERT TDM */
+#if defined(CONFIG_TARGET_PRODUCT_ENUMA) || defined(CONFIG_TARGET_PRODUCT_ELISH)
+		{ {0,   4, 8, 12, 16, 20, 24, 28} }, /* RX_0 */
+#elif defined(CONFIG_TARGET_PRODUCT_DAGU)
+		{ {0,   4, 8, 12} }, /* RX_0 */
+#elif defined(CONFIG_TARGET_PRODUCT_PIPA)
+		{ {0,  4,  8,  12, 0xFFFF} }, /* RX_0 */
+#else
 		{ {0,   4, 0xFFFF} }, /* RX_0 */
+#endif
 		{ {8,  12, 0xFFFF} }, /* RX_1 */
 		{ {16, 20, 0xFFFF} }, /* RX_2 */
 		{ {24, 28, 0xFFFF} }, /* RX_3 */
@@ -556,7 +745,13 @@ static struct tdm_dev_config tert_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 		{ {0xFFFF} }, /* RX_7 */
 	},
 	{
+#if defined(CONFIG_TARGET_PRODUCT_ENUMA) || defined(CONFIG_TARGET_PRODUCT_ELISH)
+		{ {4,  12,  16,  28, 0xFFFF} }, /* TX_0 */
+#elif defined(CONFIG_TARGET_PRODUCT_PIPA)
+		{ {0,  4,  8,  12, 0xFFFF} }, /* TX_0 */
+#else
 		{ {0,   4, 0xFFFF} }, /* TX_0 */
+#endif
 		{ {8,  12, 0xFFFF} }, /* TX_1 */
 		{ {16, 20, 0xFFFF} }, /* TX_2 */
 		{ {24, 28, 0xFFFF} }, /* TX_3 */
@@ -689,8 +884,8 @@ static const char *const usb_ch_text[] = {"One", "Two", "Three", "Four",
 					   "Five", "Six", "Seven",
 					   "Eight"};
 static char const *tdm_sample_rate_text[] = {"KHZ_8", "KHZ_16", "KHZ_32",
-					     "KHZ_48", "KHZ_176P4",
-					     "KHZ_352P8"};
+					     "KHZ_48", "KHZ_96",
+					     "KHZ_176P4", "KHZ_352P8"};
 static char const *tdm_bit_format_text[] = {"S16_LE", "S24_LE", "S32_LE"};
 static char const *tdm_ch_text[] = {"One", "Two", "Three", "Four",
 				    "Five", "Six", "Seven", "Eight"};
@@ -920,8 +1115,8 @@ static struct wcd_mbhc_config wcd_mbhc_cfg = {
 	.swap_gnd_mic = NULL,
 	.hs_ext_micbias = true,
 	.key_code[0] = KEY_MEDIA,
-	.key_code[1] = KEY_VOICECOMMAND,
-	.key_code[2] = KEY_VOLUMEUP,
+	.key_code[1] = KEY_VOLUMEUP,
+	.key_code[2] = KEY_VOICECOMMAND,
 	.key_code[3] = KEY_VOLUMEDOWN,
 	.key_code[4] = 0,
 	.key_code[5] = 0,
@@ -1666,9 +1861,12 @@ static int tdm_get_sample_rate(int value)
 		sample_rate = SAMPLING_RATE_48KHZ;
 		break;
 	case 4:
-		sample_rate = SAMPLING_RATE_176P4KHZ;
+		sample_rate = SAMPLING_RATE_96KHZ;
 		break;
 	case 5:
+		sample_rate = SAMPLING_RATE_176P4KHZ;
+		break;
+	case 6:
 		sample_rate = SAMPLING_RATE_352P8KHZ;
 		break;
 	default:
@@ -1695,11 +1893,14 @@ static int tdm_get_sample_rate_val(int sample_rate)
 	case SAMPLING_RATE_48KHZ:
 		sample_rate_val = 3;
 		break;
-	case SAMPLING_RATE_176P4KHZ:
+	case SAMPLING_RATE_96KHZ:
 		sample_rate_val = 4;
 		break;
-	case SAMPLING_RATE_352P8KHZ:
+	case SAMPLING_RATE_176P4KHZ:
 		sample_rate_val = 5;
+		break;
+	case SAMPLING_RATE_352P8KHZ:
+		sample_rate_val = 6;
 		break;
 	default:
 		sample_rate_val = 3;
@@ -3570,6 +3771,17 @@ static int msm_bt_sample_rate_tx_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
+static int usbhs_direction_get(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	if (wcd_mbhc_cfg.flip_switch)
+		ucontrol->value.integer.value[0] = 1;
+	else
+		ucontrol->value.integer.value[0] = 0;
+
+	return 0;
+}
+
 static const struct snd_kcontrol_new msm_int_snd_controls[] = {
 	SOC_ENUM_EXT("WSA_CDC_DMA_RX_0 Channels", wsa_cdc_dma_rx_0_chs,
 			cdc_dma_rx_ch_get, cdc_dma_rx_ch_put),
@@ -3812,6 +4024,8 @@ static const struct snd_kcontrol_new msm_common_snd_controls[] = {
 			afe_loopback_tx_ch_get, afe_loopback_tx_ch_put),
 	SOC_ENUM_EXT("VI_FEED_TX Channels", vi_feed_tx_chs,
 			msm_vi_feed_tx_ch_get, msm_vi_feed_tx_ch_put),
+	SOC_SINGLE_EXT("USB Headset Direction", 0, 0, UINT_MAX, 0,
+			usbhs_direction_get, NULL),
 };
 
 static const struct snd_kcontrol_new msm_tdm_snd_controls[] = {
@@ -3822,6 +4036,9 @@ static const struct snd_kcontrol_new msm_tdm_snd_controls[] = {
 			tdm_rx_sample_rate_get,
 			tdm_rx_sample_rate_put),
 	SOC_ENUM_EXT("TERT_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_TDM_RX_1 SampleRate", tdm_rx_sample_rate,
 			tdm_rx_sample_rate_get,
 			tdm_rx_sample_rate_put),
 	SOC_ENUM_EXT("QUAT_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
@@ -3860,6 +4077,9 @@ static const struct snd_kcontrol_new msm_tdm_snd_controls[] = {
 	SOC_ENUM_EXT("TERT_TDM_RX_0 Format", tdm_rx_format,
 			tdm_rx_format_get,
 			tdm_rx_format_put),
+	SOC_ENUM_EXT("TERT_TDM_RX_1 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
 	SOC_ENUM_EXT("QUAT_TDM_RX_0 Format", tdm_rx_format,
 			tdm_rx_format_get,
 			tdm_rx_format_put),
@@ -3894,6 +4114,9 @@ static const struct snd_kcontrol_new msm_tdm_snd_controls[] = {
 			tdm_rx_ch_get,
 			tdm_rx_ch_put),
 	SOC_ENUM_EXT("TERT_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("TERT_TDM_RX_1 Channels", tdm_rx_chs,
 			tdm_rx_ch_get,
 			tdm_rx_ch_put),
 	SOC_ENUM_EXT("QUAT_TDM_RX_0 Channels", tdm_rx_chs,
@@ -4224,6 +4447,13 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 		rate->min = rate->max = tdm_rx_cfg[TDM_TERT][TDM_0].sample_rate;
 		break;
 
+	case MSM_BACKEND_DAI_TERT_TDM_RX_1:
+		channels->min = channels->max =
+				tdm_rx_cfg[TDM_TERT][TDM_1].channels;
+		param_set_mask(params, SNDRV_PCM_HW_PARAM_FORMAT,
+			       tdm_rx_cfg[TDM_TERT][TDM_1].bit_format);
+		rate->min = rate->max = tdm_rx_cfg[TDM_TERT][TDM_1].sample_rate;
+		break;
 	case MSM_BACKEND_DAI_TERT_TDM_TX_0:
 		channels->min = channels->max =
 				tdm_tx_cfg[TDM_TERT][TDM_0].channels;
@@ -4568,6 +4798,8 @@ static bool msm_usbc_swap_gnd_mic(struct snd_soc_component *component, bool acti
 	if (!pdata->fsa_handle)
 		return false;
 
+	wcd_mbhc_cfg.flip_switch = true;
+
 	return fsa4480_switch_event(pdata->fsa_handle, FSA_MIC_GND_SWAP);
 }
 
@@ -4746,6 +4978,7 @@ static int msm_get_tdm_mode(u32 port_id)
 		tdm_mode = TDM_SEC;
 		break;
 	case AFE_PORT_ID_TERTIARY_TDM_RX:
+	case AFE_PORT_ID_TERTIARY_TDM_RX_1:
 	case AFE_PORT_ID_TERTIARY_TDM_TX:
 		tdm_mode = TDM_TERT;
 		break;
@@ -5402,6 +5635,137 @@ static struct snd_soc_ops msm_mi2s_be_ops = {
 	.shutdown = msm_mi2s_snd_shutdown,
 };
 
+/* use qcom default be ops */
+#if 0
+static int msm_hw_params_cs35l41_fixup(struct snd_soc_pcm_runtime *rtd,
+                                struct snd_pcm_hw_params *params)
+{
+	struct snd_interval *rate = hw_param_interval(params,
+		SNDRV_PCM_HW_PARAM_RATE);
+
+	struct snd_interval *channels = hw_param_interval(params,
+		SNDRV_PCM_HW_PARAM_CHANNELS);
+
+	param_set_mask(params, SNDRV_PCM_HW_PARAM_FORMAT, SNDRV_PCM_FORMAT_S16_LE);
+
+	pr_debug("%s()\n", __func__);
+	rate->min = rate->max = 48000;
+	channels->min = channels->max = 2;
+
+	return 0;
+}
+
+static int msm_mi2s_cs35l41_startup(struct snd_pcm_substream *substream)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_card *card = rtd->card;
+	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
+	struct snd_soc_dai *codec_dai = rtd->codec_dai;
+	struct snd_soc_codec *codec = codec_dai->codec;
+	int ret;
+
+	if (atomic_inc_return(&cs35l41_mclk_rsc_ref) == 1) {
+		ret = msm_mi2s_snd_startup(substream);
+		if (ret) {
+			dev_err(card->dev, "%s: Failed to startup mi2s: %d\n", __func__, ret);
+			return ret;
+		}
+
+		// Set cpu_dai as master
+		ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_CBS_CFS);
+		if (ret < 0) {
+			dev_err(card->dev, "%s: Failed to set fmt cpu dai: %d\n", __func__, ret);
+			return ret;
+		}
+
+		// Set codec_dai as slave
+		ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_CBS_CFS | SND_SOC_DAIFMT_I2S);
+		if (ret < 0) {
+			dev_err(card->dev, "%s: Failed to set fmt codec dai: %d\n", __func__, ret);
+			return ret;
+		}
+
+		// Set mclk to 12.288MHz for codec
+		ret = snd_soc_codec_set_sysclk(codec, 0, 0,
+				Q6AFE_LPASS_IBIT_CLK_1_P536_MHZ,
+				SND_SOC_CLOCK_IN);
+		if (ret < 0) {
+			dev_err(card->dev, "%s: Failed to set codec_sysclk: %d\n", __func__, ret);
+			return ret;
+		}
+	}
+	dev_info(card->dev, "------%s\n", __func__);
+	return 0;
+}
+
+void msm_mi2s_cs35l41_shutdown(struct snd_pcm_substream *substream)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_card *card = rtd->card;
+	struct snd_soc_dai *codec_dai = rtd->codec_dai;
+	struct snd_soc_codec *codec = codec_dai->codec;
+	struct msm_asoc_mach_data *pdata = pdata = snd_soc_card_get_drvdata(codec->component.card);
+
+
+	if (atomic_dec_return(&cs35l41_mclk_rsc_ref) == 0) {
+		msm_mi2s_snd_shutdown(substream);
+	}
+
+	dev_info(card->dev, "-----%s\n", __func__);
+	return;
+}
+
+static struct snd_soc_ops msm_mi2s_cs35l41_be_ops = {
+	.startup = msm_mi2s_cs35l41_startup,
+	.shutdown = msm_mi2s_cs35l41_shutdown,
+};
+#endif
+
+#ifdef CONFIG_BOARD_XIAOMI
+static int cs35l41_init(struct snd_soc_pcm_runtime *rtd)
+{
+#if 0
+	struct snd_soc_card *card = rtd->card;
+	struct snd_soc_codec *spk_cdc = rtd->codec_dais[0]->codec;
+	struct snd_soc_dapm_context *spk_dapm = snd_soc_codec_get_dapm(spk_cdc);
+	struct snd_soc_codec *rcv_cdc = rtd->codec_dais[1]->codec;
+	struct snd_soc_dapm_context *rcv_dapm = snd_soc_codec_get_dapm(rcv_cdc);
+
+	dev_info(card->dev, "%s: found codec[%s]\n", __func__, dev_name(spk_cdc->dev));
+			snd_soc_dapm_ignore_suspend(spk_dapm, "AMP Playback");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "AMP Capture");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "DSP1");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "Main AMP");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "ASPRX1");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "ASPRX2");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "ASPTX1");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "ASPTX2");
+			snd_soc_dapm_ignore_suspend(spk_dapm, "SPK");
+	snd_soc_dapm_sync(spk_dapm);
+
+	dev_info(card->dev, "%s: found codec[%s]\n", __func__, dev_name(rcv_cdc->dev));
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV AMP Playback");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV AMP Capture");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV DSP1");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV Main AMP");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV ASPRX1");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV ASPRX2");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV ASPTX1");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV ASPTX2");
+			snd_soc_dapm_ignore_suspend(rcv_dapm, "RCV SPK");
+	snd_soc_dapm_sync(rcv_dapm);
+#endif
+	return 0;
+}
+
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+static int tfa98xx_init(struct snd_soc_pcm_runtime *rtd)
+{
+	return 0;
+}
+#endif // CONFIG_TARGET_PRODUCT_MUNCH
+#endif // CONFIG_BOARD_XIAOMI
+
 static struct snd_soc_ops msm_fe_qos_ops = {
 	.prepare = msm_fe_qos_prepare,
 };
@@ -5509,6 +5873,9 @@ static const struct snd_soc_dapm_widget msm_int_dapm_widgets[] = {
 	SND_SOC_DAPM_MIC("Analog Mic3", NULL),
 	SND_SOC_DAPM_MIC("Analog Mic4", NULL),
 	SND_SOC_DAPM_MIC("Analog Mic5", NULL),
+	SND_SOC_DAPM_MIC("Handset Mic", NULL),
+	SND_SOC_DAPM_MIC("Headset Mic", NULL),
+	SND_SOC_DAPM_MIC("Secondary Mic", NULL),
 	SND_SOC_DAPM_MIC("Digital Mic0", msm_dmic_event),
 	SND_SOC_DAPM_MIC("Digital Mic1", msm_dmic_event),
 	SND_SOC_DAPM_MIC("Digital Mic2", msm_dmic_event),
@@ -5639,6 +6006,10 @@ static int msm_int_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic4");
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic5");
 
+	snd_soc_dapm_ignore_suspend(dapm, "Handset Mic");
+	snd_soc_dapm_ignore_suspend(dapm, "Headset Mic");
+	snd_soc_dapm_ignore_suspend(dapm, "Secondary Mic");
+
 	snd_soc_dapm_ignore_suspend(dapm, "WSA_SPK1 OUT");
 	snd_soc_dapm_ignore_suspend(dapm, "WSA_SPK2 OUT");
 	snd_soc_dapm_ignore_suspend(dapm, "WSA AIF VI");
@@ -5751,8 +6122,8 @@ static void *def_wcd_mbhc_cal(void)
 		(sizeof(btn_cfg->_v_btn_low[0]) * btn_cfg->num_btn);
 
 	btn_high[0] = 75;
-	btn_high[1] = 150;
-	btn_high[2] = 237;
+	btn_high[1] = 260;
+	btn_high[2] = 500;
 	btn_high[3] = 500;
 	btn_high[4] = 500;
 	btn_high[5] = 500;
@@ -6249,37 +6620,126 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.id = MSM_FRONTEND_DAI_MULTIMEDIA16,
 		.ops = &msm_fe_qos_ops,
 	},
+#ifdef AUDIO_SM8250_FLAG
 	{/* hw:x,30 */
+#if defined(CONFIG_TARGET_PRODUCT_APOLLO) || defined(CONFIG_TARGET_PRODUCT_CAS) || defined(CONFIG_TARGET_PRODUCT_ALIOTH)|| defined(CONFIG_TARGET_PRODUCT_ENUMA) || defined(CONFIG_TARGET_PRODUCT_ELISH)\
+		|| defined(CONFIG_TARGET_PRODUCT_PSYCHE) || defined(CONFIG_TARGET_PRODUCT_DAGU)
+		.name = "Tertiary TDM1 Hostless Playback",
+		.stream_name = "Tertiary TDM1 Hostless Playback",
+		.cpu_dai_name = "msm-dai-q6-tdm.36898",
+		.platform_name = "msm-pcm-hostless",
+		//.dynamic = 1,
+		.dpcm_playback = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+				SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ops = &kona_tdm_be_ops,
+		.id = MSM_BACKEND_DAI_TERT_TDM_RX_1,
+		.codecs = cs35l41_codec_components,
+		.num_codecs = ARRAY_SIZE(cs35l41_codec_components),
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+#elif defined(CONFIG_TARGET_PRODUCT_PIPA)
+		.name = "Tertiary TDM1 Hostless Playback",
+		.stream_name = "Tertiary TDM1 Hostless Playback",
+		.cpu_dai_name = "msm-dai-q6-tdm.36898",
+		.platform_name = "msm-pcm-hostless",
+		//.dynamic = 1,
+		.dpcm_playback = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+				SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ops = &kona_tdm_be_ops,
+		.id = MSM_BACKEND_DAI_TERT_TDM_RX_1,
+		.codecs = aw882xx_codec_components,
+		.num_codecs = ARRAY_SIZE(aw882xx_codec_components),
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+#else
 		.name = "CDC_DMA Hostless",
 		.stream_name = "CDC_DMA Hostless",
-		.cpu_dai_name = "CDC_DMA_HOSTLESS",
+		.cpu_dai_name = "msm-dai-cdc-dma-dev.45106",
 		.platform_name = "msm-pcm-hostless",
-		.dynamic = 1,
-		.dpcm_playback = 1,
-		.dpcm_capture = 1,
+		.codec_name = "bolero_codec",
+		.codec_dai_name = "rx_macro_rx2",
+		.id = MSM_BACKEND_DAI_RX_CDC_DMA_RX_1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
 			    SND_SOC_DPCM_TRIGGER_POST},
 		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
 		.ignore_suspend = 1,
 		 /* this dailink has playback support */
 		.ignore_pmdown_time = 1,
-		.codec_dai_name = "snd-soc-dummy-dai",
-		.codec_name = "snd-soc-dummy",
+#if defined(CONFIG_TARGET_PRODUCT_THYME)
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+#endif
+		.ops = &msm_cdc_dma_be_ops,
+#endif
 	},
 	{/* hw:x,31 */
 		.name = "TX3_CDC_DMA Hostless",
 		.stream_name = "TX3_CDC_DMA Hostless",
-		.cpu_dai_name = "TX3_CDC_DMA_HOSTLESS",
+		.cpu_dai_name = "msm-dai-cdc-dma-dev.45113",
 		.platform_name = "msm-pcm-hostless",
-		.dynamic = 1,
-		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
 			    SND_SOC_DPCM_TRIGGER_POST},
 		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
 		.ignore_suspend = 1,
+		.codec_name = "bolero_codec",
+		.codec_dai_name = "tx_macro_tx2",
+		.ops = &msm_cdc_dma_be_ops,
+	},
+#else
+    {/* hw:x,30 */
+        .name = "CDC_DMA Hostless",
+        .stream_name = "CDC_DMA Hostless",
+        .cpu_dai_name = "CDC_DMA_HOSTLESS",
+        .platform_name = "msm-pcm-hostless",
+        .dynamic = 1,
+        .dpcm_playback = 1,
+        .dpcm_capture = 1,
+        .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+            SND_SOC_DPCM_TRIGGER_POST},
+        .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+        .ignore_suspend = 1,
+        /* this dailink has playback support */
+        .ignore_pmdown_time = 1,
+        .codec_dai_name = "snd-soc-dummy-dai",
+        .codec_name = "snd-soc-dummy",
+    },
+    {/* hw:x,31 */
+        .name = "TX3_CDC_DMA Hostless",
+        .stream_name = "TX3_CDC_DMA Hostless",
+        .cpu_dai_name = "TX3_CDC_DMA_HOSTLESS",
+        .platform_name = "msm-pcm-hostless",
+        .dynamic = 1,
+        .dpcm_capture = 1,
+        .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+            SND_SOC_DPCM_TRIGGER_POST},
+        .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+        .ignore_suspend = 1,
+        .codec_dai_name = "snd-soc-dummy-dai",
+        .codec_name = "snd-soc-dummy",
+    },
+#endif
+#if defined(CONFIG_TARGET_PRODUCT_PIPA)
+	{/* hw:x,32 */
+		.name = "Tertiary TDM0 TX_Hostless",
+		.stream_name = "Tertiary TDM0 Hostless Capture",
+		.cpu_dai_name = "TERT_TDM_TX_0_HOSTLESS",
+		.platform_name = "msm-pcm-hostless",
+		.dynamic = 1,
+		.dpcm_capture = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+				SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
 	},
+#else
 	{/* hw:x,32 */
 		.name = "Tertiary MI2S TX_Hostless",
 		.stream_name = "Tertiary MI2S_TX Hostless Capture",
@@ -6295,22 +6755,25 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
 	},
+#endif
 };
 
 static struct snd_soc_dai_link msm_bolero_fe_dai_links[] = {
-	{/* hw:x,33 */
-		.name = LPASS_BE_WSA_CDC_DMA_TX_0,
-		.stream_name = "WSA CDC DMA0 Capture",
-		.cpu_dai_name = "msm-dai-cdc-dma-dev.45057",
-		.platform_name = "msm-pcm-hostless",
-		.codec_name = "bolero_codec",
-		.codec_dai_name = "wsa_macro_vifeedback",
-		.id = MSM_BACKEND_DAI_WSA_CDC_DMA_TX_0,
-		.be_hw_params_fixup = msm_be_hw_params_fixup,
-		.ignore_suspend = 1,
-		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
-		.ops = &msm_cdc_dma_be_ops,
-	},
+        {/* hw:x,33 */
+                .name = LPASS_BE_WSA_CDC_DMA_TX_0,
+                .stream_name = "WSA CDC DMA0 Capture",
+                .cpu_dai_name = "msm-dai-cdc-dma-dev.45057",
+                .platform_name = "msm-pcm-hostless",
+                //.codec_name = "bolero_codec",
+                //.codec_dai_name = "wsa_macro_vifeedback",
+                .codec_name = "snd-soc-dummy",
+                .codec_dai_name = "snd-soc-dummy-dai",
+                .id = MSM_BACKEND_DAI_WSA_CDC_DMA_TX_0,
+                .be_hw_params_fixup = msm_be_hw_params_fixup,
+                .ignore_suspend = 1,
+                .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+                .ops = &msm_cdc_dma_be_ops,
+        },
 };
 
 static struct snd_soc_dai_link msm_common_misc_fe_dai_links[] = {
@@ -6407,6 +6870,85 @@ static struct snd_soc_dai_link msm_common_misc_fe_dai_links[] = {
 		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
 		.ops = &msm_cdc_dma_be_ops,
 	},
+	{/* hw:x,40 */
+        .name = "Secondary MI2S_RX Hostless",
+        .stream_name = "Secondary MI2S_RX Hostless",
+        .cpu_dai_name = "SEC_MI2S_RX_HOSTLESS",
+        .platform_name = "msm-pcm-hostless",
+        .dynamic = 1,
+        .dpcm_playback = 1,
+        .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+            SND_SOC_DPCM_TRIGGER_POST},
+        .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+        .ignore_suspend = 1,
+                .ignore_pmdown_time = 1,
+        .codec_dai_name = "snd-soc-dummy-dai",
+        .codec_name = "snd-soc-dummy",
+	},
+        {/* hw:x,41 */
+                .name = "CDC_DMA Hostless_ULTRA",
+                .stream_name = "CDC_DMA Hostless_ULTRA",
+                .cpu_dai_name = "msm-dai-cdc-dma-dev.45106",
+                .platform_name = "msm-pcm-hostless",
+                .codec_name = "bolero_codec",
+                .codec_dai_name = "rx_macro_rx2",
+                .id = MSM_BACKEND_DAI_RX_CDC_DMA_RX_1,
+                .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+                            SND_SOC_DPCM_TRIGGER_POST},
+                .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+                .ignore_suspend = 1,
+                 /* this dailink has playback support */
+                .ignore_pmdown_time = 1,
+                //.be_hw_params_fixup = msm_be_hw_params_fixup,
+                .ops = &msm_cdc_dma_be_ops,
+        },
+        {/* hw:x,42 */
+                .name = "TX3_CDC_DMA Hostless_ULTRA",
+                .stream_name = "TX3_CDC_DMA Hostless_ULTRA",
+                .cpu_dai_name = "msm-dai-cdc-dma-dev.45113",
+                .platform_name = "msm-pcm-hostless",
+                .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+                            SND_SOC_DPCM_TRIGGER_POST},
+                .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+                .ignore_suspend = 1,
+                .codec_name = "bolero_codec",
+                .codec_dai_name = "tx_macro_tx2",
+                .ops = &msm_cdc_dma_be_ops,
+        },
+#ifdef CONFIG_SND_SOC_TFA9874
+        { /* hw:x,43 */
+                .name = TFA_TX_HOSTLESS_CODEC_NAME,
+                .stream_name = TFA_TX_HOSTLESS_STREAM_NAME,
+                .cpu_dai_name = TFA_TX_HOSTLESS_CPU_DAI_NAME,
+                .platform_name  = "msm-pcm-hostless",
+                .dynamic = 1,
+                .dpcm_capture = 1,
+                .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+                                        SND_SOC_DPCM_TRIGGER_POST},
+                .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+                .ignore_suspend = 1,
+                /* this dailink has playback support */
+                .ignore_pmdown_time = 1,
+                /* This dainlink has MI2S support */
+                .codec_dai_name = "snd-soc-dummy-dai",
+                .codec_name = "snd-soc-dummy",
+        },
+        { /* hw:x,44 */
+                .name = "Tertiary MI2S_RX Hostless",
+                .stream_name = "Tertiary MI2S_RX Hostless",
+                .cpu_dai_name = "TERT_MI2S_RX_HOSTLESS",
+                .platform_name  = "msm-pcm-hostless",
+                .dynamic = 1,
+                .dpcm_playback = 1,
+                .trigger = {SND_SOC_DPCM_TRIGGER_POST,
+                                        SND_SOC_DPCM_TRIGGER_POST},
+                .no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+                .ignore_suspend = 1,
+                .ignore_pmdown_time = 1,
+                .codec_dai_name = "snd-soc-dummy-dai",
+                .codec_name = "snd-soc-dummy",
+        },
+#endif
 };
 
 static struct snd_soc_dai_link msm_common_be_dai_links[] = {
@@ -6615,27 +7157,17 @@ static struct snd_soc_dai_link msm_tdm_be_dai_links[] = {
 		.ignore_suspend = 1,
 	},
 	{
-		.name = LPASS_BE_TERT_TDM_RX_0,
-		.stream_name = "Tertiary TDM0 Playback",
-		.cpu_dai_name = "msm-dai-q6-tdm.36896",
-		.platform_name = "msm-pcm-routing",
-		.codec_name = "msm-stub-codec.1",
-		.codec_dai_name = "msm-stub-rx",
-		.no_pcm = 1,
-		.dpcm_playback = 1,
-		.id = MSM_BACKEND_DAI_TERT_TDM_RX_0,
-		.be_hw_params_fixup = msm_be_hw_params_fixup,
-		.ops = &kona_tdm_be_ops,
-		.ignore_suspend = 1,
-		.ignore_pmdown_time = 1,
-	},
-	{
 		.name = LPASS_BE_TERT_TDM_TX_0,
 		.stream_name = "Tertiary TDM0 Capture",
 		.cpu_dai_name = "msm-dai-q6-tdm.36897",
 		.platform_name = "msm-pcm-routing",
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+		.codecs = tfa98xx_codec_components,
+		.num_codecs = ARRAY_SIZE(tfa98xx_codec_components),
+#else
 		.codec_name = "msm-stub-codec.1",
 		.codec_dai_name = "msm-stub-tx",
+#endif
 		.no_pcm = 1,
 		.dpcm_capture = 1,
 		.id = MSM_BACKEND_DAI_TERT_TDM_TX_0,
@@ -6856,6 +7388,7 @@ static struct snd_soc_dai_link ext_disp_be_dai_link[] = {
 };
 
 static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
+#if 0
 	{
 		.name = LPASS_BE_PRI_MI2S_RX,
 		.stream_name = "Primary MI2S Playback",
@@ -6871,6 +7404,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.ignore_suspend = 1,
 		.ignore_pmdown_time = 1,
 	},
+#endif
 	{
 		.name = LPASS_BE_PRI_MI2S_TX,
 		.stream_name = "Primary MI2S Capture",
@@ -6885,6 +7419,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.ops = &msm_mi2s_be_ops,
 		.ignore_suspend = 1,
 	},
+#if 0
 	{
 		.name = LPASS_BE_SEC_MI2S_RX,
 		.stream_name = "Secondary MI2S Playback",
@@ -6900,6 +7435,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.ignore_suspend = 1,
 		.ignore_pmdown_time = 1,
 	},
+#endif
 	{
 		.name = LPASS_BE_SEC_MI2S_TX,
 		.stream_name = "Secondary MI2S Capture",
@@ -6914,6 +7450,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.ops = &msm_mi2s_be_ops,
 		.ignore_suspend = 1,
 	},
+#if 0
 	{
 		.name = LPASS_BE_TERT_MI2S_RX,
 		.stream_name = "Tertiary MI2S Playback",
@@ -6929,6 +7466,7 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 		.ignore_suspend = 1,
 		.ignore_pmdown_time = 1,
 	},
+#endif
 	{
 		.name = LPASS_BE_TERT_MI2S_TX,
 		.stream_name = "Tertiary MI2S Capture",
@@ -7032,6 +7570,193 @@ static struct snd_soc_dai_link msm_mi2s_be_dai_links[] = {
 	},
 };
 
+#ifdef AUDIO_SM8250_FLAG  //j1
+static struct snd_soc_dai_link tert_mi2s_rx_cs35l41_dai_links[] = {
+#if defined(CONFIG_TARGET_PRODUCT_APOLLO) || defined(CONFIG_TARGET_PRODUCT_CAS)  || defined(CONFIG_TARGET_PRODUCT_ALIOTH)|| defined(CONFIG_TARGET_PRODUCT_ENUMA) || defined(CONFIG_TARGET_PRODUCT_ELISH) \
+ 	|| defined(CONFIG_TARGET_PRODUCT_PSYCHE) || defined(CONFIG_TARGET_PRODUCT_DAGU)
+	{
+		.name = LPASS_BE_TERT_TDM_RX_0,
+		.stream_name = "Tertiary TDM0 Playback",
+		.cpu_dai_name = "msm-dai-q6-tdm.36896",
+		.platform_name = "msm-pcm-routing",
+		.codecs = cs35l41_codec_components,
+		.num_codecs = ARRAY_SIZE(cs35l41_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERT_TDM_RX_0,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &kona_tdm_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.init = &cs35l41_init,
+	},
+  	{
+		.name = LPASS_BE_TERT_TDM_RX_1,
+		.stream_name = "Tertiary TDM1 Playback",
+		.cpu_dai_name = "msm-dai-q6-tdm.36898",
+		.platform_name = "msm-pcm-routing",
+		.codecs = cs35l41_codec_components,
+		.num_codecs = ARRAY_SIZE(cs35l41_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERT_TDM_RX_1,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &kona_tdm_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.init = &cs35l41_init,
+	},
+#else
+	{
+		.name = LPASS_BE_TERT_MI2S_RX,
+		.stream_name = "Tertiary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.2",
+		.platform_name = "msm-pcm-routing",
+		.codecs = cs35l41_codec_components,
+		.num_codecs = ARRAY_SIZE(cs35l41_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.init = &cs35l41_init,
+	},
+#endif
+};
+
+static struct snd_soc_dai_link tert_mi2s_rx_aw882xx_dai_links[] = {
+#if defined(CONFIG_TARGET_PRODUCT_PIPA)
+	{
+		.name = LPASS_BE_TERT_TDM_RX_0,
+		.stream_name = "Tertiary TDM0 Playback",
+		.cpu_dai_name = "msm-dai-q6-tdm.36896",
+		.platform_name = "msm-pcm-routing",
+		.codecs = aw882xx_codec_components,
+		.num_codecs = ARRAY_SIZE(aw882xx_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERT_TDM_RX_0,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &kona_tdm_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		//.init = &cs35l41_init,
+	},
+  	{
+		.name = LPASS_BE_TERT_TDM_RX_1,
+		.stream_name = "Tertiary TDM1 Playback",
+		.cpu_dai_name = "msm-dai-q6-tdm.36898",
+		.platform_name = "msm-pcm-routing",
+		.codecs = aw882xx_codec_components,
+		.num_codecs = ARRAY_SIZE(aw882xx_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERT_TDM_RX_1,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &kona_tdm_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		//.init = &cs35l41_init,
+	},
+#else
+	{
+		.name = LPASS_BE_TERT_MI2S_RX,
+		.stream_name = "Tertiary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.2",
+		.platform_name = "msm-pcm-routing",
+		.codecs = aw882xx_codec_components,
+		.num_codecs = ARRAY_SIZE(aw882xx_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		//.init = &cs35l41_init,
+	},
+#endif
+};
+
+static struct snd_soc_dai_link pri_mi2s_rx_tfa9874_dai_links[] = {
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+	{
+		.name = LPASS_BE_TERT_MI2S_RX,
+		.stream_name = "Tertiary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.2",
+		.platform_name = "msm-pcm-routing",
+		.codecs = tfa98xx_codec_components,
+		.num_codecs = ARRAY_SIZE(tfa98xx_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.init = &tfa98xx_init,
+	},
+#else
+	{
+		.name = LPASS_BE_PRI_MI2S_RX,
+		.stream_name = "Primary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.0",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "tfa98xx.1-0034",
+		.codec_dai_name = "tfa98xx-aif-1-34",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_PRI_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+	},
+#endif
+};
+#endif
+
+#ifdef CONFIG_BOARD_XIAOMI_SM7250
+static struct snd_soc_dai_link sec_mi2s_rx_tfa9874_be_dai_links[] = {
+	{
+		.name = LPASS_BE_SEC_MI2S_RX,
+		.stream_name = "Secondary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.1",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "tfa98xx.1-0034",
+		.codec_dai_name = "tfa98xx-aif-1-34",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_SECONDARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+	},
+};
+
+static struct snd_soc_dai_link sec_mi2s_rx_cs35l41_dai_links[] = {
+	{
+		.name = LPASS_BE_SEC_MI2S_RX,
+		.stream_name = "Secondary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.1",
+		.platform_name = "msm-pcm-routing",
+		.codecs = cs35l41_codec_components,
+		.num_codecs = ARRAY_SIZE(cs35l41_codec_components),
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_SECONDARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.init = &cs35l41_init,
+	},
+};
+
+#endif
 static struct snd_soc_dai_link msm_auxpcm_be_dai_links[] = {
 	/* Primary AUX PCM Backend DAI Links */
 	{
@@ -7222,7 +7947,6 @@ static struct snd_soc_dai_link msm_wsa_cdc_dma_be_dai_links[] = {
 		.codec_dai_name = "wsa_macro_rx1",
 		.no_pcm = 1,
 		.dpcm_playback = 1,
-		.init = &msm_int_audrx_init,
 		.id = MSM_BACKEND_DAI_WSA_CDC_DMA_RX_0,
 		.be_hw_params_fixup = msm_be_hw_params_fixup,
 		.ignore_pmdown_time = 1,
@@ -7367,6 +8091,7 @@ static struct snd_soc_dai_link msm_va_cdc_dma_be_dai_links[] = {
 		.codec_dai_name = "va_macro_tx1",
 		.no_pcm = 1,
 		.dpcm_capture = 1,
+		.init = &msm_int_audrx_init,
 		.id = MSM_BACKEND_DAI_VA_CDC_DMA_TX_0,
 		.be_hw_params_fixup = msm_be_hw_params_fixup,
 		.ignore_suspend = 1,
@@ -7425,6 +8150,15 @@ static struct snd_soc_dai_link msm_kona_dai_links[
 			ARRAY_SIZE(msm_common_misc_fe_dai_links) +
 			ARRAY_SIZE(msm_common_be_dai_links) +
 			ARRAY_SIZE(msm_mi2s_be_dai_links) +
+#ifdef AUDIO_SM8250_FLAG
+			ARRAY_SIZE(tert_mi2s_rx_cs35l41_dai_links) +
+			ARRAY_SIZE(pri_mi2s_rx_tfa9874_dai_links) +
+			ARRAY_SIZE(tert_mi2s_rx_aw882xx_dai_links) +
+#endif
+#ifdef CONFIG_BOARD_XIAOMI_SM7250
+			ARRAY_SIZE(sec_mi2s_rx_tfa9874_be_dai_links) +
+			ARRAY_SIZE(sec_mi2s_rx_cs35l41_dai_links) +
+#endif
 			ARRAY_SIZE(msm_auxpcm_be_dai_links) +
 			ARRAY_SIZE(msm_wsa_cdc_dma_be_dai_links) +
 			ARRAY_SIZE(msm_rx_tx_cdc_dma_be_dai_links) +
@@ -7555,6 +8289,13 @@ static struct snd_soc_ops msm_stub_be_ops = {
 
 struct snd_soc_card snd_soc_card_stub_msm = {
 	.name		= "kona-stub-snd-card",
+#if defined(CONFIG_TARGET_PRODUCT_MUNCH)
+	.codec_conf	= tfa98xx_codec_conf,
+	.num_configs	= ARRAY_SIZE(tfa98xx_codec_conf),
+#else
+	.codec_conf	= cs35l41_codec_conf,
+	.num_configs	= ARRAY_SIZE(cs35l41_codec_conf),
+#endif
 };
 
 static struct snd_soc_dai_link msm_stub_fe_dai_links[] = {
@@ -7637,6 +8378,7 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 	u32 auxpcm_audio_intf = 0;
 	u32 val = 0;
 	u32 wcn_btfm_intf = 0;
+	u32 wsa_bolero_codec = 0;
 	const struct of_device_id *match;
 
 	match = of_match_node(kona_asoc_machine_of_match, dev->of_node);
@@ -7655,10 +8397,27 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 		total_links += ARRAY_SIZE(msm_common_dai_links);
 
 		memcpy(msm_kona_dai_links + total_links,
-		       msm_bolero_fe_dai_links,
-		       sizeof(msm_bolero_fe_dai_links));
-		total_links +=
-			ARRAY_SIZE(msm_bolero_fe_dai_links);
+			msm_bolero_fe_dai_links,
+			sizeof(msm_bolero_fe_dai_links));
+		total_links += ARRAY_SIZE(msm_bolero_fe_dai_links);
+
+		rc = of_property_read_u32(dev->of_node, "qcom,wsa-bolero-codec",
+					  &wsa_bolero_codec);
+		if (rc) {
+			dev_dbg(dev, "%s: No DT match WSA Macro codec\n",
+				__func__);
+		} else {
+			if (wsa_bolero_codec) {
+				dev_dbg(dev, "%s(): WSA macro in bolero codec present\n",
+					__func__);
+
+				memcpy(msm_kona_dai_links + total_links,
+				       msm_bolero_fe_dai_links,
+				       sizeof(msm_bolero_fe_dai_links));
+				total_links +=
+					ARRAY_SIZE(msm_bolero_fe_dai_links);
+			}
+		}
 
 		memcpy(msm_kona_dai_links + total_links,
 		       msm_common_misc_fe_dai_links,
@@ -7670,11 +8429,15 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 		       sizeof(msm_common_be_dai_links));
 		total_links += ARRAY_SIZE(msm_common_be_dai_links);
 
-		memcpy(msm_kona_dai_links + total_links,
-		       msm_wsa_cdc_dma_be_dai_links,
-		       sizeof(msm_wsa_cdc_dma_be_dai_links));
-		total_links +=
-			ARRAY_SIZE(msm_wsa_cdc_dma_be_dai_links);
+		if (wsa_bolero_codec) {
+			dev_dbg(dev, "%s(): WSAmacro in bolero codec present\n",
+				__func__);
+			memcpy(msm_kona_dai_links + total_links,
+			       msm_wsa_cdc_dma_be_dai_links,
+			       sizeof(msm_wsa_cdc_dma_be_dai_links));
+			total_links +=
+				ARRAY_SIZE(msm_wsa_cdc_dma_be_dai_links);
+		}
 
 		memcpy(msm_kona_dai_links + total_links,
 		       msm_rx_tx_cdc_dma_be_dai_links,
@@ -7700,6 +8463,57 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 					sizeof(msm_mi2s_be_dai_links));
 				total_links +=
 					ARRAY_SIZE(msm_mi2s_be_dai_links);
+#ifdef AUDIO_SM8250_FLAG
+				if (get_hw_version_platform() == HARDWARE_PLATFORM_UMI ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_CMI ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_APOLLO ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_ALIOTH ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_THYME ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_ENUMA ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_ELISH ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_PSYCHE ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_DAGU ||
+				    get_hw_version_platform() == HARDWARE_PLATFORM_CAS) {
+					memcpy(msm_kona_dai_links + total_links,
+						tert_mi2s_rx_cs35l41_dai_links,
+						sizeof(tert_mi2s_rx_cs35l41_dai_links));
+					total_links += ARRAY_SIZE(tert_mi2s_rx_cs35l41_dai_links);
+					dev_info(dev, "%s: Using tert_mi2s_rx_cs35l41_dai_links\n", __func__);
+				} else if (get_hw_version_platform() == HARDWARE_PLATFORM_LMI ||
+							get_hw_version_platform() == HARDWARE_PLATFORM_MUNCH) {
+					memcpy(msm_kona_dai_links + total_links,
+						pri_mi2s_rx_tfa9874_dai_links,
+						sizeof(pri_mi2s_rx_tfa9874_dai_links));
+					total_links += ARRAY_SIZE(pri_mi2s_rx_tfa9874_dai_links);
+					dev_info(dev, "%s: Using pri_mi2s_rx_tfa9874_dai_links\n", __func__);
+				} else if (get_hw_version_platform() == HARDWARE_PLATFORM_PIPA) {
+					memcpy(msm_kona_dai_links + total_links,
+						tert_mi2s_rx_aw882xx_dai_links,
+						sizeof(tert_mi2s_rx_aw882xx_dai_links));
+					total_links += ARRAY_SIZE(tert_mi2s_rx_aw882xx_dai_links);
+					dev_info(dev, "%s: Using tert_mi2s_rx_aw882xx_dai_links\n", __func__);
+				}
+#endif
+#ifdef CONFIG_BOARD_XIAOMI_SM7250
+				if (get_hw_version_platform() == HARDWARE_PLATFORM_PICASSO) {
+					memcpy(msm_kona_dai_links + total_links,
+						sec_mi2s_rx_tfa9874_be_dai_links,
+						sizeof(sec_mi2s_rx_tfa9874_be_dai_links));
+					total_links += ARRAY_SIZE(sec_mi2s_rx_tfa9874_be_dai_links);
+				}
+				if (get_hw_version_platform() == HARDWARE_PLATFORM_MONET) {
+				    memcpy(msm_kona_dai_links + total_links,
+					    sec_mi2s_rx_cs35l41_dai_links,
+					    sizeof(sec_mi2s_rx_cs35l41_dai_links));
+				    total_links += ARRAY_SIZE(sec_mi2s_rx_cs35l41_dai_links);
+				}
+				if (get_hw_version_platform() == HARDWARE_PLATFORM_VANGOGH) {
+				    memcpy(msm_kona_dai_links + total_links,
+					    sec_mi2s_rx_cs35l41_dai_links,
+					    sizeof(sec_mi2s_rx_cs35l41_dai_links));
+				    total_links += ARRAY_SIZE(sec_mi2s_rx_cs35l41_dai_links);
+				}
+#endif
 			}
 		}
 

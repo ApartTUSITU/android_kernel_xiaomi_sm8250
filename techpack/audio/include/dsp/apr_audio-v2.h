@@ -3981,7 +3981,7 @@ struct afe_param_id_set_topology_cfg {
 	u32		topology_id;
 } __packed;
 
-#define MAX_ABR_LEVELS 5
+#define MAX_ABR_LEVELS 6
 
 struct afe_bit_rate_level_map_t {
 	/*
@@ -4563,6 +4563,61 @@ struct asm_ldac_enc_cfg_t {
 	struct afe_abr_enc_cfg_t abr_config;
 } __packed;
 
+#define ASM_MEDIA_FMT_LHDC 0x1000B400
+#define ENC_CODEC_TYPE_LHDC 0x28000000
+struct asm_lhdc_specific_enc_cfg_t {
+	uint32_t                     version;
+	uint32_t                     ll_enabled;
+	uint32_t                     max_bitrate;
+	/*
+	 * @Range(in bits per second)
+	 * 256000
+	 * 300000
+	 * 400000
+	 * 500000
+	 * 900000
+	 */
+	uint32_t                     bit_rate;
+	/*
+	 * bit0 channel split compress disable
+	 * bit1 channel split compress (for forwarding type TWS used)
+	 * bit2 channel split compress. pre-split left/right frame at encode side
+	 */
+	uint32_t                     channel_split_mode;
+	/*
+	 * The channel setting information for LHDC specification
+	 * of Bluetooth A2DP which is determined by SRC and SNK
+	 * devices in Bluetooth transmission.
+	 * @Range:
+	 * 0 for native mode
+	 * 4 for mono
+	 * 2 for dual channel
+	 * 1 for stereo
+	 */
+	uint16_t                     channel_mode;
+	/*
+	 * Maximum Transmission Unit (MTU).
+	 * The minimum MTU that a L2CAP implementation for LHDC shall
+	 * support is 679 bytes, because LHDC is optimized with 2-DH5
+	 * packet as its target.
+	 * @Range : 679
+	 * @Default: 679 for LHDCBT_MTU_2DH5
+	 */
+	uint16_t                     mtu;
+	uint32_t                     ar_enabled;
+	uint32_t                     meta_enabled;
+	uint32_t                     llac_enabled;
+	uint32_t                     mbr_enabled;
+	uint32_t                     larc_enabled;
+} __packed;
+
+struct asm_lhdc_enc_cfg_t {
+	struct asm_custom_enc_cfg_t  custom_config;
+	struct asm_lhdc_specific_enc_cfg_t  lhdc_specific_config;
+	struct afe_abr_enc_cfg_t abr_config;
+} __packed;
+
+
 struct afe_enc_fmt_id_param_t {
 	/*
 	 * Supported values:
@@ -4757,6 +4812,7 @@ union afe_enc_config_data {
 	struct asm_celt_enc_cfg_t  celt_config;
 	struct asm_aptx_enc_cfg_t  aptx_config;
 	struct asm_ldac_enc_cfg_t  ldac_config;
+	struct asm_lhdc_enc_cfg_t  lhdc_config;
 	struct asm_aptx_ad_enc_cfg_t  aptx_ad_config;
 	struct asm_aptx_ad_speech_enc_cfg_t aptx_ad_speech_config;
 };
@@ -5471,6 +5527,8 @@ struct afe_param_id_lpass_core_shared_clk_cfg {
 #define ADM_CMD_COPP_OPEN_TOPOLOGY_ID_DTS_HPX		0x10015002
 #define ADM_CMD_COPP_OPEN_TOPOLOGY_ID_AUDIOSPHERE	0x10028000
 #define VPM_TX_DM_FLUENCE_EF_COPP_TOPOLOGY		0x10000005
+#define ADM_TOPOLOGY_ID_AUDIO_RX_FVSAM			0x1000FFF0
+#define ADM_TOPOLOGY_ID_AUDIO_RX_MISE			0x1000A467
 
 /* Memory map regions command payload used by the
  * #ASM_CMD_SHARED_MEM_MAP_REGIONS ,#ADM_CMD_SHARED_MEM_MAP_REGIONS

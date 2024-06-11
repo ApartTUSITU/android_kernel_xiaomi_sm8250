@@ -528,6 +528,8 @@ enum {
 	EXT_EC_REF_SLIM_1_TX,
 	EXT_EC_REF_PRI_TDM_TX,
 	EXT_EC_REF_SEC_TDM_TX,
+	EXT_EC_REF_SEC_MI2S_RX,
+	EXT_EC_REF_TERT_TDM_TX,
 };
 
 #define INVALID_SESSION -1
@@ -605,6 +607,7 @@ struct msm_pcm_stream_app_type_cfg {
 	int app_type;
 	int acdb_dev_id;
 	int sample_rate;
+	int channel;
 };
 
 /* dai_id: front-end ID,
