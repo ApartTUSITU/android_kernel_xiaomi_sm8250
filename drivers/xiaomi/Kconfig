@@ -1,0 +1,12 @@
+menu "Xiaomi MIUI additions"
+
+config XIAOMI_MIUI
+	bool "Enable Xiaomi MIUI modifications"
+	depends on BOARD_XIAOMI
+	help
+	  Enables compilation of Xiaomi MIUI specific vendor additions
+
+	  Say Y if you want to compile the Xiaomi MIUI specific kernel modifications.
+	  Say N if you want to discard the Xiaomi MIUI specific kernel modifications.
+
+endmenu
