@@ -19,6 +19,9 @@
 #include <linux/user_namespace.h>
 #include <linux/proc_fs.h>
 #include <linux/proc_ns.h>
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+#include <linux/pkg_stat.h>
+#endif
 
 /*
  * userns count is 1 for root user, 1 for init_uts_ns,
@@ -103,6 +106,10 @@ struct user_struct root_user = {
 	.locked_shm     = 0,
 	.uid		= GLOBAL_ROOT_UID,
 	.ratelimit	= RATELIMIT_STATE_INIT(root_user.ratelimit, 0, 0),
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	.pkg.lock	= __RW_LOCK_UNLOCKED(root_user.pkg.lock),
+	.pkg.list	= LIST_HEAD_INIT(root_user.pkg.list),
+#endif
 };
 
 /*
@@ -190,6 +197,9 @@ struct user_struct *alloc_uid(kuid_t uid)
 
 		new->uid = uid;
 		refcount_set(&new->__count, 1);
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+		init_package_runtime_info(new);
+#endif
 		ratelimit_state_init(&new->ratelimit, HZ, 100);
 		ratelimit_set_flags(&new->ratelimit, RATELIMIT_MSG_ON_RELEASE);
 

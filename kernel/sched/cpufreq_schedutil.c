@@ -283,6 +283,20 @@ static void sugov_deferred_update(struct sugov_policy *sg_policy, u64 time,
 	irq_work_queue(&sg_policy->irq_work);
 }
 
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+__weak unsigned int glk_freq_limit(struct cpufreq_policy *policy,
+		unsigned int *target_freq)
+{
+	return 0;
+}
+
+__weak unsigned long glk_cal_freq(struct cpufreq_policy *policy,
+		unsigned long util, unsigned long max)
+{
+	return 0;
+}
+#endif
+
 #define TARGET_LOAD 80
 /**
  * get_next_freq - Compute a new frequency for a given cpufreq policy.
@@ -310,10 +324,23 @@ static unsigned int get_next_freq(struct sugov_policy *sg_policy,
 				  unsigned long util, unsigned long max)
 {
 	struct cpufreq_policy *policy = sg_policy->policy;
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	unsigned int walt_freq;
+#endif
 	unsigned int freq = arch_scale_freq_invariant() ?
 				policy->cpuinfo.max_freq : policy->cur;
 
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	walt_freq = map_util_freq(util, freq, max);
+	freq = glk_cal_freq(policy, util, max);
+	if (!freq)
+		freq = glk_freq_limit(policy, &walt_freq);
+	else
+		sg_policy->need_freq_update = true;
+#else
 	freq = map_util_freq(util, freq, max);
+#endif
+
 	trace_sugov_next_freq(policy->cpu, util, max, freq);
 
 	if (freq == sg_policy->cached_raw_freq && !sg_policy->need_freq_update)

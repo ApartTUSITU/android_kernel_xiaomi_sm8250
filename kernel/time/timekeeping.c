@@ -2196,12 +2196,18 @@ void ktime_get_coarse_ts64(struct timespec64 *ts)
 }
 EXPORT_SYMBOL(ktime_get_coarse_ts64);
 
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+void __weak package_runtime_monitor(u64 now) {}
+#endif
 /*
  * Must hold jiffies_lock
  */
 void do_timer(unsigned long ticks)
 {
 	jiffies_64 += ticks;
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	package_runtime_monitor(jiffies_64);
+#endif
 	calc_global_load(ticks);
 }
 

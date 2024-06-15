@@ -1937,6 +1937,12 @@ void blk_init_request_from_bio(struct request *req, struct bio *bio)
 	else
 		req->ioprio = IOPRIO_PRIO_VALUE(IOPRIO_CLASS_NONE, 0);
 	req->write_hint = bio->bi_write_hint;
+
+#ifdef CONFIG_PERF_HUMANTASK
+	if (bio->human_task)
+		req->ioprio = 0;
+#endif
+
 	blk_rq_bio_prep(req->q, req, bio);
 }
 EXPORT_SYMBOL_GPL(blk_init_request_from_bio);
@@ -2032,6 +2038,11 @@ get_rq:
 	 * often, and the elevators are able to handle it.
 	 */
 	blk_init_request_from_bio(req, bio);
+
+#ifdef CONFIG_PERF_HUMANTASK
+	if (bio->human_task)
+		where = ELEVATOR_INSERT_FRONT;
+#endif
 
 	if (test_bit(QUEUE_FLAG_SAME_COMP, &q->queue_flags))
 		req->cpu = raw_smp_processor_id();

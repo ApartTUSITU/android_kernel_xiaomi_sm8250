@@ -591,7 +591,11 @@ out:
 
 static int init_binder_logs(struct super_block *sb)
 {
+#ifdef CONFIG_XIAOMI_MIUI
+	struct dentry *binder_logs_root_dir, *dentry, *proc_log_dir, *proc_transaction_log_dir;
+#else
 	struct dentry *binder_logs_root_dir, *dentry, *proc_log_dir;
+#endif
 	struct binderfs_info *info;
 	int ret = 0;
 
@@ -648,6 +652,15 @@ static int init_binder_logs(struct super_block *sb)
 	}
 	info = sb->s_fs_info;
 	info->proc_log_dir = proc_log_dir;
+
+#ifdef CONFIG_XIAOMI_MIUI
+	proc_transaction_log_dir = binderfs_create_dir(binder_logs_root_dir, "proc_transaction");
+	if (IS_ERR(proc_transaction_log_dir)) {
+		ret = PTR_ERR(proc_transaction_log_dir);
+		goto out;
+	}
+	info->proc_transaction_log_dir = proc_transaction_log_dir;
+#endif
 
 out:
 	return ret;

@@ -6,6 +6,9 @@
 #include <linux/atomic.h>
 #include <linux/refcount.h>
 #include <linux/ratelimit.h>
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+#include <linux/pkg_stat.h>
+#endif
 
 struct key;
 
@@ -38,6 +41,10 @@ struct user_struct {
 	/* Hash table maintenance information */
 	struct hlist_node uidhash_node;
 	kuid_t uid;
+
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	struct package_runtime_info pkg;
+#endif
 
 #if defined(CONFIG_PERF_EVENTS) || defined(CONFIG_BPF_SYSCALL) || \
     defined(CONFIG_NET)

@@ -212,6 +212,12 @@ static inline unsigned int cpufreq_quick_get_max(unsigned int cpu)
 static inline void disable_cpufreq(void) { }
 #endif
 
+#ifdef CONFIG_MIGT_ENERGY_MODEL
+void create_cpu_pcost_entry(struct cpufreq_policy *policy);
+#else
+static inline void create_cpu_pcost_entry(struct cpufreq_policy *policy) { };
+#endif
+
 #ifdef CONFIG_CPU_FREQ_STAT
 void cpufreq_stats_create_table(struct cpufreq_policy *policy);
 void cpufreq_stats_free_table(struct cpufreq_policy *policy);

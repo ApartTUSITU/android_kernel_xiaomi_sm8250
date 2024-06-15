@@ -24,6 +24,9 @@
 
 #define MAX_PRIO		(MAX_RT_PRIO + NICE_WIDTH)
 #define DEFAULT_PRIO		(MAX_RT_PRIO + NICE_WIDTH / 2)
+#ifdef CONFIG_PERF_HUMANTASK
+#define MAX_LEVER               3
+#endif
 
 /*
  * Convert user-nice values [ -20 ... 0 ... 19 ]

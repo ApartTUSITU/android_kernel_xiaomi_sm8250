@@ -450,6 +450,28 @@ static u64 freezer_parent_freezing_read(struct cgroup_subsys_state *css,
 	return (bool)(freezer->state & CGROUP_FREEZING_PARENT);
 }
 
+#ifdef CONFIG_MILLET
+int __weak millet_can_attach(struct cgroup_taskset *tset)
+{
+	return 0;
+}
+
+int __weak millet_cancel_attach(struct cgroup_taskset *tset)
+{
+	return 0;
+}
+
+static int freezer_can_attach(struct cgroup_taskset *tset)
+{
+	return millet_can_attach(tset);
+}
+
+static void freezer_cancel_attach(struct cgroup_taskset *tset)
+{
+	millet_cancel_attach(tset);
+}
+#endif
+
 static struct cftype files[] = {
 	{
 		.name = "state",
@@ -475,6 +497,10 @@ struct cgroup_subsys freezer_cgrp_subsys = {
 	.css_online	= freezer_css_online,
 	.css_offline	= freezer_css_offline,
 	.css_free	= freezer_css_free,
+#ifdef CONFIG_MILLET
+	.can_attach	= freezer_can_attach,
+	.cancel_attach	= freezer_cancel_attach,
+#endif
 	.attach		= freezer_attach,
 	.fork		= freezer_fork,
 	.legacy_cftypes	= files,

@@ -16,7 +16,13 @@
  * boost is responsible for disabling it as well.
  */
 
+#ifdef CONFIG_XIAOMI_MIUI
+unsigned int mi_sched_boost;
+#endif
 unsigned int sysctl_sched_boost; /* To/from userspace */
+#ifdef CONFIG_XIAOMI_MIUI
+unsigned int sysctl_sched_boost_top_app;
+#endif
 unsigned int sched_boost_type; /* currently activated sched boost */
 enum sched_boost_policy boost_policy;
 
@@ -56,12 +62,23 @@ static void set_boost_policy(int type)
 
 static bool verify_boost_params(int type)
 {
+#ifdef CONFIG_XIAOMI_MIUI
+	return type >= RESTRAINED_BOOST_DISABLE && type <= MI_BOOST;
+#else
 	return type >= RESTRAINED_BOOST_DISABLE && type <= RESTRAINED_BOOST;
+#endif
 }
 
 static void sched_no_boost_nop(void)
 {
 }
+
+#ifdef CONFIG_XIAOMI_MIUI
+static bool verify_boost_top_app_params(int type)
+{
+	return type >= 0;
+}
+#endif
 
 static void sched_full_throttle_boost_enter(void)
 {
@@ -208,6 +225,15 @@ static void sched_boost_disable_all(void)
 
 static void _sched_set_boost(int type)
 {
+#ifdef CONFIG_XIAOMI_MIUI
+	if (type == MI_BOOST) {
+		type = FULL_THROTTLE_BOOST;
+		mi_sched_boost = MI_BOOST;
+	} else if (FULL_THROTTLE_BOOST + type == NO_BOOST){
+		mi_sched_boost = NO_BOOST;
+	}
+#endif
+
 	if (type == 0)
 		sched_boost_disable_all();
 	else if (type > 0)
@@ -227,6 +253,13 @@ static void _sched_set_boost(int type)
 	set_boost_policy(sysctl_sched_boost);
 	trace_sched_set_boost(sysctl_sched_boost);
 }
+
+#ifdef CONFIG_XIAOMI_MIUI
+static void sched_set_boost_top_app(int type)
+{
+	sysctl_sched_boost_top_app = type;
+}
+#endif
 
 void sched_boost_parse_dt(void)
 {
@@ -281,3 +314,34 @@ done:
 	mutex_unlock(&boost_mutex);
 	return ret;
 }
+
+#ifdef CONFIG_XIAOMI_MIUI
+int sched_boost_top_app_handler(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp,
+		loff_t *ppos)
+{
+	int ret;
+	unsigned int *data = (unsigned int *)table->data;
+
+	mutex_lock(&boost_mutex);
+
+	ret = proc_dointvec_minmax(table, write, buffer, lenp, ppos);
+
+	if (ret || !write)
+		goto done;
+
+	if (verify_boost_top_app_params(*data))
+		sched_set_boost_top_app(*data);
+	else
+		ret = -EINVAL;
+
+done:
+	mutex_unlock(&boost_mutex);
+	return ret;
+}
+
+bool sched_boost_top_app(void)
+{
+	return sysctl_sched_boost_top_app > 0 && mi_sched_boost == MI_BOOST;
+}
+#endif

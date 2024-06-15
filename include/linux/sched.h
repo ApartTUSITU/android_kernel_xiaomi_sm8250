@@ -31,6 +31,9 @@
 #include <linux/task_io_accounting.h>
 #include <linux/rseq.h>
 #include <linux/android_kabi.h>
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+#include <linux/pkg_stat.h>
+#endif
 
 /* task_struct member predeclarations (sorted alphabetically): */
 struct audit_context;
@@ -1406,6 +1409,21 @@ struct task_struct {
 	 */
 	u64				timer_slack_ns;
 	u64				default_timer_slack_ns;
+#ifdef CONFIG_XIAOMI_MIUI
+	unsigned int			top_app;
+	unsigned int			inherit_top_app;
+	unsigned int    		critical_task;
+#endif
+#ifdef CONFIG_PERF_CRITICAL_RT_TASK
+	unsigned int    		critical_rt_task;
+#endif
+#ifdef CONFIG_SF_BINDER
+	unsigned int			sf_binder_task;
+#endif
+#ifdef CONFIG_PERF_HUMANTASK
+	unsigned int 			human_task;
+	unsigned int 			cpux;
+#endif
 
 #ifdef CONFIG_KASAN
 	unsigned int			kasan_depth;
@@ -1535,6 +1553,9 @@ struct task_struct {
 #endif
 	ANDROID_KABI_RESERVE(8);
 
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+struct package_runtime_info pkg;
+#endif
 	/*
 	 * New fields for task_struct should be added above here, so that
 	 * they are included in the randomized portion of task_struct.
@@ -2278,5 +2299,16 @@ static inline void set_wake_up_idle(bool enabled)
 	else
 		current->flags &= ~PF_WAKE_UP_IDLE;
 }
+
+#ifdef CONFIG_XIAOMI_MIUI
+extern inline bool is_critical_task(struct task_struct *p);
+extern inline bool is_top_app(struct task_struct *p);
+extern inline bool is_inherit_top_app(struct task_struct *p);
+
+#define INHERIT_DEPTH 2
+extern inline void set_inherit_top_app(struct task_struct *p,
+					struct task_struct *from);
+extern inline void restore_inherit_top_app(struct task_struct *p);
+#endif // CONFIG_XIAOMI_MIUI
 
 #endif

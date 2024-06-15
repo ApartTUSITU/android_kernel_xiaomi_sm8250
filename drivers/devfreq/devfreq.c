@@ -636,6 +636,9 @@ struct devfreq *devfreq_add_device(struct device *dev,
 	devfreq->previous_freq = profile->initial_freq;
 	devfreq->last_status.current_frequency = profile->initial_freq;
 	devfreq->data = data;
+#ifdef CONFIG_MIGT_ENERGY_MODEL
+	devfreq->flag = DF_NORMAL;
+#endif
 	devfreq->nb.notifier_call = devfreq_notifier_call;
 	devfreq->dev_suspended = false;
 

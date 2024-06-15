@@ -2795,12 +2795,18 @@ int cgroup_migrate(struct task_struct *leader, bool threadgroup,
  *
  * Call holding cgroup_mutex and cgroup_threadgroup_rwsem.
  */
+#ifdef CONFIG_PERF_HUMANTASK
+#define PATH_LEN 1024
+#endif
 int cgroup_attach_task(struct cgroup *dst_cgrp, struct task_struct *leader,
 		       bool threadgroup)
 {
 	DEFINE_CGROUP_MGCTX(mgctx);
 	struct task_struct *task;
 	int ret;
+#ifdef CONFIG_PERF_HUMANTASK
+	char dst_path[PATH_LEN];
+#endif
 
 	ret = cgroup_migrate_vet_dst(dst_cgrp);
 	if (ret)
@@ -2825,9 +2831,28 @@ int cgroup_attach_task(struct cgroup *dst_cgrp, struct task_struct *leader,
 
 	cgroup_migrate_finish(&mgctx);
 
-	if (!ret)
+	if (!ret) {
+#ifdef CONFIG_PERF_HUMANTASK
+		memset(dst_path, 0, sizeof(dst_path));
+		cgroup_path(dst_cgrp, dst_path, PATH_LEN);
+		trace_cgroup_attach_task(dst_cgrp, dst_path, leader, threadgroup);
+		if (strlen(dst_path) > 2) {
+			task_lock(leader);
+			if (strstr(dst_path, "top-app") &&
+			   (leader->pid == leader->tgid ||
+			    !strcmp(leader->comm, "RenderThread"))) {
+				if (!leader->human_task) {
+					leader->human_task++;
+				}
+			} else {
+				leader->human_task = 0;
+			}
+			task_unlock(leader);
+		}
+#else
 		TRACE_CGROUP_PATH(attach_task, dst_cgrp, leader, threadgroup);
-
+#endif
+	}
 	return ret;
 }
 

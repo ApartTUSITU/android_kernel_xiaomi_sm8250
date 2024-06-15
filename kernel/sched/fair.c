@@ -61,6 +61,10 @@ walt_dec_cfs_rq_stats(struct cfs_rq *cfs_rq, struct task_struct *p) {}
 
 #endif
 
+#ifdef CONFIG_XIAOMI_MIUI
+unsigned int super_big_cpu = 7;
+#endif
+
 /*
  * Targeted preemption latency for CPU-bound tasks:
  *
@@ -86,6 +90,9 @@ unsigned int sysctl_sched_sync_hint_enable = 1;
  * Enable/disable using cstate knowledge in idle sibling selection
  */
 unsigned int sysctl_sched_cstate_aware = 1;
+#ifdef CONFIG_XIAOMI_MIUI
+unsigned int sysctl_boost_stask_to_big = 1;
+#endif
 
 /*
  * The initial- and re-scaling of tunables is configurable
@@ -598,12 +605,43 @@ static void update_min_vruntime(struct cfs_rq *cfs_rq)
 
 	/* ensure we never gain time by being placed backwards. */
 	cfs_rq->min_vruntime = max_vruntime(cfs_rq->min_vruntime, vruntime);
+#ifdef CONFIG_XIAOMI_MIUI
+	cfs_rq->min_vruntimex = min_vruntime(cfs_rq->min_vruntime, vruntime);
+#endif
 #ifndef CONFIG_64BIT
 	smp_wmb();
 	cfs_rq->min_vruntime_copy = cfs_rq->min_vruntime;
 #endif
 }
 
+#ifdef CONFIG_PERF_HUMANTASK
+static inline bool jump_queue(struct task_struct *tsk,
+			      struct rb_node *root)
+{
+	bool jump = false;
+
+	if (tsk && tsk->human_task && root) {
+		if (tsk->human_task > MAX_LEVER ||
+			sched_mi_boost() == MI_BOOST) {
+			jump = true;
+			goto out;
+		}
+
+		// 66%
+		if (tsk->human_task < MAX_LEVER)
+			jump = true;
+
+		tsk->human_task = jump ? ++tsk->human_task : 1;
+	}
+out:
+	if (jump)
+		trace_sched_debug_einfo(tsk, "jumper", "boostx",
+			tsk->human_task, sched_boost(), sched_mi_boost(),
+			sched_boost_top_app(), 0);
+
+	return jump;
+}
+#endif
 /*
  * Enqueue an entity into the rb-tree:
  */
@@ -613,6 +651,17 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 	struct rb_node *parent = NULL;
 	struct sched_entity *entry;
 	bool leftmost = true;
+#ifdef CONFIG_PERF_HUMANTASK
+	bool speed = false;
+	struct task_struct *tsk = NULL;
+	if (entity_is_task(se)) {
+		tsk = task_of(se);
+		speed = jump_queue(tsk, *link);
+	}
+
+	if (speed)
+		se->vruntime = tsk->human_task * 1000000;
+#endif
 
 	/*
 	 * Find the right place in the rbtree:
@@ -631,6 +680,11 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			leftmost = false;
 		}
 	}
+
+#ifdef CONFIG_PERF_HUMANTASK
+	if (speed)
+		se->vruntime = entry ->vruntime  -1;
+#endif
 
 	rb_link_node(&se->run_node, parent, link);
 	rb_insert_color_cached(&se->run_node,
@@ -6941,6 +6995,20 @@ static int get_start_cpu(struct task_struct *p)
 		return start_cpu;
 	}
 
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	if (game_super_task(p)) {
+		if (sysctl_boost_stask_to_big)
+			return rd->max_cap_orig_cpu;
+		return rd->mid_cap_orig_cpu;
+	}
+
+	if (game_vip_task(p))
+		return rd->mid_cap_orig_cpu;
+
+	if (fas_power_bias(p))
+		return rd->min_cap_orig_cpu;
+#endif
+
 	if (start_cpu == -1 || start_cpu == rd->max_cap_orig_cpu)
 		return start_cpu;
 
@@ -6961,6 +7029,9 @@ enum fastpaths {
 	NONE = 0,
 	SYNC_WAKEUP,
 	PREV_CPU_FASTPATH,
+#ifdef CONFIG_XIAOMI_MIUI
+	SCHED_BIG_TOP,
+#endif
 };
 
 static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
@@ -6992,6 +7063,13 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	int isolated_candidate = -1;
 	unsigned int target_nr_rtg_high_prio = UINT_MAX;
 	bool rtg_high_prio_task = task_rtg_high_prio(p);
+#ifdef CONFIG_XIAOMI_MIUI
+	struct root_domain *rd;
+#endif
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	if (!prefer_idle)
+		prefer_idle = !!game_vip_task(p);
+#endif
 
 	/*
 	 * In most cases, target_capacity tracks capacity_orig of the most
@@ -7012,6 +7090,9 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 
 	/* Find start CPU based on boost value */
 	start_cpu = fbt_env->start_cpu;
+#ifdef CONFIG_XIAOMI_MIUI
+	rd = cpu_rq(start_cpu)->rd;
+#endif
 	/* Find SD for the start CPU */
 	start_sd = rcu_dereference(per_cpu(sd_asym_cpucapacity, start_cpu));
 	if (!start_sd)
@@ -7062,6 +7143,14 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 
 			if (fbt_env->skip_cpu == i)
 				continue;
+
+#ifdef CONFIG_XIAOMI_MIUI
+			if (sched_boost_top_app() && rd->mid_cap_orig_cpu != -1 &&
+				((i < rd->mid_cap_orig_cpu && MAX_USER_RT_PRIO <= p->prio &&
+				p->prio < DEFAULT_PRIO) ||
+				(i >= rd->mid_cap_orig_cpu && p->prio > DEFAULT_PRIO)))
+				break;
+#endif
 
 			/*
 			 * p's blocked utilization is still accounted for on prev_cpu
@@ -7354,6 +7443,22 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 		 * iterate lower capacity CPUs unless the task can't be
 		 * accommodated in the higher capacity CPUs.
 		 */
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+		if (!sysctl_boost_stask_to_big) {
+			if (best_idle_cpu != -1) {
+				if (game_vip_task(p))
+					break;
+			} else if (target_cpu != -1 || best_active_cpu != -1) {
+				if (game_vip_task(p))
+					break;
+			}
+		} else {
+			if (game_vip_task(p) &&
+				(best_idle_cpu != -1 || target_cpu != -1 || best_active_cpu != -1))
+				break;
+		}
+#endif
+
 		if ((prefer_idle && best_idle_cpu != -1) ||
 		    (boosted && (best_idle_cpu != -1 || target_cpu != -1 ||
 		     (fbt_env->strict_max && most_spare_cap_cpu != -1)))) {
@@ -7814,6 +7919,16 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 		goto done;
 	}
 
+#ifdef CONFIG_XIAOMI_MIUI
+	if (sched_boost_top_app() && is_top_app(p) &&
+	    cpu_online(super_big_cpu) && !cpu_isolated(super_big_cpu) &&
+	    cpumask_test_cpu(super_big_cpu, &p->cpus_allowed)) {
+		best_energy_cpu = super_big_cpu;
+		fbt_env.fastpath = SCHED_BIG_TOP;
+		goto done;
+	}
+#endif
+
 	rcu_read_lock();
 	pd = rcu_dereference(rd->pd);
 	if (!pd)
@@ -7886,6 +8001,9 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 #endif
 	if (task_placement_boost_enabled(p) || fbt_env.need_idle || boosted ||
 	    is_rtg || __cpu_overutilized(prev_cpu, delta) ||
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+	    game_vip_task(p) ||
+#endif
 	    !task_fits_max(p, prev_cpu) || cpu_isolated(prev_cpu)) {
 		best_energy_cpu = cpu;
 		goto unlock;
@@ -7933,6 +8051,9 @@ done:
 			sync, fbt_env.need_idle, fbt_env.fastpath,
 			placement_boost, start_t, boosted, is_rtg,
 			get_rtg_status(p), start_cpu);
+#ifdef CONFIG_PERF_HUMANTASK
+	p->cpux = best_energy_cpu;
+#endif
 
 	return best_energy_cpu;
 
@@ -7941,6 +8062,14 @@ fail:
 eas_not_ready:
 	return -1;
 }
+
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+static inline void wake_render(struct task_struct *p)
+{
+	if (is_render_thread(p))
+		current->pkg.migt.wake_render++;
+}
+#endif
 
 /*
  * select_task_rq_fair: Select target runqueue for the waking task in domains
@@ -7966,6 +8095,10 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 
 	if (static_branch_unlikely(&sched_energy_present)) {
 		rcu_read_lock();
+#ifdef CONFIG_PACKAGE_RUNTIME_INFO
+		wake_render(p);
+#endif
+
 		new_cpu = find_energy_efficient_cpu(p, prev_cpu, sync,
 						    sibling_count_hint);
 		if (unlikely(new_cpu < 0))
@@ -8976,6 +9109,13 @@ redo:
 			env->flags |= LBF_NEED_BREAK;
 			break;
 		}
+
+#ifdef CONFIG_XIAOMI_MIUI
+		if (sched_boost_top_app() &&
+				super_big_cpu == env->src_cpu &&
+				is_top_app(p))
+			goto next;
+#endif
 
 		if (!can_migrate_task(p, env))
 			goto next;
