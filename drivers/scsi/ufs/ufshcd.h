@@ -931,6 +931,12 @@ struct ufs_hba {
 	 */
 	#define UFSHCI_QUIRK_BROKEN_HCE				0x400
 
+	/*
+	* This quirk needs to be enabled if the host controller cannot
+	* support SAMSUNG and WDC interface configuration.
+	*/
+	#define UFS_DEVICE_QUIRK_PA_SYNCLENGTH			0x700
+
 	/* HIBERN8 support is broken */
 	#define UFSHCD_QUIRK_BROKEN_HIBERN8			0x800
 
