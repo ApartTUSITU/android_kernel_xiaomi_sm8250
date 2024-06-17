@@ -6158,13 +6158,6 @@ static void fts_update_touchmode_data(void)
 	const struct fts_hw_platform_data *bdata = fts_info->board;
 	static expert_mode = false;
 
-	ret = wait_event_interruptible_timeout(fts_info->wait_queue, !(fts_info->irq_status ||
-	fts_info->touch_id), msecs_to_jiffies(500));
-
-	if (ret <= 0) {
-		logError(1, "%s %s: wait touch finger up timeout\n", tag, __func__);
-		return;
-	}
 	if (fts_info->tp_pm_suspend) {
 		logError(1, "%s %s tp is in suspend mode,do't set gamemode\n", tag, __func__);
 		return;
