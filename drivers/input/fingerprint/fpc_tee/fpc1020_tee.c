@@ -25,8 +25,7 @@
  * as published by the Free Software Foundation.
  */
 
-#define FPC_DRM_INTERFACE_WA
-
+// #define FPC_DRM_INTERFACE_WA
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/atomic.h>
@@ -43,8 +42,10 @@
 #include <linux/pm_wakeup.h>
 #include <linux/fb.h>
 #include <linux/pinctrl/qcom-pinctrl.h>
+#ifndef FPC_DRM_INTERFACE_WA
 #include <drm/drm_bridge.h>
 #include <drm/drm_notifier_mi.h>
+#endif
 
 #define FPC_GPIO_NO_DEFAULT -1
 #define FPC_GPIO_NO_DEFINED -2
@@ -989,6 +990,7 @@ static int fpc1020_request_named_gpio(struct fpc1020_data *fpc1020,
 	return 0;
 }
 
+#ifndef FPC_DRM_INTERFACE_WA
 static int fpc_fb_notif_callback(struct notifier_block *nb, unsigned long val,
 				 void *data)
 {
@@ -1025,6 +1027,7 @@ static int fpc_fb_notif_callback(struct notifier_block *nb, unsigned long val,
 static struct notifier_block fpc_notif_block = {
 	.notifier_call = fpc_fb_notif_callback,
 };
+#endif
 
 static int fpc1020_probe(struct platform_device *pdev)
 {
@@ -1120,9 +1123,9 @@ static int fpc1020_probe(struct platform_device *pdev)
 	fpc1020->wait_finger_down = false;
 #ifndef FPC_DRM_INTERFACE_WA
 	INIT_WORK(&fpc1020->work, notification_work);
-#endif
 	fpc1020->fb_notifier = fpc_notif_block;
 	mi_drm_register_client(&fpc1020->fb_notifier);
+#endif
 
 	//rc = hw_reset(fpc1020);
 
@@ -1143,7 +1146,9 @@ static int fpc1020_remove(struct platform_device *pdev)
 {
 	struct fpc1020_data *fpc1020 = platform_get_drvdata(pdev);
 
+#ifndef FPC_DRM_INTERFACE_WA
 	mi_drm_unregister_client(&fpc1020->fb_notifier);
+#endif
 	sysfs_remove_group(&pdev->dev.kobj, &attribute_group);
 	mutex_destroy(&fpc1020->lock);
 	wakeup_source_unregister(fpc1020->ttw_wl);
