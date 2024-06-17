@@ -823,8 +823,6 @@ static ssize_t irq_get(struct device *dev, struct device_attribute *attr,
 static ssize_t irq_ack(struct device *dev, struct device_attribute *attr,
 		       const char *buf, size_t count)
 {
-	struct fpc1020_data *fpc1020 = dev_get_drvdata(dev);
-
 	return count;
 }
 
