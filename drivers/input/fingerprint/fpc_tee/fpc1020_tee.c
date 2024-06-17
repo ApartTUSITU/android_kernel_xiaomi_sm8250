@@ -883,7 +883,6 @@ static DEVICE_ATTR(irq_enable, S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP, NULL,
 		   irq_enable_set);
 
 static struct attribute *attributes[] = {
-					  &dev_attr_screen.attr,
 					  &dev_attr_power_ctrl.attr,
 					  &dev_attr_request_vreg.attr,
 					  &dev_attr_pinctl_set.attr,
