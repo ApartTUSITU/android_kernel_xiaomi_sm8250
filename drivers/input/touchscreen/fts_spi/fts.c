@@ -3945,13 +3945,17 @@ static void fts_enter_pointer_event_handler(struct fts_ts_info *info,
 				info->fod_x = x;
 				info->fod_y = y;
 				info->fod_coordinate_update = true;
-				__set_bit(touchId, &info->fod_id);
 				input_report_abs(info->input_dev, ABS_MT_WIDTH_MINOR, info->fod_overlap);
 				if (!info->board->support_fod) {
 					input_report_key(info->input_dev, BTN_INFO, 1);
 					mi_disp_set_fod_queue_work(1, true);
 				}
-				logError(1,	"%s  %s :  FOD Press :%d, fod_id:%08x\n", tag, __func__, touchId, info->fod_id);
+				if (!__test_and_set_bit(touchId, &info->fod_id))
+					logError(
+						1,
+						"%s  %s :  FOD Press :%d, fod_id:%08x\n",
+						tag, __func__, touchId,
+						info->fod_id);
 			}
 		} else if (__test_and_clear_bit(touchId, &info->fod_id)) {
 			input_report_abs(info->input_dev, ABS_MT_WIDTH_MINOR, 0);
