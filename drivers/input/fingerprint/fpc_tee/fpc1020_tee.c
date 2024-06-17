@@ -169,22 +169,6 @@ static int request_vreg_gpio(struct fpc1020_data *fpc1020, bool enable)
 	mutex_lock(&fpc1020->lock);
 
 	if (enable && !fpc1020->gpios_requested) {
-		rc = fpc1020_request_named_gpio(fpc1020, "fpc,gpio_vdd1v8",
-						&fpc1020->vdd1v8_gpio);
-		if (rc == FPC_GPIO_NO_DEFINED) {
-			dev_err(dev, "fpc vdd1v8 gpio get failed!\n");
-			vreg_conf[0].gpio = FPC_GPIO_NO_DEFAULT;
-		} else if (rc == FPC_GPIO_REQUEST_FAIL) {
-			dev_err(dev, "fpc vdd1v8 gpio request failed!\n");
-			goto release_vreg_gpio;
-		} else {
-			dev_info(dev, "fpc vdd1v8 gpio applied at  %d\n",
-				 fpc1020->vdd1v8_gpio);
-			vreg_conf[0].gpio = fpc1020->vdd1v8_gpio;
-		}
-
-		dev_info(dev, "fpc vreg gpio requested successfully!\n");
-
 		rc = fpc1020_request_named_gpio(fpc1020, "fpc,gpio_irq",
 						&fpc1020->irq_gpio);
 		if (rc) {
@@ -230,19 +214,11 @@ static int request_vreg_gpio(struct fpc1020_data *fpc1020, bool enable)
 			fpc1020->irq_requested = false;
 		}
 
-	release_irq_gpio:
+release_irq_gpio:
 		if (gpio_is_valid(fpc1020->irq_gpio)) {
 			devm_gpio_free(dev, fpc1020->irq_gpio);
 			fpc1020->irq_gpio = FPC_GPIO_NO_DEFAULT;
 			dev_info(dev, "fpc irq gpio released successfully!\n");
-		}
-
-	release_vreg_gpio:
-		if (gpio_is_valid(fpc1020->vdd1v8_gpio)) {
-			devm_gpio_free(dev, fpc1020->vdd1v8_gpio);
-			fpc1020->vdd1v8_gpio = FPC_GPIO_NO_DEFAULT;
-			vreg_conf[0].gpio = FPC_GPIO_NO_DEFAULT;
-			dev_info(dev, "fpc vreg gpio released successfully!\n");
 		}
 
 		fpc1020->gpios_requested = false;
