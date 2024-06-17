@@ -253,7 +253,7 @@ static int irq_setup(struct fpc1020_data *fpc1020, bool enable)
 			enable_irq_wake(gpio_to_irq(fpc1020->irq_gpio));
 			dev_info(dev, "fpc irq_gpio is enable.\n");
 		} else {
-			disable_irq_wake(gpio_to_irq(fpc1020->irq_gpio));
+			disable_irq(gpio_to_irq(fpc1020->irq_gpio));
 			dev_info(dev, "fpc irq_gpio is disable.\n");
 		}
 	} else {
