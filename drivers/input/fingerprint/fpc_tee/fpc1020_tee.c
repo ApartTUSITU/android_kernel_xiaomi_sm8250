@@ -917,12 +917,10 @@ static irqreturn_t fpc1020_irq_handler(int irq, void *handle)
 {
 	struct fpc1020_data *fpc1020 = handle;
 
-	mutex_lock(&fpc1020->lock);
 	if (atomic_read(&fpc1020->wakeup_enabled)) {
 		fpc1020->nbr_irqs_received++;
 		__pm_wakeup_event(fpc1020->ttw_wl, FPC_TTW_HOLD_TIME);
 	}
-	mutex_unlock(&fpc1020->lock);
 
 	sysfs_notify(&fpc1020->dev->kobj, NULL, dev_attr_irq.attr.name);
 	if (fpc1020->wait_finger_down && fpc1020->fb_black &&
