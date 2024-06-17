@@ -27,7 +27,6 @@
 
 #define FPC_DRM_INTERFACE_WA
 
-#define CONFIG_FINGERPRINT_FP_VREG_CONTROL
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/atomic.h>
@@ -81,9 +80,7 @@ struct vreg_config {
 	int gpio;
 };
 
-#ifdef CONFIG_FINGERPRINT_FP_VREG_CONTROL
 struct regulator *vreg;
-#endif
 
 static struct vreg_config vreg_conf[] = {
 	{ "vdd_ana", 1800000UL, 1800000UL, 6000, FPC_GPIO_NO_DEFAULT },
@@ -563,7 +560,6 @@ static int device_prepare(struct fpc1020_data *fpc1020, bool enable)
 
 		select_pin_ctl(fpc1020, "fpc1020_reset_reset");
 
-#ifdef CONFIG_FINGERPRINT_FP_VREG_CONTROL
 		pr_info("Try to enable fp_vdd_vreg\n");
 		vreg = regulator_get(dev, "fp_vdd_vreg");
 
@@ -585,13 +581,6 @@ static int device_prepare(struct fpc1020_data *fpc1020, bool enable)
 		}
 
 		pr_info("fp_vdd_vreg is enabled!\n");
-#else
-		rc = vreg_setup(fpc1020, "vdd_ana", true);
-		if (rc) {
-			dev_dbg(dev, "fpc power on failed。\n");
-			goto exit;
-		}
-#endif
 		usleep_range(PWR_ON_SLEEP_MIN_US, PWR_ON_SLEEP_MAX_US);
 
 		/* As we can't control chip select here the other part of the
@@ -614,13 +603,6 @@ static int device_prepare(struct fpc1020_data *fpc1020, bool enable)
 		(void)select_pin_ctl(fpc1020, "fpc1020_reset_reset");
 
 		usleep_range(PWR_ON_SLEEP_MIN_US, PWR_ON_SLEEP_MAX_US);
-#ifndef CONFIG_FINGERPRINT_FP_VREG_CONTROL
-		rc = vreg_setup(fpc1020, "vdd_ana", false);
-		if (rc) {
-			dev_dbg(dev, "fpc vreg power off failed.\n");
-			goto exit;
-		}
-#endif
 	exit:
 		fpc1020->prepared = false;
 	} else {
