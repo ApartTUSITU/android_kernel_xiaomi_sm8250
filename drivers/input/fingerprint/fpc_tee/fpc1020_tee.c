@@ -81,6 +81,7 @@ struct vreg_config {
 };
 
 struct regulator *vreg;
+static int power_cfg;
 
 static struct vreg_config vreg_conf[] = {
 	{ "vdd_ana", 1800000UL, 1800000UL, 6000, FPC_GPIO_NO_DEFAULT },
@@ -504,6 +505,73 @@ exit:
 	return rc;
 }
 
+static void power_reset(void)
+{
+	int status = -EINVAL;
+
+	status = regulator_get_voltage(vreg);
+	pr_info("%s, voltage before power down is %d\n", __func__, status);
+	/* power down */
+	status = regulator_disable(vreg);
+	usleep_range(100 * 1000, 200 * 1000);
+	/* power up */
+	status = regulator_enable(vreg);
+	usleep_range(100 * 1000, 200 * 1000);
+}
+
+static ssize_t power_ctrl_get(struct device *device,
+			      struct device_attribute *attribute, char *buffer)
+{
+	int enabled;
+	struct fpc1020_data *fpc1020 = dev_get_drvdata(device);
+
+	mutex_lock(&fpc1020->lock);
+	enabled = regulator_is_enabled(vreg);
+	mutex_unlock(&fpc1020->lock);
+	return scnprintf(buffer, PAGE_SIZE, "%i\n", enabled);
+}
+
+static ssize_t power_ctrl_set(struct device *device,
+			      struct device_attribute *attr, const char *buf,
+			      size_t count)
+{
+	int status = 0;
+	int voltage, enabled;
+	struct fpc1020_data *fpc1020 = dev_get_drvdata(device);
+
+	mutex_lock(&fpc1020->lock);
+	if (!strncmp(buf, "enable", strlen("enable"))) {
+		enabled = regulator_is_enabled(vreg);
+		if (enabled <= 0) {
+			status = regulator_enable(vreg);
+			usleep_range(100 * 1000, 200 * 1000);
+		}
+	} else if (!strncmp(buf, "disable", strlen("disable"))) {
+		enabled = regulator_is_enabled(vreg);
+		if (enabled > 0) {
+			status = regulator_disable(vreg);
+		}
+	} else if (!strncmp(buf, "force_disable", strlen("force_disable"))) {
+		status = regulator_force_disable(vreg);
+	} else if (!strncmp(buf, "power_on_reset", strlen("power_on_reset"))) {
+		enabled = regulator_is_enabled(vreg);
+		if (enabled <= 0) {
+			status = regulator_enable(vreg);
+			usleep_range(100 * 1000, 200 * 1000);
+		}
+		status = hw_reset(fpc1020);
+	} else {
+		status = -EINVAL;
+	}
+	voltage = regulator_get_voltage(vreg);
+	enabled = regulator_is_enabled(vreg);
+	pr_info("%s, get cmd:%s, status:%d, enabled:%d cur voltage:%d\n",
+		__func__, buf, status, enabled, voltage);
+	mutex_unlock(&fpc1020->lock);
+	return status ? status : count;
+}
+static DEVICE_ATTR(power_ctrl, S_IWUSR, power_ctrl_get, power_ctrl_set);
+
 static ssize_t hw_reset_set(struct device *dev, struct device_attribute *attr,
 			    const char *buf, size_t count)
 {
@@ -512,6 +580,7 @@ static ssize_t hw_reset_set(struct device *dev, struct device_attribute *attr,
 
 	if (!strncmp(buf, "reset", strlen("reset"))) {
 		mutex_lock(&fpc1020->lock);
+		power_reset();
 		rc = hw_reset(fpc1020);
 		mutex_unlock(&fpc1020->lock);
 	} else {
@@ -560,27 +629,44 @@ static int device_prepare(struct fpc1020_data *fpc1020, bool enable)
 
 		select_pin_ctl(fpc1020, "fpc1020_reset_reset");
 
-		pr_info("Try to enable fp_vdd_vreg\n");
-		vreg = regulator_get(dev, "fp_vdd_vreg");
+		if (power_cfg == 1) {
+			pr_info("Try to enable fp_vdd_vreg\n");
+			vreg = regulator_get(dev, "fp_vdd_vreg");
 
-		if (vreg == NULL) {
-			dev_err(dev, "fp_vdd_vreg regulator get failed!\n");
-			goto exit;
-		}
+			if (vreg == NULL) {
+				dev_err(dev,
+					"fp_vdd_vreg regulator get failed!\n");
+				goto exit;
+			}
 
-		if (regulator_is_enabled(vreg)) {
-			pr_info("fp_vdd_vreg is already enabled!\n");
+			if (regulator_is_enabled(vreg)) {
+				pr_info("fp_vdd_vreg is already enabled!\n");
+			} else {
+				rc = regulator_set_load(vreg, 100000);
+				if (rc < 0) {
+					dev_err(dev,
+						"Regulator set load failed rc = %d\n",
+						rc);
+				}
+				rc = regulator_enable(vreg);
+				if (rc) {
+					dev_err(dev,
+						"error enabling fp_vdd_vreg!\n");
+					regulator_put(vreg);
+					vreg = NULL;
+					goto exit;
+				}
+			}
+			pr_info("fp_vdd_vreg is enabled %d!\n",
+				regulator_get_voltage(vreg));
 		} else {
-			rc = regulator_enable(vreg);
+			rc = vreg_setup(fpc1020, "vdd_ana", true);
 			if (rc) {
-				dev_err(dev, "error enabling fp_vdd_vreg!\n");
-				regulator_put(vreg);
-				vreg = NULL;
+				dev_dbg(dev, "fpc power on failed.\n");
 				goto exit;
 			}
 		}
 
-		pr_info("fp_vdd_vreg is enabled!\n");
 		usleep_range(PWR_ON_SLEEP_MIN_US, PWR_ON_SLEEP_MAX_US);
 
 		/* As we can't control chip select here the other part of the
@@ -603,7 +689,22 @@ static int device_prepare(struct fpc1020_data *fpc1020, bool enable)
 		(void)select_pin_ctl(fpc1020, "fpc1020_reset_reset");
 
 		usleep_range(PWR_ON_SLEEP_MIN_US, PWR_ON_SLEEP_MAX_US);
-	exit:
+
+		if (power_cfg == 1) {
+			//disable 3.3V?
+			rc = regulator_disable(vreg);
+			if (rc) {
+				dev_dbg(dev, "fpc vreg disable failed.\n");
+				goto exit;
+			}
+		} else {
+			rc = vreg_setup(fpc1020, "vdd_ana", false);
+			if (rc) {
+				dev_dbg(dev, "fpc vreg power off failed.\n");
+				goto exit;
+			}
+		}
+exit:
 		fpc1020->prepared = false;
 	} else {
 		rc = 0;
@@ -637,6 +738,29 @@ static ssize_t device_prepare_set(struct device *dev,
 }
 
 static DEVICE_ATTR(device_prepare, S_IWUSR, NULL, device_prepare_set);
+
+static ssize_t power_cfg_set(struct device *dev, struct device_attribute *attr,
+			     const char *buf, size_t count)
+{
+	int rc = 0;
+	struct fpc1020_data *fpc1020 = dev_get_drvdata(dev);
+
+	mutex_lock(&fpc1020->lock);
+	if (!strncmp(buf, "1V8", strlen("1V8"))) {
+		power_cfg = 0;
+	} else if (!strncmp(buf, "3V3", strlen("3V3"))) {
+		power_cfg = 1;
+	} else {
+		rc = -EINVAL;
+	}
+	mutex_unlock(&fpc1020->lock);
+
+	dev_info(dev, "fpc set power_cfg: %d, rc: %d", power_cfg, rc);
+
+	return rc ? rc : count;
+}
+
+static DEVICE_ATTR(power_cfg, S_IWUSR, NULL, power_cfg_set);
 
 /**
  * sysfs node for controlling whether the driver is allowed
@@ -782,9 +906,12 @@ static DEVICE_ATTR(irq_enable, S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP, NULL,
 		   irq_enable_set);
 
 static struct attribute *attributes[] = {
+					  &dev_attr_screen.attr,
+					  &dev_attr_power_ctrl.attr,
 					  &dev_attr_request_vreg.attr,
 					  &dev_attr_pinctl_set.attr,
 					  &dev_attr_device_prepare.attr,
+					  &dev_attr_power_cfg.attr,
 					  &dev_attr_regulator_enable.attr,
 					  &dev_attr_hw_reset.attr,
 					  &dev_attr_wakeup_enable.attr,
