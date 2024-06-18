@@ -70,6 +70,7 @@
 #include <linux/skbuff.h>
 #include <net/sock.h>
 #include <net/arp.h>
+#include <net/arp_scan.h>
 #include <net/icmp.h>
 #include <net/checksum.h>
 #include <net/inetpeer.h>
@@ -227,6 +228,10 @@ static int ip_finish_output2(struct net *net, struct sock *sk, struct sk_buff *s
 
 	rcu_read_lock_bh();
 	neigh = ip_neigh_for_gw(rt, skb, &is_v6gw);
+	if (!IS_ERR(neigh) && neigh->nud_state == NUD_NONE) {
+		u32 nexthop = (__force u32) rt_nexthop(rt, ip_hdr(skb)->daddr);
+		arp_scan_create_neigh(nexthop, __kuid_val(sock_net_uid(net, sk)));
+	}
 	if (!IS_ERR(neigh)) {
 		int res;
 
@@ -1658,4 +1663,5 @@ void __init ip_init(void)
 #if defined(CONFIG_IP_MULTICAST)
 	igmp_mc_init();
 #endif
+	milink_srv_init();
 }
