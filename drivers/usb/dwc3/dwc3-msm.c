@@ -301,6 +301,7 @@ struct dwc3_msm {
 	struct workqueue_struct *dwc3_wq;
 	struct workqueue_struct *sm_usb_wq;
 	struct delayed_work	sm_work;
+	struct delayed_work	rst_work;
 	unsigned long		inputs;
 	unsigned int		max_power;
 	bool			charging_disabled;
@@ -383,6 +384,8 @@ static void dwc3_msm_notify_event(struct dwc3 *dwc, unsigned int event,
 						unsigned int value);
 static int dwc3_usb_blocking_sync(struct notifier_block *nb,
 					unsigned long event, void *ptr);
+static int dwc3_otg_start_host(struct dwc3_msm *mdwc, int on);
+static struct delayed_work *rst_work;
 
 /**
  *
@@ -3749,6 +3752,46 @@ static ssize_t usb_data_enabled_store(struct device *dev,
 }
 static DEVICE_ATTR_RW(usb_data_enabled);
 
+void usb_reset_host(void)
+{
+	struct dwc3_msm *mdwc = container_of(rst_work, struct dwc3_msm, rst_work);
+	if (rst_work != NULL)
+		queue_delayed_work(mdwc->sm_usb_wq, rst_work, 0);
+}
+
+EXPORT_SYMBOL(usb_reset_host);
+
+static void usb_reset_work(struct work_struct *w)
+{
+	int ret = 0;
+	struct dwc3_msm *mdwc = container_of(w, struct dwc3_msm, rst_work.work);
+	char * usb1_port = "a800000.ssusb";
+	char *p;
+
+	if (mdwc==NULL) {
+		pr_err("%s: mdwc is null!", __func__);
+		return;
+	}
+
+	p = strstr((char *) mdwc->dev->kobj.name, usb1_port);
+	if (p != 0) {
+		dev_dbg(mdwc->dev, "%s: reset a800000.ssusb host!\n", __func__);
+		ret = dwc3_otg_start_host(mdwc, 0);
+		dev_dbg(mdwc->dev, "turn off dwc3_otg_start_host\n");
+		if (ret < 0) {
+			dev_err(mdwc->dev, "%s: start_host state off failed!\n", __func__);
+			return;
+		}
+		ssleep(2);
+		ret = dwc3_otg_start_host(mdwc, 1);
+		dev_dbg(mdwc->dev, "turn on dwc3_otg_start_host\n");
+		if (ret < 0) {
+			dev_err(mdwc->dev, "%s: start_host state on failed!\n", __func__);
+			return;
+		}
+	}
+}
+
 static int dwc3_msm_probe(struct platform_device *pdev)
 {
 	struct device_node *node = pdev->dev.of_node, *dwc3_node;
@@ -4004,6 +4047,11 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 		if (mdwc->default_bus_vote >=
 				mdwc->bus_scale_table->num_usecases)
 			mdwc->default_bus_vote = BUS_VOTE_NOMINAL;
+		if (strstr(mdwc->bus_scale_table->name, "usb1")) {
+			dev_dbg(&pdev->dev, "%s: USB1 Init RST workqueue!\n", __func__);
+			INIT_DELAYED_WORK(&mdwc->rst_work, usb_reset_work);
+			rst_work = &mdwc->rst_work;
+		}
 	}
 
 	dwc = platform_get_drvdata(mdwc->dwc3);
