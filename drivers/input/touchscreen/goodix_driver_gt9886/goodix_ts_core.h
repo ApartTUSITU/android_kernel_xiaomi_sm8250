@@ -854,7 +854,7 @@ int goodix_ts_fb_notifier_callback(struct notifier_block *self,
 void goodix_msg_printf(const char *fmt, ...);
 int goodix_check_gesture_stat(bool enable);
 
-#ifndef CONFIG_TOUCHSCREEN_GOODIX_GTX8_UPDATE
+#if !IS_ENABLED(CONFIG_TOUCHSCREEN_GOODIX_GTX8_UPDATE)
 static inline int goodix_do_fw_update(int mode)
 {
 	return -1111;
