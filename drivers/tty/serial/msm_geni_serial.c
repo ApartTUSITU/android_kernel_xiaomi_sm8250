@@ -2445,6 +2445,9 @@ static void msm_geni_serial_shutdown(struct uart_port *uport)
 		msm_geni_serial_stop_tx(uport);
 	}
 
+	if (likely(!uart_console(uport)))
+		disable_irq(uport->irq);
+
 	if (!uart_console(uport)) {
 		if (msm_port->ioctl_count) {
 			int i;
@@ -2584,6 +2587,8 @@ static int msm_geni_serial_startup(struct uart_port *uport)
 		}
 	}
 
+	if (likely(!uart_console(uport)))
+		enable_irq(uport->irq);
 	/*
 	 * Ensure that all the port configuration writes complete
 	 * before returning to the framework.
@@ -3654,6 +3659,13 @@ static int msm_geni_serial_probe(struct platform_device *pdev)
 	irq_set_status_flags(uport->irq, IRQ_NOAUTOEN);
 	ret = devm_request_irq(uport->dev, uport->irq, msm_geni_serial_isr,
 				IRQF_TRIGGER_HIGH, dev_port->name, uport);
+	if (likely(!uart_console(uport))) {
+		/*
+		 * irq should disable untill msm_geni_serial_port_setup
+		 * called in msm_geni_serial_startup.
+		 */
+		disable_irq(uport->irq);
+	}
 	if (ret) {
 		dev_err(uport->dev, "%s: Failed to get IRQ ret %d\n",
 							__func__, ret);
