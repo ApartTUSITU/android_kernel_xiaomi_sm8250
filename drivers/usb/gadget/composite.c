@@ -1822,13 +1822,10 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 					cdev->desc.bcdUSB = cpu_to_le16(0x0320);
 					cdev->desc.bMaxPacketSize0 = 9;
 				} else {
-					cdev->desc.bcdUSB = cpu_to_le16(0x0210);
+					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
 				}
 			} else {
-				if (gadget->lpm_capable)
-					cdev->desc.bcdUSB = cpu_to_le16(0x0201);
-				else
-					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
+				cdev->desc.bcdUSB = cpu_to_le16(0x0200);
 			}
 
 			value = min(w_length, (u16) sizeof cdev->desc);
