@@ -1101,7 +1101,7 @@ void nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
 
 #endif
 
-static void release_pen_event() {
+static void release_pen_event(void) {
 	if (ts && ts->pen_input_dev) {
 		input_report_abs(ts->pen_input_dev, ABS_X, 0);
 		input_report_abs(ts->pen_input_dev, ABS_Y, 0);
@@ -2232,7 +2232,7 @@ static void nvt_pen_charge_state_change_work(struct work_struct *work)
 	disable_pen_input_device(ts->pen_is_charge);
 }
 
-static void nvt_set_gesture_mode()
+static void nvt_set_gesture_mode(void)
 {
 	NVT_LOG("%s double click wakeup", ts->db_wakeup ? "ENABLE" : "DISABLE");
 	if (ts->ic_state <= NVT_IC_SUSPEND_OUT && ts->ic_state != NVT_IC_INIT ) {
