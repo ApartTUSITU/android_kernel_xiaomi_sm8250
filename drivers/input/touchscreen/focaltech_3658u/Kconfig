@@ -20,7 +20,7 @@ config TOUCHSCREEN_FTS_DIRECTORY
 
 
 config TOUCHSCREEN_SUPPORT_NEW_GAME_MODE
-    tristate "Touch Support New Game Mode"
+    bool "Touch Support New Game Mode"
     default n
     help
       Say Y here if the device support new game mode
