@@ -155,9 +155,8 @@ struct usb_hub *usb_hub_to_struct_hub(struct usb_device *hdev)
 
 int usb_device_supports_lpm(struct usb_device *udev)
 {
-	/* Some devices have trouble with LPM */
-	if (udev->quirks & USB_QUIRK_NO_LPM)
-		return 0;
+	/* Some devices have trouble with LPM  so can't support LPM */
+	return 0;
 
 	/* Skip if the device BOS descriptor couldn't be read */
 	if (!udev->bos)
