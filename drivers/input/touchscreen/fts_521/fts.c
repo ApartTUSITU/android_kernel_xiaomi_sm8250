@@ -217,7 +217,7 @@ static ssize_t fts_fwupdate_store(struct device *dev,
 				  const char *buf, size_t count)
 {
 	int ret, mode[2];
-	char path[100];
+	char path[101];
 	struct fts_ts_info *info = dev_get_drvdata(dev);
 
 	/* by default(if not specified by the user) set the force = 0 and keep_cx to 1 */
