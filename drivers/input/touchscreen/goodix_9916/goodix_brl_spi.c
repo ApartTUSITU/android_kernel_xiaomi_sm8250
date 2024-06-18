@@ -38,7 +38,7 @@ static struct platform_device *goodix_pdev;
 struct goodix_bus_interface goodix_spi_bus;
 struct device *global_spi_parent_device;
 bool display_name_status = false;
-static int __init setup_get_display_cmdline(char *str)
+static __maybe_unused int __init setup_get_display_cmdline(char *str)
 {
 	pr_info("get display cmdline");
 	if (str == NULL)
