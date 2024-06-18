@@ -3842,7 +3842,9 @@ static void fts_leave_pointer_event_handler(struct fts_ts_info *info,
 		info->fod_coordinate_update = false;
 		info->fod_x = 0;
 		info->fod_y = 0;
+#ifdef CONFIG_TOUCHSCREEN_FOD
 		info->fod_down = false;
+#endif
 	}
 	input_mt_report_slot_state(info->input_dev, tool, 0);
 	if (info->touch_id == 0) {
@@ -3862,6 +3864,8 @@ static void fts_leave_pointer_event_handler(struct fts_ts_info *info,
 		info->fod_id = 0;
 	}
 	input_report_abs(info->input_dev, ABS_MT_TRACKING_ID, -1);
+
+#ifdef CONFIG_TOUCHSCREEN_FOD
 	if (fod_up) {
 		info->fod_down = false;
 		MI_TOUCH_LOGI(1, "%s %s:  FOD Up  release ID[%d], FOD status: %d\n",
@@ -3870,10 +3874,14 @@ static void fts_leave_pointer_event_handler(struct fts_ts_info *info,
 		MI_TOUCH_LOGI(1, "%s %s:  Event 0x%02x - release ID[%d]\n",
 			tag,  __func__, event[0], touchId);
 	}
+#endif
 
 	input_sync(info->input_dev);
+
+#ifdef CONFIG_TOUCHSCREEN_FOD
 exit:
 	return;
+#endif
 }
 
 /* EventId : EVT_ID_MOTION_POINT */
@@ -5176,6 +5184,8 @@ static int fts_mode_handler(struct fts_ts_info *info, int force)
 	switch (info->resume_bit) {
 	case 0:
 		MI_TOUCH_LOGI(1, "%s %s: Screen OFF... \n", tag, __func__);
+
+#ifdef CONFIG_TOUCHSCREEN_FOD
 		gesture_type = fts_need_enter_lp_mode();
 		gesture_cmd[5] = gesture_type;
 		if (gesture_type) {
@@ -5189,6 +5199,7 @@ static int fts_mode_handler(struct fts_ts_info *info, int force)
 			ret = setScanMode(SCAN_MODE_LOW_POWER, 0);
 			res |= ret;
 		} else {
+#endif
 			if (info->gesture_enabled == 1) {
 				MI_TOUCH_LOGI(1, "%s %s: enter doubletap mode! \n", tag, __func__);
 				res = fts_write_dma_safe(doubletap_cmd, ARRAY_SIZE(doubletap_cmd));
@@ -5202,7 +5213,9 @@ static int fts_mode_handler(struct fts_ts_info *info, int force)
 				ret = setScanMode(SCAN_MODE_ACTIVE, 0x00);
 				res |= ret;
 			}
+#ifdef CONFIG_TOUCHSCREEN_FOD
 		}
+#endif
 		setSystemResetedDown(0);
 		break;
 
@@ -6886,6 +6899,7 @@ static int parse_dt(struct device *dev, struct fts_hw_platform_data *bdata)
 	return OK;
 }
 
+#ifdef CONFIG_TOUCHSCREEN_FOD
 static void fts_switch_mode_work(struct work_struct *work)
 {
 	struct fts_ts_info *info = container_of(work, struct fts_ts_info, switch_mode_work);
@@ -6931,6 +6945,7 @@ static void fts_switch_mode_work(struct work_struct *work)
 	}
 	mutex_unlock(&info->fod_mutex);
 }
+#endif
 
 static int fts_short_open_test(void)
 {
@@ -7895,7 +7910,9 @@ static int fts_probe(struct spi_device *client)
 		goto ProbeErrorExit_8;
 	}
 	/*INIT_WORK(&info->cmd_update_work, fts_cmd_update_work);*/
+#ifdef CONFIG_TOUCHSCREEN_FOD
 	INIT_WORK(&info->switch_mode_work, fts_switch_mode_work);
+#endif
 	/*INIT_WORK(&info->grip_mode_work, fts_grip_mode_work);*/
 	INIT_DELAYED_WORK(&info->grip_mode_delay_work, fts_grip_mode_work);
 	INIT_DELAYED_WORK(&info->cmd_update_delay_work, fts_cmd_update_work);
