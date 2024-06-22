@@ -110,7 +110,7 @@ KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/vendor/qcom/opensource/audio-kernel/soc/Module
 endif
 
 # Module information used by KBuild framework
-obj-$(CONFIG_MMHARDWARE_DETECTION)    += mmhardware_sysfs.o
+obj-y    += mmhardware_sysfs.o
 mmhardware_sysfs-y := $(MMHARDWARE_OBJS)
 # inject some build related information
 DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
