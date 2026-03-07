@@ -13,17 +13,10 @@
 #include <linux/fs.h>
 
 #include <linux/proc_fs.h>
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-#include <linux/susfs_def.h>
-#endif
 
 #include "../mount.h"
 #include "internal.h"
 #include "fd.h"
-
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-struct mount *susfs_get_non_sus_mnt_from_mnt(struct mount *orig_mnt);
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 
 static int seq_show(struct seq_file *m, void *v)
 {
@@ -31,9 +24,6 @@ static int seq_show(struct seq_file *m, void *v)
 	int f_flags = 0, ret = -ENOENT;
 	struct file *file = NULL;
 	struct task_struct *task;
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	struct mount *mnt = NULL;
-#endif
 
 	task = get_proc_task(m->private);
 	if (!task)
@@ -64,52 +54,9 @@ static int seq_show(struct seq_file *m, void *v)
 	if (ret)
 		return ret;
 
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	mnt = real_mount(file->f_path.mnt);
-	if (mnt->mnt_id >= DEFAULT_KSU_MNT_ID &&
-		likely(susfs_is_current_proc_umounted()))
-	{
-		struct path path;
-		char *pathname = kmalloc(PAGE_SIZE, GFP_KERNEL);
-		char *dpath;
-
-		if (!pathname) {
-			goto orig_flow;
-		}
-		dpath = d_path(&file->f_path, pathname, PAGE_SIZE);
-		if (!dpath) {
-			goto out_kfree;
-		}
-		if (kern_path(dpath, 0, &path)) {
-			goto out_kfree;
-		}
-		if (!path.dentry->d_inode) {
-			goto out_path_put;
-		}
-
-		seq_printf(m, "pos:\t%lli\nflags:\t0%o\nmnt_id:\t%i\nino:\t%lu\n",
-				(long long)file->f_pos, f_flags,
-				susfs_get_non_sus_mnt_from_mnt(mnt)->mnt_id,
-				path.dentry->d_inode->i_ino);
-		path_put(&path);
-		kfree(pathname);
-		goto bypass_orig_flow;
-out_path_put:
-		path_put(&path);
-out_kfree:
-		kfree(pathname);
-	}
-orig_flow:
-	seq_printf(m, "pos:\t%lli\nflags:\t0%o\nmnt_id:\t%i\nino:\t%lu\n",
-			(long long)file->f_pos, f_flags,
-			mnt->mnt_id,
-			file_inode(file)->i_ino);
-bypass_orig_flow:
-#else
 	seq_printf(m, "pos:\t%lli\nflags:\t0%o\nmnt_id:\t%i\n",
 		   (long long)file->f_pos, f_flags,
 		   real_mount(file->f_path.mnt)->mnt_id);
-#endif
 
 	show_fd_locks(m, file, files);
 	if (seq_has_overflowed(m))
