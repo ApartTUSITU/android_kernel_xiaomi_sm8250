@@ -3162,7 +3162,7 @@ int smblib_get_prop_batt_charge_done(struct smb_charger *chg,
 			if ((smblib_get_fastcharge_mode(chg) == true)
 				&& (pval.intval >= 98))
 				smblib_set_fastcharge_mode(chg, false);
-				return 0;
+			return 0;
 		}
 
 		if (smblib_get_fastcharge_mode(chg) == true)
@@ -6777,8 +6777,8 @@ static int smblib_handle_usb_current(struct smb_charger *chg,
 			smblib_err(chg, "Couldn't vote ICL USB_PSY_VOTER rc=%d\n", rc);
 			return rc;
 		}
-	if (chg->mtbf_current  >= 1500)
-		vote(chg->usb_icl_votable, USB_PSY_VOTER, true, chg->mtbf_current*1000);
+		if(chg->mtbf_current  >= 1500)
+			vote(chg->usb_icl_votable, USB_PSY_VOTER, true, chg->mtbf_current*1000);
 		rc = vote(chg->usb_icl_votable, SW_ICL_MAX_VOTER, false, 0);
 		if (rc < 0) {
 			smblib_err(chg, "Couldn't remove SW_ICL_MAX vote rc=%d\n", rc);
@@ -8174,11 +8174,10 @@ static void check_batt_missing(struct work_struct *work)
 	};
 	int chip_ok, rc;
 
-	if (chg->bms_psy) {
-		rc = power_supply_get_property(
-			chg->bms_psy, POWER_SUPPLY_PROP_CHIP_OK, &pval);
-		if (rc < 0)
-			smblib_err(chg, "Couldn't get chip ok:%d\n", rc);
+ 	if(chg->bms_psy)
+ 		rc = power_supply_get_property(chg->bms_psy,POWER_SUPPLY_PROP_CHIP_OK, &pval);
+	if (rc < 0) {
+		smblib_err(chg, "Couldn't get chip ok:%d\n", rc);
 	}
 
 	chip_ok = pval.intval;
@@ -9289,8 +9288,8 @@ static void update_sw_icl_max(struct smb_charger *chg, int pst)
 			vote(chg->usb_icl_votable, SW_ICL_MAX_VOTER, true, SDP_CURRENT_UA);
 		else
 			vote(chg->usb_icl_votable, SW_ICL_MAX_VOTER, false, 0);
-	if (chg->mtbf_current  >= 1500)
-		vote(chg->usb_icl_votable, USB_PSY_VOTER, true, chg->mtbf_current*1000);
+		if(chg->mtbf_current  >= 1500)
+			vote(chg->usb_icl_votable, USB_PSY_VOTER, true, chg->mtbf_current*1000);
 		break;
 	case POWER_SUPPLY_TYPE_USB_CDP:
 		vote(chg->usb_icl_votable, SW_ICL_MAX_VOTER, true,
@@ -10568,25 +10567,25 @@ static void smblib_charger_type_recheck(struct work_struct *work)
 	if (smblib_get_prop_dfp_mode(chg) != POWER_SUPPLY_TYPEC_NONE)
 		goto check_next;
 
-		if (chg->typec_port && !chg->pr_swap_in_progress) {
+	if (chg->typec_port && !chg->pr_swap_in_progress) {
 
-			/*
-			 * Schedule the work to differentiate actual removal
-			 * of cable and detach interrupt during role swap,
-			 * unregister the partner only during actual cable
-			 * removal.
-			 */
-			cancel_delayed_work(&chg->pr_swap_detach_work);
-			vote(chg->awake_votable, DETACH_DETECT_VOTER, true, 0);
-			schedule_delayed_work(&chg->pr_swap_detach_work,
-				msecs_to_jiffies(TYPEC_DETACH_DETECT_DELAY_MS));
-			smblib_force_dr_mode(chg, TYPEC_PORT_DRP);
-			/*
-			 * To handle cable removal during role
-			 * swap failure.
-			 */
-			chg->typec_role_swap_failed = false;
-		}
+		/*
+			* Schedule the work to differentiate actual removal
+			* of cable and detach interrupt during role swap,
+			* unregister the partner only during actual cable
+			* removal.
+			*/
+		cancel_delayed_work(&chg->pr_swap_detach_work);
+		vote(chg->awake_votable, DETACH_DETECT_VOTER, true, 0);
+		schedule_delayed_work(&chg->pr_swap_detach_work,
+			msecs_to_jiffies(TYPEC_DETACH_DETECT_DELAY_MS));
+		smblib_force_dr_mode(chg, TYPEC_PORT_DRP);
+		/*
+			* To handle cable removal during role
+			* swap failure.
+			*/
+		chg->typec_role_swap_failed = false;
+	}
 
 	if (!chg->recheck_charger)
 		chg->precheck_charger_type = chg->real_charger_type;

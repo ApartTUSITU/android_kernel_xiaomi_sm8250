@@ -117,7 +117,6 @@ struct dsi_phy_cfg {
 	u32 data_lanes;
 	unsigned long clk_strength;
 	bool cphy_strength;
-	unsigned long phy_voltage;
 };
 
 struct dsi_phy_hw;
@@ -187,14 +186,6 @@ struct phy_dyn_refresh_ops {
 	 * @offset:         register offset to program.
 	 */
 	void (*dyn_refresh_helper)(struct dsi_phy_hw *phy, u32 offset);
-
-	/**
-	 * dyn_refresh_trigger_sel - configure trigger_sel to frame flush
-	 * @phy:           Pointer to DSI PHY hardware instance.
-	 * @is_master:      Boolean to indicate whether master or slave.
-	 */
-	void (*dyn_refresh_trigger_sel)(struct dsi_phy_hw *phy,
-			bool is_master);
 
 	/**
 	 * dyn_refresh_config - configure dynamic refresh ctrl registers

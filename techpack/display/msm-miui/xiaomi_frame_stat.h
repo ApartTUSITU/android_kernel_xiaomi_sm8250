@@ -19,8 +19,8 @@
 #define FPS_PERIOD_1_SEC	(1000000)
 #endif
 #define NANO_TO_MICRO				(1000)
-#define MAX_STAT_FRAME_COUNT		(60)
-#define STAT_ITEM_NUM				(5)
+#define MAX_STAT_FRAME_COUNT 		(60)
+#define STAT_ITEM_NUM 				(5)
 #define IDLE_FPS					(50)
 #define DEFAULT_FPS					(60)
 #define LONG_INTERVAL_FRAME_COUNT	(3)

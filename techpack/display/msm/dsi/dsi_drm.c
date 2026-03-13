@@ -15,6 +15,7 @@
 #include <drm/drm_bridge.h>
 #include <linux/pm_wakeup.h>
 #include "msm_drv.h"
+#include "sde_dbg.h"
 #include "dsi_defs.h"
 #include "sde_encoder.h"
 #include "dsi_mi_feature.h"
@@ -194,6 +195,7 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 
 	if (bridge->encoder->crtc->state->active_changed)
 		atomic_set(&c_bridge->display->panel->esd_recovery_pending, 0);
+
 	mi_cfg = &c_bridge->display->panel->mi_cfg;
 
 	/* By this point mode should have been validated through mode_fixup */
@@ -228,7 +230,6 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
 	mi_drm_notifier_call_chain(MI_DRM_EARLY_EVENT_BLANK, &notify_data);
 
-
 	if (c_bridge->dsi_mode.dsi_mode_flags &
 		(DSI_MODE_FLAG_SEAMLESS | DSI_MODE_FLAG_VRR |
 		 DSI_MODE_FLAG_DYN_CLK)) {
@@ -261,55 +262,9 @@ static void dsi_bridge_pre_enable(struct drm_bridge *bridge)
 	if (rc)
 		DSI_ERR("Continuous splash pipeline cleanup failed, rc=%d\n",
 									rc);
-
 	if (c_bridge->display->is_prim_display)
 		atomic_set(&prim_panel_is_on, true);
-
 }
-
-/**
- *  dsi_bridge_interface_enable - Panel light on interface for fingerprint
- *  In order to improve panel light on performance when unlock device by
- *  fingerprint, export this interface for fingerprint.Once finger touch
- *  happened, it could light on LCD panel in advance of android resume.
- *
- *  @timeout: DSI bridge wait time for android resume and set panel on.
- *            If timeout, dsi bridge will disable panel to avoid fingerprint
- *            touch by mistake.
- */
-
-int dsi_bridge_interface_enable(int timeout)
-{
-	int ret = 0;
-
-	ret = wait_event_timeout(resume_wait_q,
-		!atomic_read(&resume_pending),
-		msecs_to_jiffies(WAIT_RESUME_TIMEOUT));
-	if (!ret) {
-		pr_info("Primary fb resume timeout\n");
-		return -ETIMEDOUT;
-	}
-
-	mutex_lock(&gbridge->base.lock);
-
-	if (atomic_read(&prim_panel_is_on)) {
-		mutex_unlock(&gbridge->base.lock);
-		return 0;
-	}
-
-	__pm_stay_awake(prim_panel_wakelock);
-	gbridge->dsi_mode.dsi_mode_flags = 0;
-	dsi_bridge_pre_enable(&gbridge->base);
-
-	if (timeout > 0)
-		schedule_delayed_work(&prim_panel_work, msecs_to_jiffies(timeout));
-	else
-		__pm_relax(prim_panel_wakelock);
-
-	mutex_unlock(&gbridge->base.lock);
-	return ret;
-}
-EXPORT_SYMBOL(dsi_bridge_interface_enable);
 
 static void dsi_bridge_enable(struct drm_bridge *bridge)
 {
@@ -335,9 +290,6 @@ static void dsi_bridge_enable(struct drm_bridge *bridge)
 		DSI_ERR("[%d] DSI display post enabled failed, rc=%d\n",
 		       c_bridge->id, rc);
 
-	if (display)
-		display->enabled = true;
-
 	if (display && display->drm_conn) {
 		sde_connector_helper_bridge_enable(display->drm_conn);
 		if (c_bridge->dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_POMS)
@@ -346,9 +298,10 @@ static void dsi_bridge_enable(struct drm_bridge *bridge)
 	}
 
 	rc = dsi_display_esd_irq_ctrl(c_bridge->display, true);
-	if (rc)
+	if (rc) {
 		DSI_ERR("[%d] DSI display enable esd irq failed, rc=%d\n",
 				c_bridge->id, rc);
+	}
 }
 
 static void dsi_bridge_disable(struct drm_bridge *bridge)
@@ -388,9 +341,6 @@ static void dsi_bridge_disable(struct drm_bridge *bridge)
 				c_bridge->id, rc);
 	}
 
-	if (display)
-		display->enabled = false;
-
 	if (display && display->drm_conn) {
 		display->poms_pending =
 			private_flags & MSM_MODE_FLAG_SEAMLESS_POMS;
@@ -420,10 +370,11 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 
 	mi_cfg = &c_bridge->display->panel->mi_cfg;
 
-	if (mi_cfg->fod_dimlayer_enabled)
+	if (mi_cfg->fod_dimlayer_enabled) {
 		power_mode = sde_connector_get_lp(c_bridge->display->drm_conn);
-	else
+	} else {
 		power_mode = MI_DRM_BLANK_POWERDOWN;
+	}
 
 	notify_data.data = &power_mode;
 	notify_data.id = MSM_DRM_PRIMARY_DISPLAY;
@@ -450,10 +401,8 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 
 	mi_drm_notifier_call_chain(MI_DRM_EVENT_BLANK, &notify_data);
 	SDE_ATRACE_END("dsi_bridge_post_disable");
-
 	if (c_bridge->display->is_prim_display)
 		atomic_set(&prim_panel_is_on, false);
-
 }
 
 static void prim_panel_off_delayed_work(struct work_struct *work)
@@ -466,7 +415,7 @@ static void prim_panel_off_delayed_work(struct work_struct *work)
 		return;
 	}
 	mutex_unlock(&gbridge->base.lock);
-}
+} // git
 
 static void dsi_bridge_mode_set(struct drm_bridge *bridge,
 				struct drm_display_mode *mode,
@@ -566,8 +515,16 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
 		if ((dsi_mode.panel_mode != cur_dsi_mode.panel_mode) &&
 			(!(dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR)) &&
 			(crtc_state->enable ==
-				crtc_state->crtc->state->enable))
+				crtc_state->crtc->state->enable)) {
 			dsi_mode.dsi_mode_flags |= DSI_MODE_FLAG_POMS;
+
+			SDE_EVT32(SDE_EVTLOG_FUNC_CASE1,
+				dsi_mode.timing.h_active,
+				dsi_mode.timing.v_active,
+				dsi_mode.timing.refresh_rate,
+				dsi_mode.pixel_clk_khz,
+				dsi_mode.panel_mode);
+		}
 		/* No DMS/VRR when drm pipeline is changing */
 		if (!drm_mode_equal(cur_mode, adjusted_mode) &&
 			(!(dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR)) &&
@@ -575,8 +532,16 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
 			(!(dsi_mode.dsi_mode_flags & DSI_MODE_FLAG_DYN_CLK)) &&
 			(!crtc_state->active_changed ||
 			 display->is_cont_splash_enabled) &&
-			 display->config.panel_mode == DSI_OP_CMD_MODE)
+			 display->config.panel_mode == DSI_OP_CMD_MODE) {
 			dsi_mode.dsi_mode_flags |= DSI_MODE_FLAG_DMS;
+
+			SDE_EVT32(SDE_EVTLOG_FUNC_CASE2,
+				dsi_mode.timing.h_active,
+				dsi_mode.timing.v_active,
+				dsi_mode.timing.refresh_rate,
+				dsi_mode.pixel_clk_khz,
+				dsi_mode.panel_mode);
+		}
 	}
 
 	/* Reject seamless transition when active changed */
@@ -1118,9 +1083,8 @@ int dsi_conn_post_kickoff(struct drm_connector *connector,
 	struct dsi_display_mode adj_mode;
 	struct dsi_display *display;
 	struct dsi_display_ctrl *m_ctrl, *ctrl;
-	int i, rc = 0, ctrl_version;
+	int i, rc = 0;
 	bool enable;
-	struct dsi_dyn_clk_caps *dyn_clk_caps;
 
 	if (!connector || !connector->state) {
 		DSI_ERR("invalid connector or connector state\n");
@@ -1136,27 +1100,14 @@ int dsi_conn_post_kickoff(struct drm_connector *connector,
 	c_bridge = to_dsi_bridge(encoder->bridge);
 	adj_mode = c_bridge->dsi_mode;
 	display = c_bridge->display;
-	dyn_clk_caps = &(display->panel->dyn_clk_caps);
 
 	if (adj_mode.dsi_mode_flags & DSI_MODE_FLAG_VRR) {
 		m_ctrl = &display->ctrl[display->clk_master_idx];
-		ctrl_version = m_ctrl->ctrl->version;
 		rc = dsi_ctrl_timing_db_update(m_ctrl->ctrl, false);
 		if (rc) {
 			DSI_ERR("[%s] failed to dfps update  rc=%d\n",
 				display->name, rc);
 			return -EINVAL;
-		}
-
-		if ((ctrl_version >= DSI_CTRL_VERSION_2_4) &&
-				(dyn_clk_caps->maintain_const_fps)) {
-			display_for_each_ctrl(i, display) {
-				ctrl = &display->ctrl[i];
-				rc = dsi_ctrl_wait4dynamic_refresh_done(
-						ctrl->ctrl);
-				if (rc)
-					DSI_ERR("wait4dfps refresh failed\n");
-			}
 		}
 
 		/* Update the rest of the controllers */
@@ -1218,11 +1169,9 @@ struct dsi_bridge *dsi_drm_bridge_init(struct dsi_display *display,
 
 	if (display->is_prim_display) {
 		gbridge = bridge;
-		atomic_set(&resume_pending, 0);
 		prim_panel_wakelock = wakeup_source_create("prim_panel_wakelock");
 		wakeup_source_add(prim_panel_wakelock);
 		atomic_set(&prim_panel_is_on, false);
-		init_waitqueue_head(&resume_wait_q);
 		INIT_DELAYED_WORK(&prim_panel_work, prim_panel_off_delayed_work);
 	}
 

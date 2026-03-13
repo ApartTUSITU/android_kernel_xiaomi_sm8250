@@ -112,19 +112,35 @@ jobs:
           MSG+="🔗 [查看 GitHub Release](https://github.com/${{ github.repository }}/releases/tag/${{ env.TAG_NAME }}) %0A%0A"
           MSG+="📦 开始上传文件..."
           
-          curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
+          curl -s -X POST "$API/sendMessage" \
             -d "chat_id=$TG_CHAT_ID" \
             -d "parse_mode=Markdown" \
             -d "text=$MSG"
 
-          for file in all_kernels/*.zip; do
-            filename=$(basename "$file")
-            echo "正在上传: $filename"
-            
-            curl -s -F chat_id="$TG_CHAT_ID" \
-                 -F document=@"$file" \
-                 -F caption="✅ $filename" \
-                 "https://api.telegram.org/bot$TG_TOKEN/sendDocument"
-            
-            sleep 1
+          files=(all_kernels/*.zip)
+          total=${#files[@]}
+          batch_size=10
+
+          for ((i=0; i<total; i+=batch_size)); do
+            media="["
+
+            for ((j=0; j<batch_size && i+j<total; j++)); do
+              file="${files[i+j]}"
+              name=$(basename "$file")
+
+              media+="{\"type\":\"document\",\"media\":\"attach://file$j\",\"caption\":\"$name\"},"
+            done
+
+            media="${media%,}]"
+
+            cmd=(curl -s -X POST "$API/sendMediaGroup" -F chat_id="$TG_CHAT_ID" -F media="$media")
+
+            for ((j=0; j<batch_size && i+j<total; j++)); do
+              file="${files[i+j]}"
+              cmd+=(-F "file$j=@$file")
+            done
+
+            "${cmd[@]}"
+
+            sleep 2
           done

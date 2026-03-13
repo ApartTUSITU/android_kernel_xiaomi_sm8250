@@ -5,10 +5,10 @@
 
 drm-y       :=	drm_auth.o drm_bufs.o drm_cache.o \
 		drm_context.o drm_dma.o \
-		drm_file.o drm_gem.o drm_ioctl.o drm_irq.o \
+		drm_file.o drm_gem.o drm_irq.o \
 		drm_lock.o drm_memory.o drm_drv.o \
 		drm_scatter.o drm_pci.o \
-		drm_sysfs.o drm_hashtab.o drm_mm.o \
+		drm_hashtab.o drm_mm.o \
 		drm_crtc.o drm_fourcc.o drm_modes.o drm_edid.o \
 		drm_info.o drm_encoder_slave.o \
 		drm_trace_points.o drm_global.o drm_prime.o \
@@ -20,6 +20,12 @@ drm-y       :=	drm_auth.o drm_bufs.o drm_cache.o \
 		drm_dumb_buffers.o drm_mode_config.o drm_vblank.o \
 		drm_syncobj.o drm_lease.o drm_writeback.o drm_client.o \
 		drm_notifier_mi.o
+
+ifeq ($(CONFIG_XIAOMI_MIUI), y)
+drm-y += drm_ioctl_mi.o drm_sysfs_mi.o
+else
+drm-y += drm_ioctl.o drm_sysfs.o
+endif
 
 drm-$(CONFIG_DRM_LIB_RANDOM) += lib/drm_random.o
 drm-$(CONFIG_DRM_VM) += drm_vm.o

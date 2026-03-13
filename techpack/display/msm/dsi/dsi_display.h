@@ -188,9 +188,6 @@ struct dsi_display_ext_bridge {
  * @queue_cmd_waits   Indicates if wait for dma commands done has to be queued.
  * @dma_cmd_workq:	Pointer to the workqueue of DMA command transfer done
  *				wait sequence.
- * @tx_cmd_buf_ndx:   Index to the DSI debugfs TX CMD buffer.
- * @cmd_set:	      Debugfs TX cmd set.
- * @enabled:	      Boolean to indicate display enabled.
  */
 struct dsi_display {
 	struct platform_device *pdev;
@@ -278,11 +275,7 @@ struct dsi_display {
 	u32 clk_gating_config;
 	bool queue_cmd_waits;
 	struct workqueue_struct *dma_cmd_workq;
-
-	int tx_cmd_buf_ndx;
-	struct dsi_panel_cmd_set cmd_set;
-
-	bool enabled;
+	atomic_t fod_ui;
 };
 
 int dsi_display_dev_probe(struct platform_device *pdev);
@@ -666,17 +659,6 @@ int dsi_display_cmd_transfer(struct drm_connector *connector,
 		u32 cmd_buf_len);
 
 /**
- * dsi_display_cmd_receive() - receive response from the panel
- * @display:            Handle to display.
- * @cmd_buf:            Command buffer
- * @cmd_buf_len:        Command buffer length in bytes
- * @recv_buf:           Receive buffer
- * @recv_buf_len:       Receive buffer length in bytes
- */
-int dsi_display_cmd_receive(void *display, const char *cmd_buf,
-			    u32 cmd_buf_len, u8 *recv_buf, u32 recv_buf_len);
-
-/**
  * dsi_display_soft_reset() - perform a soft reset on DSI controller
  * @display:         Handle to display
  *
@@ -759,12 +741,14 @@ int dsi_display_cmd_engine_enable(struct dsi_display *display);
 int dsi_display_cmd_engine_disable(struct dsi_display *display);
 int dsi_host_alloc_cmd_tx_buffer(struct dsi_display *display);
 
-char *dsi_display_get_cmdline_panel_info(void);
-
 int dsi_display_hbm_set_disp_param(struct drm_connector *connector,
 				u32 param_type);
 
 int dsi_display_esd_irq_ctrl(struct dsi_display *display,
 		bool enable);
+
+struct dsi_display *get_main_display(void);
+
+void dsi_display_set_fod_ui(struct dsi_display *display, bool status);
 
 #endif /* _DSI_DISPLAY_H_ */

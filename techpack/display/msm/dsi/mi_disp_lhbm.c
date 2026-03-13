@@ -47,14 +47,15 @@ static int mi_get_fod_lhbm_target_brightness(struct dsi_display *display)
 {
 	int target = LOCAL_LHBM_TARGET_BRIGHTNESS_WHITE_1000NIT;
 
-	if (display->panel->mi_cfg.fp_status == HEART_RATE_START)
+	if(display->panel->mi_cfg.fp_status == HEART_RATE_START) {
 		target = LOCAL_LHBM_TARGET_BRIGHTNESS_GREEN_500NIT;
-	else if (display->panel->mi_cfg.fod_lhbm_low_brightness_enabled &&
-		 display->panel->mi_cfg.fod_lhbm_low_brightness_allow)
+	} else if (display->panel->mi_cfg.fod_lhbm_low_brightness_enabled && display->panel->mi_cfg.fod_lhbm_low_brightness_allow){
 		target = LOCAL_LHBM_TARGET_BRIGHTNESS_WHITE_110NIT;
+	}
 
-	if (display->panel->mi_cfg.fp_status == ENROLL_START)
+	if(display->panel->mi_cfg.fp_status == ENROLL_START) {
 		target = LOCAL_LHBM_TARGET_BRIGHTNESS_WHITE_1000NIT;
+	}
 
 	return target;
 }
@@ -67,18 +68,19 @@ static int mi_dsi_panel_set_fod_lhbm(struct dsi_panel *panel, int lhbm_target)
 		pr_err("%s invalid params\n", LHBM_TAG);
 		return -EINVAL;
 	}
-	if (!panel->panel_initialized) {
+	if (!panel->panel_initialized){
 		pr_err("%s Panel not initialized!\n", LHBM_TAG);
 		return -ENODEV;
 	}
 
 	if (lhbm_target == LOCAL_LHBM_TARGET_BRIGHTNESS_NONE) {
-		if (panel->mi_cfg.local_hbm_cur_status == true)
+		if (panel->mi_cfg.local_hbm_cur_status == true)	{
 			rc = dsi_panel_set_disp_param(panel, DISPPARAM_HBM_FOD_OFF);
+		}
 	} else {
 		if (panel->mi_cfg.local_hbm_cur_status == false) {
 			rc = dsi_panel_set_disp_param(panel, DISPPARAM_HBM_FOD_ON|lhbm_target);
-			if (panel->mi_cfg.in_aod == true) {
+			if(panel->mi_cfg.in_aod == true) {
 				pr_info("%s in aod status delay 30 ms lhbm on\n", LHBM_TAG);
 				mdelay(70);
 			}
@@ -144,8 +146,9 @@ static int mi_sde_connector_fod_lhbm(struct drm_connector *connector, bool from_
 		rc = mi_dsi_panel_set_fod_lhbm(display->panel, LOCAL_LHBM_TARGET_BRIGHTNESS_NONE);
 		display->panel->mi_cfg.lhbm_target = LOCAL_LHBM_TARGET_BRIGHTNESS_NONE;
 		mi_cfg->pending_lhbm_state = 0;
-		if (rc)
+		if (rc) {
 			pr_err("%s LHBM off failed rc=%d\n", LHBM_TAG, rc);
+		}
 	}
 
 	return rc;
@@ -171,32 +174,39 @@ static void mi_disp_set_fod_work_handler(struct kthread_work *work)
 			pr_debug("%s from touch, current(%d),last(%d)\n",
 				LHBM_TAG, atomic_read(&touch_current_status), atomic_read(&touch_last_status));
 			atomic_set(&touch_current_status, atomic_read(&touch_last_status));
-			if (atomic_read(&touch_current_status) == 0)
+			if (atomic_read(&touch_current_status) == 0) {
+				//mi_sde_connector_fod_lhbm_notify(fod_data->display->drm_conn,
+					//atomic_read(&touch_current_status));
 				sde_crtc_fod_ui_ready(fod_data->display, 2, atomic_read(&touch_current_status));
+			}
 
-			rc = mi_sde_connector_fod_lhbm(fod_data->display->drm_conn, true,
-						       atomic_read(&touch_current_status));
+			rc = mi_sde_connector_fod_lhbm(fod_data->display->drm_conn, true, atomic_read(&touch_current_status));
 
 			if (atomic_read(&touch_current_status) == 1) {
-				if (rc)
+				if (rc) {
 					pr_err("%s LHBM on failed rc=%d, not notify\n", LHBM_TAG, rc);
-				else
+				} else {
+					//mi_sde_connector_fod_lhbm_notify(fod_data->display->drm_conn,
+						//atomic_read(&touch_current_status));
 					sde_crtc_fod_ui_ready(fod_data->display, 2, atomic_read(&touch_current_status));
+				}
 			}
 		} while (atomic_read(&touch_current_status) != atomic_read(&touch_last_status));
 		atomic_set(&fod_work_status, FOD_WORK_DONE);
 	} else {
 		pr_debug("%s not from touch, fod_btn(%d)\n", LHBM_TAG, fod_data->fod_btn);
-		if (fod_data->fod_btn == 0)
+		if (fod_data->fod_btn == 0) {
 			sde_crtc_fod_ui_ready(fod_data->display, 2, fod_data->fod_btn);
+		}
 
 		rc = mi_sde_connector_fod_lhbm(fod_data->display->drm_conn, false, fod_data->fod_btn);
 
 		if (fod_data->fod_btn == 1) {
-			if (rc)
+			if (rc) {
 				pr_err("%s LHBM on failed rc=%d, not notify\n", LHBM_TAG, rc);
-			else
+			} else {
 				sde_crtc_fod_ui_ready(fod_data->display, 2, fod_data->fod_btn);
+			}
 		}
 	}
 
@@ -212,7 +222,7 @@ int mi_disp_set_fod_queue_work(u32 fod_btn, bool from_touch)
 	struct fod_work_data *fod_data;
 	int fp_status = FINGERPRINT_NONE;
 	struct dsi_panel_mi_cfg *mi_cfg;
-	static bool ignore_fod_btn;
+	static bool ignore_fod_btn = false;
 
 	if (!dl_ptr) {
 		pr_err("%s invalid params\n", LHBM_TAG);
@@ -292,6 +302,7 @@ int mi_disp_set_fod_queue_work(u32 fod_btn, bool from_touch)
 
 	return 0;
 }
+
 EXPORT_SYMBOL_GPL(mi_disp_set_fod_queue_work);
 
 int mi_disp_lhbm_attach_primary_dsi_display(struct dsi_display *display)

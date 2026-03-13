@@ -25,6 +25,10 @@ ifeq ($(CONFIG_ARCH_BENGAL), y)
 LINUXINCLUDE    += -include $(srctree)/techpack/display/config/bengaldispconf.h
 endif
 
+ifeq ($(CONFIG_XIAOMI_MIUI), y)
+obj-$(CONFIG_DRM_MSM) += msm-miui/
+else
 obj-$(CONFIG_DRM_MSM) += msm/
+endif
 obj-$(CONFIG_MSM_SDE_ROTATOR) += rotator/
 obj-$(CONFIG_QCOM_MDSS_PLL) += pll/

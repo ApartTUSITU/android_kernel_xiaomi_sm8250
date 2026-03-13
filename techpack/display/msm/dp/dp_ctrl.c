@@ -1342,7 +1342,7 @@ static void dp_ctrl_off(struct dp_ctrl *dp_ctrl)
 
 	ctrl->catalog->fec_config(ctrl->catalog, false);
 	dp_ctrl_configure_source_link_params(ctrl, false);
-	ctrl->catalog->reset(ctrl->catalog);
+	dp_ctrl_state_ctrl(ctrl, 0);
 
 	/* Make sure DP is disabled before clk disable */
 	wmb();

@@ -887,7 +887,7 @@ int dsi_phy_enable(struct msm_dsi_phy *phy,
 	phy->cfg.bit_clk_rate_hz = config->bit_clk_rate_hz;
 	phy->cfg.clk_strength = config->common_config.clk_strength;
 	phy->cfg.cphy_strength = config->common_config.cphy_strength;
-	phy->cfg.phy_voltage = config->common_config.phy_voltage;
+
 	/**
 	 * If PHY timing parameters are not present in panel dtsi file,
 	 * then calculate them in the driver
@@ -1177,32 +1177,6 @@ void dsi_phy_config_dynamic_refresh(struct msm_dsi_phy *phy,
 	if (phy->hw.ops.dyn_refresh_ops.dyn_refresh_pipe_delay)
 		phy->hw.ops.dyn_refresh_ops.dyn_refresh_pipe_delay(
 				&phy->hw, delay);
-
-	mutex_unlock(&phy->phy_lock);
-}
-
-/**
- * dsi_phy_dynamic_refresh_trigger_sel() - trigger dynamic refresh and
- * update the video timings at next frame flush call.
- * @phy:	DSI PHY handle
- * @is_master:	Boolean to indicate if for master or slave.
- */
-void dsi_phy_dynamic_refresh_trigger_sel(struct msm_dsi_phy *phy,
-		bool is_master)
-{
-	if (!phy)
-		return;
-
-	mutex_lock(&phy->phy_lock);
-	/*
-	 * program DYNAMIC_REFRESH_CTRL.TRIGGER_SEL for master.
-	 */
-	if (phy->hw.ops.dyn_refresh_ops.dyn_refresh_trigger_sel)
-		phy->hw.ops.dyn_refresh_ops.dyn_refresh_trigger_sel
-			(&phy->hw, is_master);
-	phy->dfps_trigger_mdpintf_flush = true;
-
-	SDE_EVT32(is_master, phy->index);
 
 	mutex_unlock(&phy->phy_lock);
 }

@@ -360,11 +360,7 @@ static void dsi_phy_hw_dphy_enable(struct dsi_phy_hw *phy,
 		less_than_1500_mhz = true;
 
 	if (phy->version == DSI_PHY_VERSION_4_1) {
-		if (cfg->phy_voltage) {
-			vreg_ctrl_0 = cfg->phy_voltage;
-		} else {
-			vreg_ctrl_0 = less_than_1500_mhz ? 0x53 : 0x52;
-		}
+		vreg_ctrl_0 = less_than_1500_mhz ? 0x53 : 0x52;
 		glbl_rescode_top_ctrl = less_than_1500_mhz ? 0x3d :  0x00;
 		glbl_rescode_bot_ctrl = less_than_1500_mhz ? 0x39 :  0x3c;
 		if (cfg->clk_strength == 0) {
@@ -377,10 +373,11 @@ static void dsi_phy_hw_dphy_enable(struct dsi_phy_hw *phy,
 	} else {
 		vreg_ctrl_0 = less_than_1500_mhz ? 0x5B : 0x59;
 		glbl_str_swi_cal_sel_ctrl = less_than_1500_mhz ? 0x03 : 0x00;
-		if (cfg->clk_strength == 0)
+		if (cfg->clk_strength == 0) {
 			glbl_hstx_str_ctrl_0 = less_than_1500_mhz ? 0x66 : 0x88;
-		else
+		} else {
 			glbl_hstx_str_ctrl_0 = cfg->clk_strength;
+		}
 		glbl_rescode_top_ctrl = 0x03;
 		glbl_rescode_bot_ctrl = 0x3c;
 	}
@@ -417,10 +414,11 @@ static void dsi_phy_hw_dphy_enable(struct dsi_phy_hw *phy,
 			glbl_rescode_top_ctrl);
 	DSI_W32(phy, DSIPHY_CMN_GLBL_RESCODE_OFFSET_BOT_CTRL,
 			glbl_rescode_bot_ctrl);
-	if (cfg->clk_strength == 0)
+	if (cfg->clk_strength == 0) {
 		DSI_W32(phy, DSIPHY_CMN_GLBL_LPTX_STR_CTRL, 0x55);
-	else
+	} else {
 		DSI_W32(phy, DSIPHY_CMN_GLBL_LPTX_STR_CTRL, cfg->clk_strength);
+	}
 
 	/* Remove power down from all blocks */
 	DSI_W32(phy, DSIPHY_CMN_CTRL_0, 0x7f);
@@ -799,23 +797,6 @@ void dsi_phy_hw_v4_0_dyn_refresh_pipe_delay(struct dsi_phy_hw *phy,
 		    delay->pll_delay);
 }
 
-void dsi_phy_hw_v4_0_dyn_refresh_trigger_sel(struct dsi_phy_hw *phy,
-		bool is_master)
-{
-	u32 reg;
-
-	/*
-	 * Dynamic refresh will take effect at next mdp flush event.
-	 * This makes sure that any update to frame timings together
-	 * with dfps will take effect in one vsync at next mdp flush.
-	 */
-	if (is_master) {
-		reg = DSI_GEN_R32(phy->dyn_pll_base, DSI_DYN_REFRESH_CTRL);
-		reg |= BIT(17);
-		DSI_GEN_W32(phy->dyn_pll_base, DSI_DYN_REFRESH_CTRL, reg);
-	}
-}
-
 void dsi_phy_hw_v4_0_dyn_refresh_helper(struct dsi_phy_hw *phy, u32 offset)
 {
 	u32 reg;
@@ -827,7 +808,7 @@ void dsi_phy_hw_v4_0_dyn_refresh_helper(struct dsi_phy_hw *phy, u32 offset)
 	 */
 	if (!offset) {
 		reg = DSI_GEN_R32(phy->dyn_pll_base, DSI_DYN_REFRESH_CTRL);
-		reg &= ~(BIT(0) | BIT(8) | BIT(13) | BIT(16) | BIT(17));
+		reg &= ~(BIT(0) | BIT(8));
 		DSI_GEN_W32(phy->dyn_pll_base, DSI_DYN_REFRESH_CTRL, reg);
 		wmb(); /* ensure dynamic fps is cleared */
 		return;

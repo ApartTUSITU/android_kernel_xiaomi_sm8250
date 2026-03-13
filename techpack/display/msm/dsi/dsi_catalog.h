@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
  */
 
 #ifndef _DSI_CATALOG_H_
@@ -131,7 +130,6 @@ void dsi_phy_hw_v4_0_commit_phy_timing(struct dsi_phy_hw *phy,
 u32 dsi_ctrl_hw_cmn_get_interrupt_status(struct dsi_ctrl_hw *ctrl);
 void dsi_ctrl_hw_cmn_debug_bus(struct dsi_ctrl_hw *ctrl, u32 *entries,
 			       u32 size);
-u32 dsi_ctrl_hw_cmn_poll_slave_dma_status(struct dsi_ctrl_hw *ctrl);
 void dsi_ctrl_hw_cmn_clear_interrupt_status(struct dsi_ctrl_hw *ctrl, u32 ints);
 void dsi_ctrl_hw_cmn_enable_status_interrupts(struct dsi_ctrl_hw *ctrl,
 					     u32 ints);
@@ -215,8 +213,6 @@ void dsi_ctrl_hw_cmn_error_intr_ctrl(struct dsi_ctrl_hw *ctrl, bool en);
 u32 dsi_ctrl_hw_cmn_get_error_mask(struct dsi_ctrl_hw *ctrl);
 u32 dsi_ctrl_hw_cmn_get_hw_version(struct dsi_ctrl_hw *ctrl);
 int dsi_ctrl_hw_cmn_wait_for_cmd_mode_mdp_idle(struct dsi_ctrl_hw *ctrl);
-void dsi_ctrl_hw_cmn_init_cmddma_trig_ctrl(struct dsi_ctrl_hw *ctrl,
-					   struct dsi_host_common_cfg *cfg);
 
 /* Definitions specific to 1.4 DSI controller hardware */
 int dsi_ctrl_hw_14_wait_for_lane_idle(struct dsi_ctrl_hw *ctrl, u32 lanes);
@@ -263,12 +259,9 @@ void dsi_phy_hw_v3_0_dyn_refresh_pipe_delay(struct dsi_phy_hw *phy,
 					    struct dsi_dyn_clk_delay *delay);
 
 int dsi_ctrl_hw_cmn_wait4dynamic_refresh_done(struct dsi_ctrl_hw *ctrl);
-bool dsi_ctrl_hw_cmn_vid_engine_busy(struct dsi_ctrl_hw *ctrl);
 int dsi_phy_hw_v3_0_cache_phy_timings(struct dsi_phy_per_lane_cfgs *timings,
 				      u32 *dst, u32 size);
 
-void dsi_phy_hw_v4_0_dyn_refresh_trigger_sel(struct dsi_phy_hw *phy,
-		bool is_master);
 void dsi_phy_hw_v4_0_dyn_refresh_helper(struct dsi_phy_hw *phy, u32 offset);
 void dsi_phy_hw_v4_0_dyn_refresh_config(struct dsi_phy_hw *phy,
 				struct dsi_phy_cfg *cfg, bool is_master);
@@ -278,10 +271,15 @@ void dsi_phy_hw_v4_0_dyn_refresh_pipe_delay(struct dsi_phy_hw *phy,
 int dsi_phy_hw_v4_0_cache_phy_timings(struct dsi_phy_per_lane_cfgs *timings,
 				      u32 *dst, u32 size);
 
+int dsi_ctrl_hw_22_map_mdp_regs(struct platform_device *pdev,
+		struct dsi_ctrl_hw *ctrl);
+
 void dsi_ctrl_hw_22_configure_cmddma_window(struct dsi_ctrl_hw *ctrl,
 		struct dsi_ctrl_cmd_dma_info *cmd,
 		u32 line_no, u32 window);
+
 void dsi_ctrl_hw_22_reset_trigger_controls(struct dsi_ctrl_hw *ctrl,
-				       struct dsi_host_common_cfg *cfg);
+		struct dsi_host_common_cfg *cfg);
+
 u32 dsi_ctrl_hw_22_log_line_count(struct dsi_ctrl_hw *ctrl, bool cmd_mode);
 #endif /* _DSI_CATALOG_H_ */
