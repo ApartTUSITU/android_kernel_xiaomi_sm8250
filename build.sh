@@ -22,11 +22,11 @@ fi
 
 
 
-if [ ! -d $TOOLCHAIN_PATH ]; then
-    echo "TOOLCHAIN_PATH [$TOOLCHAIN_PATH] does not exist."
-    echo "Please ensure the toolchain is there, or change TOOLCHAIN_PATH in the script to your toolchain path."
-    exit 1
-fi
+# if [ ! -d $TOOLCHAIN_PATH ]; then
+#     echo "TOOLCHAIN_PATH [$TOOLCHAIN_PATH] does not exist."
+#     echo "Please ensure the toolchain is there, or change TOOLCHAIN_PATH in the script to your toolchain path."
+#     exit 1
+# fi
 
 echo "TOOLCHAIN_PATH: [$TOOLCHAIN_PATH]"
 export PATH="$TOOLCHAIN_PATH:$PATH"
