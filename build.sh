@@ -122,7 +122,8 @@ if [ $KSU_ENABLE -eq 1 ]; then
     scripts/config --file out/.config \
     -e KSU \
     -e THREAD_INFO_IN_TASK \
-    -e REKERNEL
+    -e REKERNEL \
+    -e KSU_EXTRAS
 else
     scripts/config --file out/.config -d KSU
 fi
