@@ -2780,21 +2780,6 @@ bool policy_mgr_is_safe_channel(struct wlan_objmgr_psoc *psoc,
 				uint32_t ch_freq);
 
 /**
- * policy_mgr_is_sap_freq_allowed - Check if the channel is allowed for sap
- * @psoc: PSOC object information
- * @sap_freq: channel frequency to be checked
- *
- * Check the factors as below to decide whether the channel is allowed or not:
- * If the channel is in LTE coex channel avoidance list;
- * If it's STA+SAP SCC;
- * If STA+SAP SCC on LTE coex channel is allowed.
- *
- * Return: true for allowed, else false
- */
-bool policy_mgr_is_sap_freq_allowed(struct wlan_objmgr_psoc *psoc,
-				    uint32_t sap_freq);
-
-/**
  * policy_mgr_is_force_scc() - checks if SCC needs to be
  * mandated
  * @psoc: PSOC object information
@@ -2982,18 +2967,6 @@ void policy_mgr_set_weight_of_dfs_passive_channels_to_zero(
  */
 bool policy_mgr_is_sta_sap_scc_allowed_on_dfs_chan(
 		struct wlan_objmgr_psoc *psoc);
-
-/**
- * policy_mgr_is_sap_only_allow_sta_dfs_indoor_chan() - check if disallow
- * sap to work on dfs/indoor chan outside mac working freq
- * @psoc: pointer to soc
- * check if disallow sap to work on dfs/indoor chan outside mac working freq
- *
- * Return: true if disallowsap to work on dfs/indoor chan outside mac working freq
- */
-bool policy_mgr_is_sap_only_allow_sta_dfs_indoor_chan(
-		struct wlan_objmgr_psoc *psoc);
-
 /**
  * policy_mgr_is_sta_connected_2g() - check if sta connected in 2g
  * @psoc: pointer to soc

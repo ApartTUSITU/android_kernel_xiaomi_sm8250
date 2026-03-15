@@ -3634,52 +3634,6 @@ void hdd_set_qmi_stats_enabled(struct hdd_context *hdd_ctx)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU)
-static void
-hdd_install_key_comp_cb(struct wma_install_key_complete_param *param)
-{
-	struct hdd_context *hdd_ctx;
-	struct hdd_adapter *adapter;
-
-	if (!param) {
-		hdd_err("param is NULL");
-		return;
-	}
-
-	hdd_ctx = cds_get_context(QDF_MODULE_ID_HDD);
-	if (!hdd_ctx) {
-		hdd_err("hdd ctx is NULL");
-		return;
-	}
-
-	adapter = hdd_get_adapter_by_vdev(hdd_ctx, param->vdev_id);
-	if (!adapter) {
-		hdd_err("adapter is NULL");
-		return;
-	}
-
-	qdf_event_set(&adapter->install_key_complete);
-}
-
-#define HDD_INSTALL_KEY_TIMEOUT 200
-void hdd_start_install_key(struct hdd_adapter *adapter)
-{
-	hdd_enter();
-	qdf_event_reset(&adapter->install_key_complete);
-}
-
-int hdd_wait_for_install_key_complete(struct hdd_adapter *adapter)
-{
-	QDF_STATUS status;
-
-	hdd_enter();
-	status = qdf_wait_for_event_completion(&adapter->install_key_complete,
-					       HDD_INSTALL_KEY_TIMEOUT);
-	hdd_debug("exit with status %d", status);
-	return qdf_status_to_os_return(status);
-}
-#endif
-
 int hdd_wlan_start_modules(struct hdd_context *hdd_ctx, bool reinit)
 {
 	int ret = 0;
@@ -3800,10 +3754,6 @@ int hdd_wlan_start_modules(struct hdd_context *hdd_ctx, bool reinit)
 			ret = qdf_status_to_os_return(status);
 			goto psoc_close;
 		}
-
-#if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU)
-		wma_register_install_key_complete_cb(hdd_install_key_comp_cb);
-#endif
 
 		hdd_set_qmi_stats_enabled(hdd_ctx);
 
@@ -4138,15 +4088,21 @@ static int hdd_open(struct net_device *net_dev)
 		return errno;
 
 	errno = __hdd_open(net_dev);
-	if (!errno)
-		osif_vdev_cache_command(vdev_sync, NO_COMMAND);
 
 	osif_vdev_sync_trans_stop(vdev_sync);
 
 	return errno;
 }
 
-int hdd_stop_no_trans(struct net_device *dev)
+/**
+ * __hdd_stop() - HDD stop function
+ * @dev:	Pointer to net_device structure
+ *
+ * This is called in response to ifconfig down
+ *
+ * Return: 0 for success; non-zero for failure
+ */
+static int __hdd_stop(struct net_device *dev)
 {
 	struct hdd_adapter *adapter = WLAN_HDD_GET_PRIV_PTR(dev);
 	struct hdd_context *hdd_ctx = WLAN_HDD_GET_CTX(adapter);
@@ -4160,8 +4116,10 @@ int hdd_stop_no_trans(struct net_device *dev)
 		   adapter->vdev_id, adapter->device_mode);
 
 	ret = wlan_hdd_validate_context(hdd_ctx);
-	if (ret)
+	if (ret) {
+		set_bit(DOWN_DURING_SSR, &adapter->event_flags);
 		return ret;
+	}
 
 	/* Nothing to be done if the interface is not opened */
 	if (false == test_bit(DEVICE_IFACE_OPENED, &adapter->event_flags)) {
@@ -4248,13 +4206,10 @@ static int hdd_stop(struct net_device *net_dev)
 	struct osif_vdev_sync *vdev_sync;
 
 	errno = osif_vdev_sync_trans_start(net_dev, &vdev_sync);
-	if (errno) {
-		if (vdev_sync)
-			osif_vdev_cache_command(vdev_sync, INTERFACE_DOWN);
+	if (errno)
 		return errno;
-	}
 
-	errno = hdd_stop_no_trans(net_dev);
+	errno = __hdd_stop(net_dev);
 
 	osif_vdev_sync_trans_stop(vdev_sync);
 
@@ -6522,9 +6477,6 @@ struct hdd_adapter *hdd_open_adapter(struct hdd_context *hdd_ctx, uint8_t sessio
 	qdf_mutex_create(&adapter->blocked_scan_request_q_lock);
 	qdf_event_create(&adapter->acs_complete_event);
 	qdf_event_create(&adapter->peer_cleanup_done);
-#if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU)
-	qdf_event_create(&adapter->install_key_complete);
-#endif
 	hdd_sta_info_init(&adapter->sta_info_list);
 	hdd_sta_info_init(&adapter->cache_sta_info_list);
 	qdf_atomic_init(&adapter->gro_disallowed);
@@ -6587,9 +6539,6 @@ static void __hdd_close_adapter(struct hdd_context *hdd_ctx,
 	qdf_mutex_destroy(&adapter->blocked_scan_request_q_lock);
 	policy_mgr_clear_concurrency_mode(hdd_ctx->psoc, adapter->device_mode);
 	qdf_event_destroy(&adapter->acs_complete_event);
-#if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU)
-	qdf_event_destroy(&adapter->install_key_complete);
-#endif
 	qdf_event_destroy(&adapter->peer_cleanup_done);
 	hdd_adapter_feature_update_work_deinit(adapter);
 	hdd_cleanup_adapter(hdd_ctx, adapter, rtnl_held);
@@ -8152,9 +8101,19 @@ QDF_STATUS hdd_start_all_adapters(struct hdd_context *hdd_ctx)
 			hdd_start_station_adapter(adapter);
 			hdd_set_mon_rx_cb(adapter->dev);
 
-			wlan_hdd_set_mon_chan(
-					adapter, adapter->mon_chan_freq,
-					adapter->mon_bandwidth);
+			/*
+			 * Do not set channel for monitor mode if monitor iface
+			 * went down during SSR, as for set channels host sends
+			 * vdev start command to FW. For the interfaces went
+			 * down during SSR, host stops those adapters by sending
+			 * vdev stop/down/delete commands to FW. So FW doesn't
+			 * sends response for vdev start and vdev start response
+			 * timer expires and thus host triggers ASSERT.
+			 */
+			if (!test_bit(DOWN_DURING_SSR, &adapter->event_flags))
+				wlan_hdd_set_mon_chan(
+						adapter, adapter->mon_chan_freq,
+						adapter->mon_bandwidth);
 			break;
 		case QDF_NDI_MODE:
 			hdd_ndi_start(adapter->dev->name, 0);
@@ -15704,9 +15663,6 @@ static ssize_t wlan_hdd_state_ctrl_param_write(struct file *filp,
 			goto exit;
 		}
 	}
-
-	hdd_info("is_driver_loaded %d is_driver_recovering %d",
-		 cds_is_driver_loaded(), cds_is_driver_recovering());
 
 	if (!cds_is_driver_loaded() || cds_is_driver_recovering()) {
 		rc = wait_for_completion_timeout(&wlan_start_comp,

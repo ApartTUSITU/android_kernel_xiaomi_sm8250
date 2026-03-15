@@ -237,6 +237,7 @@ static inline bool in_compat_syscall(void) { return is_compat_task(); }
  * @DEVICE_IFACE_OPENED: Adapter has been "opened" via the kernel
  * @SOFTAP_INIT_DONE: Software Access Point (SAP) is initialized
  * @VENDOR_ACS_RESPONSE_PENDING: Waiting for event for vendor acs
+ * @DOWN_DURING_SSR: Mark interface is down during SSR
  */
 enum hdd_adapter_flags {
 	NET_DEVICE_REGISTERED,
@@ -247,16 +248,7 @@ enum hdd_adapter_flags {
 	DEVICE_IFACE_OPENED,
 	SOFTAP_INIT_DONE,
 	VENDOR_ACS_RESPONSE_PENDING,
-};
-
-/**
- * enum hdd_nb_cmd_id - North bound command IDs received during SSR
- * @NO_COMMAND - No NB command received during SSR
- * @INTERFACE_DOWN - Received interface down during SSR
- */
-enum hdd_nb_cmd_id {
-	NO_COMMAND,
-	INTERFACE_DOWN
+	DOWN_DURING_SSR,
 };
 
 #define WLAN_WAIT_DISCONNECT_ALREADY_IN_PROGRESS  1000
@@ -1185,7 +1177,6 @@ enum qdisc_filter_status {
 				 for the adapter.
  * @gro_disallowed: Flag to check if GRO is enabled or disable for adapter
  * @gro_flushed: Flag to indicate if GRO explicit flush is done or not
- * @install_key_complete: Completion variable for wlan install key
  * @delete_in_progress: Flag to indicate that the adapter delete is in
  *			progress, and any operation using rtnl lock inside
  *			the driver can be avoided/skipped.
@@ -1491,14 +1482,8 @@ struct hdd_adapter {
 	qdf_work_t netdev_features_update_work;
 	qdf_atomic_t gro_disallowed;
 	uint8_t gro_flushed[DP_MAX_RX_THREADS];
-#if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU)
-	qdf_event_t install_key_complete;
-#endif
 	bool delete_in_progress;
 	qdf_atomic_t net_dev_hold_ref_count[NET_DEV_HOLD_ID_MAX];
-#ifdef CFG_SUPPORT_SCAN_EXT_FLAG
-	uint8_t scan_ext_flag;
-#endif
 };
 
 #define WLAN_HDD_GET_STATION_CTX_PTR(adapter) (&(adapter)->session.station)
@@ -4779,38 +4764,5 @@ void hdd_init_start_completion(void);
  * Return: None
  */
 void hdd_netdev_update_features(struct hdd_adapter *adapter);
-
-/**
- * hdd_stop_no_trans() - HDD stop function
- * @dev:	Pointer to net_device structure
- *
- * This is called in response to ifconfig down. Vdev sync transaction
- * should be started before calling this API.
- *
- * Return: 0 for success; non-zero for failure
- */
-int hdd_stop_no_trans(struct net_device *dev);
-
-#if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU)
-/**
- * hdd_start_install_key - indicate install key start
- * @adapter: Adapter upon which the command was received
- *
- * This func indicates install key start.
- *
- * Return: None
- */
-void hdd_start_install_key(struct hdd_adapter *adapter);
-
-/**
- * hdd_wait_for_install_key_complete - wait for result of install key
- * @adapter: Adapter upon which the command was received
- *
- * This func waits until install key complete/timeout.
- *
- * Return: 0 on success and errno on failure
- */
-int hdd_wait_for_install_key_complete(struct hdd_adapter *adapter);
-#endif /* end #if IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) || IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) || IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU) */
 
 #endif /* end #if !defined(WLAN_HDD_MAIN_H) */

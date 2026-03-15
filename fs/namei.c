@@ -1891,6 +1891,7 @@ static struct dentry *lookup_slow(const struct qstr *name,
 	inode_lock_shared(inode);
 	res = __lookup_slow(name, dir, flags);
 	inode_unlock_shared(inode);
+
 	return res;
 }
 

@@ -3873,24 +3873,6 @@ bool policy_mgr_is_sta_sap_scc_allowed_on_dfs_chan(
 	return status;
 }
 
-bool policy_mgr_is_sap_only_allow_sta_dfs_indoor_chan(
-		struct wlan_objmgr_psoc *psoc)
-{
-	struct policy_mgr_psoc_priv_obj *pm_ctx;
-	bool status = true;
-
-	pm_ctx = policy_mgr_get_context(psoc);
-	if (!pm_ctx) {
-		policy_mgr_err("Invalid Context");
-		return status;
-	}
-
-	if (!pm_ctx->cfg.sap_only_allow_sta_dfs_indoor_chan)
-		status = false;
-
-	return status;
-}
-
 bool policy_mgr_is_sta_connected_2g(struct wlan_objmgr_psoc *psoc)
 {
 	struct policy_mgr_psoc_priv_obj *pm_ctx;

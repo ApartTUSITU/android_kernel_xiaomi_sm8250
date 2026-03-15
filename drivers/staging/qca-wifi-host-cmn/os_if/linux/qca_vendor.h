@@ -4428,11 +4428,6 @@ enum qca_wlan_vendor_attr_config {
 	 */
 	QCA_WLAN_VENDOR_ATTR_CONFIG_RX_NSS = 78,
 
-	/* 8-bit unsigned value to set nss and ant mode.
-	 * 1-1x1, 2-2x2
-	 */
-	QCA_WLAN_VENDOR_ATTR_CONFIG_SET_NSS_ANT = 82,
-
 	/* keep last */
 	QCA_WLAN_VENDOR_ATTR_CONFIG_AFTER_LAST,
 	QCA_WLAN_VENDOR_ATTR_CONFIG_MAX =

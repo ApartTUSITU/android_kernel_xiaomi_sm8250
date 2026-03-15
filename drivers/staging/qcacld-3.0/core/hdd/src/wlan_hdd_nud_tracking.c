@@ -266,9 +266,6 @@ hdd_handle_nud_fail_non_sta(struct hdd_adapter *adapter)
 {
 	int status;
 
-	hdd_debug("Do not disconnect after NUD Failure.");
-	return;
-
 	qdf_mutex_acquire(&adapter->disconnection_status_lock);
 	if (adapter->disconnection_in_progress) {
 		qdf_mutex_release(&adapter->disconnection_status_lock);

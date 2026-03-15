@@ -134,17 +134,6 @@ void hdd_reset_scan_reject_params(struct hdd_context *hdd_ctx,
  */
 void wlan_hdd_cfg80211_scan_block(struct hdd_adapter *adapter);
 
-#ifdef CFG_SUPPORT_SCAN_EXT_FLAG
-/**
- * hdd_scan_event_callback() - scan done callback function called after
- * scan is finished
- * @netdev: net_device ptr
- *
- * Return: none
- */
-void hdd_scan_event_callback(struct net_device *netdev);
-#endif
-
 static const
 struct nla_policy wlan_hdd_extscan_config_policy[EXTSCAN_PARAM_MAX + 1] = {
 	[QCA_WLAN_VENDOR_ATTR_EXTSCAN_SUBCMD_CONFIG_PARAM_REQUEST_ID] = {

@@ -27,9 +27,7 @@
 /* sus_path */
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 struct st_susfs_sus_path {
-	unsigned long                           target_ino;
 	char                                    target_pathname[SUSFS_MAX_LEN_PATHNAME];
-	unsigned int                            i_uid;
 	int                                     err;
 };
 
@@ -37,9 +35,7 @@ struct st_susfs_sus_path_list {
 	struct list_head                        list;
 	struct st_susfs_sus_path                info;
 	char                                    target_pathname[SUSFS_MAX_LEN_PATHNAME];
-	size_t                                  path_len;
 };
-
 #endif
 
 /* sus_mount */
@@ -52,27 +48,43 @@ struct st_susfs_hide_sus_mnts_for_non_su_procs {
 
 /* sus_kstat */
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+#define KSTAT_SPOOF_INO (1 << 0)
+#define KSTAT_SPOOF_DEV (1 << 1)
+#define KSTAT_SPOOF_NLINK (1 << 2)
+#define KSTAT_SPOOF_SIZE (1 << 3)
+#define KSTAT_SPOOF_ATIME_TV_SEC (1 << 4)
+#define KSTAT_SPOOF_ATIME_TV_NSEC (1 << 5)
+#define KSTAT_SPOOF_MTIME_TV_SEC (1 << 6)
+#define KSTAT_SPOOF_MTIME_TV_NSEC (1 << 7)
+#define KSTAT_SPOOF_CTIME_TV_SEC (1 < 8)
+#define KSTAT_SPOOF_CTIME_TV_NSEC (1 << 9)
+#define KSTAT_SPOOF_BLOCKS (1 << 10)
+#define KSTAT_SPOOF_BLKSIZE (1 << 11)
+
 struct st_susfs_sus_kstat {
 	int                                     is_statically;
-	unsigned long                           target_ino; // the ino after bind mounted or overlayed
+	unsigned long                           target_ino;
 	char                                    target_pathname[SUSFS_MAX_LEN_PATHNAME];
 	unsigned long                           spoofed_ino;
 	unsigned long                           spoofed_dev;
 	unsigned int                            spoofed_nlink;
 	long long                               spoofed_size;
 	long                                    spoofed_atime_tv_sec;
+	unsigned long                           spoofed_atime_tv_nsec;
 	long                                    spoofed_mtime_tv_sec;
+	unsigned long                           spoofed_mtime_tv_nsec;
 	long                                    spoofed_ctime_tv_sec;
-	long                                    spoofed_atime_tv_nsec;
-	long                                    spoofed_mtime_tv_nsec;
-	long                                    spoofed_ctime_tv_nsec;
-	unsigned long                           spoofed_blksize;
-	unsigned long long                      spoofed_blocks;
+	unsigned long                           spoofed_ctime_tv_nsec;
+	long long                               spoofed_blocks;
+	long                                    spoofed_blksize;
+	int                                     flags;
 	int                                     err;
 };
 
 struct st_susfs_sus_kstat_hlist {
 	unsigned long                           target_ino;
+	unsigned long                           target_dev;
+	bool                                    is_fuse;
 	struct st_susfs_sus_kstat               info;
 	struct hlist_node                       node;
 };
@@ -170,8 +182,6 @@ void susfs_set_hide_sus_mnts_for_non_su_procs(void __user **user_info);
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 void susfs_add_sus_kstat(void __user **user_info);
 void susfs_update_sus_kstat(void __user **user_info);
-void susfs_sus_ino_for_generic_fillattr(unsigned long ino, struct kstat *stat);
-void susfs_sus_ino_for_show_map_vma(unsigned long ino, dev_t *out_dev, unsigned long *out_ino);
 #endif
 
 /* spoof_uname */

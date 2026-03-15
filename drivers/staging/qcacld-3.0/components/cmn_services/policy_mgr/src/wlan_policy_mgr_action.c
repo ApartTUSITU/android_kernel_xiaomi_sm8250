@@ -1323,25 +1323,6 @@ bool policy_mgr_is_safe_channel(struct wlan_objmgr_psoc *psoc,
 	return is_safe;
 }
 
-bool policy_mgr_is_sap_freq_allowed(struct wlan_objmgr_psoc *psoc,
-				    uint32_t sap_freq)
-{
-	if (policy_mgr_is_safe_channel(psoc, sap_freq))
-		return true;
-
-	/*
-	 * Return true if it's STA+SAP SCC and
-	 * STA+SAP SCC on LTE coex channel is allowed.
-	 */
-	if (policy_mgr_sta_sap_scc_on_lte_coex_chan(psoc) &&
-	    policy_mgr_is_sta_sap_scc(psoc, sap_freq)) {
-		policy_mgr_debug("unsafe freq %d for sap is allowed", sap_freq);
-		return true;
-	}
-
-	return false;
-}
-
 bool policy_mgr_is_sap_restart_required_after_sta_disconnect(
 			struct wlan_objmgr_psoc *psoc,
 			uint32_t sap_vdev_id, uint32_t *intf_ch_freq)
@@ -2024,8 +2005,7 @@ QDF_STATUS policy_mgr_valid_sap_conc_channel_check(
 		    (!enable_srd_channel &&
 		     wlan_reg_is_etsi13_srd_chan_for_freq(pm_ctx->pdev,
 							  ch_freq))) {
-			if ((wlan_reg_is_dfs_for_freq(pm_ctx->pdev, ch_freq) ||
-			    wlan_reg_is_freq_indoor(pm_ctx->pdev, ch_freq)) &&
+			if (wlan_reg_is_dfs_for_freq(pm_ctx->pdev, ch_freq) &&
 			    sta_sap_scc_on_dfs_chan) {
 				policy_mgr_debug("STA SAP SCC is allowed on DFS channel");
 				goto update_chan;

@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2018-2020 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -266,8 +265,8 @@ static uint32_t dsc_test_psoc_trans_blocks(void)
 
 	/* ... children vdev trans/ops to fail */
 	dsc_for_each_psoc_vdev(psoc, vdev) {
-		action_expect(vdev, trans, QDF_STATUS_E_BUSY, errors);
-		action_expect(vdev, op, QDF_STATUS_E_BUSY, errors);
+		action_expect(vdev, trans, QDF_STATUS_E_AGAIN, errors);
+		action_expect(vdev, op, QDF_STATUS_E_AGAIN, errors);
 	}
 
 	/* ... while driver unload in progress vdev op and trans should be
@@ -304,8 +303,8 @@ static uint32_t dsc_test_psoc_trans_blocks(void)
 
 	/* ... children vdev trans/ops to fail */
 	dsc_for_each_psoc_vdev(psoc, vdev) {
-		action_expect(vdev, trans, QDF_STATUS_E_BUSY, errors);
-		action_expect(vdev, op, QDF_STATUS_E_BUSY, errors);
+		action_expect(vdev, trans, QDF_STATUS_E_AGAIN, errors);
+		action_expect(vdev, op, QDF_STATUS_E_AGAIN, errors);
 	}
 
 	/* teardown */
@@ -358,8 +357,8 @@ static uint32_t dsc_test_vdev_trans_blocks(void)
 
 		/* ... the same vdev trans/ops to fail */
 		dsc_for_each_psoc_vdev(psoc, vdev) {
-			action_expect(vdev, trans, QDF_STATUS_E_BUSY, errors);
-			action_expect(vdev, op, QDF_STATUS_E_BUSY, errors);
+			action_expect(vdev, trans, QDF_STATUS_E_AGAIN, errors);
+			action_expect(vdev, op, QDF_STATUS_E_AGAIN, errors);
 		}
 	}
 

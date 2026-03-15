@@ -316,21 +316,13 @@ static QDF_STATUS policy_mgr_modify_pcl_based_on_enabled_channels(
 					struct policy_mgr_psoc_priv_obj *pm_ctx,
 					uint32_t *pcl_list_org,
 					uint8_t *weight_list_org,
-					uint32_t *pcl_len_org,
-					struct wlan_objmgr_psoc *psoc)
+					uint32_t *pcl_len_org)
 {
-	uint32_t i, pcl_len = 0, freq=0;
-	if (policy_mgr_get_connection_count(psoc) == 1 && 
-			pm_conc_connection_list[0].ch_flagext &
-			(IEEE80211_CHAN_DFS | IEEE80211_CHAN_DFS_CFREQ2)) {
-			freq = pm_conc_connection_list[0].freq;
-			policy_mgr_debug("allow p2p go create on dfs freq=%u", freq);
-	}
+	uint32_t i, pcl_len = 0;
 
 	for (i = 0; i < *pcl_len_org; i++) {
 		if (!wlan_reg_is_passive_or_disable_for_freq(
-			pm_ctx->pdev, pcl_list_org[i]) ||
-			freq == pcl_list_org[i]) {
+			pm_ctx->pdev, pcl_list_org[i])) {
 			pcl_list_org[pcl_len] = pcl_list_org[i];
 			weight_list_org[pcl_len++] = weight_list_org[i];
 		}
@@ -659,7 +651,7 @@ static QDF_STATUS policy_mgr_pcl_modification_for_p2p_go(
 	}
 
 	status = policy_mgr_modify_pcl_based_on_enabled_channels(
-			pm_ctx, pcl_channels, pcl_weight, len, psoc);
+			pm_ctx, pcl_channels, pcl_weight, len);
 	if (QDF_IS_STATUS_ERROR(status)) {
 		policy_mgr_err("failed to get modified pcl for GO");
 		return status;

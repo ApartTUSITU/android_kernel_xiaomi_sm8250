@@ -1,4 +1,1 @@
 include $(WLAN_ROOT)/configs/genoa.pci.debug_defconfig
-
-#Flag to enable/disable TARGET 11d scan
-CONFIG_TARGET_11D_SCAN := y

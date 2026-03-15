@@ -43,7 +43,7 @@ static void *zstd_init(struct squashfs_sb_info *msblk, void *buff)
 		goto failed;
 	wksp->window_size = max_t(size_t,
 			msblk->block_size, SQUASHFS_METADATA_SIZE);
-	wksp->mem_size = ZSTD_DStreamWorkspaceBound(wksp->window_size);
+	wksp->mem_size = zstd_dstream_workspace_bound(wksp->window_size);
 	wksp->mem = vmalloc(wksp->mem_size);
 	if (wksp->mem == NULL)
 		goto failed;
@@ -72,14 +72,14 @@ static int zstd_uncompress(struct squashfs_sb_info *msblk, void *strm,
 	struct squashfs_page_actor *output)
 {
 	struct workspace *wksp = strm;
-	ZSTD_DStream *stream;
+	zstd_dstream *stream;
 	size_t total_out = 0;
 	size_t zstd_err;
 	int k = 0;
-	ZSTD_inBuffer in_buf = { NULL, 0, 0 };
-	ZSTD_outBuffer out_buf = { NULL, 0, 0 };
+	zstd_in_buffer in_buf = { NULL, 0, 0 };
+	zstd_out_buffer out_buf = { NULL, 0, 0 };
 
-	stream = ZSTD_initDStream(wksp->window_size, wksp->mem, wksp->mem_size);
+	stream = zstd_init_dstream(wksp->window_size, wksp->mem, wksp->mem_size);
 
 	if (!stream) {
 		ERROR("Failed to initialize zstd decompressor\n");
@@ -114,12 +114,12 @@ static int zstd_uncompress(struct squashfs_sb_info *msblk, void *strm,
 		}
 
 		total_out -= out_buf.pos;
-		zstd_err = ZSTD_decompressStream(stream, &out_buf, &in_buf);
+		zstd_err = zstd_decompress_stream(stream, &out_buf, &in_buf);
 		total_out += out_buf.pos; /* add the additional data produced */
 
 		if (in_buf.pos == in_buf.size && k < b)
 			put_bh(bh[k++]);
-	} while (zstd_err != 0 && !ZSTD_isError(zstd_err));
+	} while (zstd_err != 0 && !zstd_is_error(zstd_err));
 
 	squashfs_finish_page(output);
 
