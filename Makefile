@@ -3,7 +3,7 @@ VERSION = 4
 PATCHLEVEL = 19
 SUBLEVEL = 325
 EXTRAVERSION =
-NAME = "People's Front"
+NAME = "People's Front LXC/Docker"
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
