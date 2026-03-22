@@ -59,7 +59,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 		mi,qc3-bat-curr-max = <3600>;
 		mi,qc3-bus-volt-max = <12000>;
 		mi,qc3-bus-curr-max = <2100>;
-		mi,qc3-battery-warm-th = <480>;
+		mi,qc3-battery-warm-th = <500>;
 		mi,cp-sec-enable;
 	};
 
@@ -75,7 +75,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 		mi,step-charge-high-vol-curr-max = <4400>;
 		mi,cell-vol-high-threshold-mv = <4448>;
 		mi,cell-vol-max-threshold-mv = <4477>;
-		mi,pd-battery-warm-th = <480>;
+		mi,pd-battery-warm-th = <500>;
 		mi,cp-sec-enable;
 		mi,pd-power-max = <120>; /*charge power max : 120W */
 	};
@@ -355,7 +355,7 @@ And public attribution of xiaomi platforms(like cas and so and)
 	qcom,chg-term-current-ma = <(-220)>;
 	qcom,step-charging-enable;
 	qcom,sw-jeita-enable;
-	qcom,chg-warm-th= <450>;
+	qcom,chg-warm-th= <500>;
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;

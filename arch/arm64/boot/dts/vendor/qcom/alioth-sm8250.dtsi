@@ -528,7 +528,7 @@ this file is for attribution only of alioth
 	qcom,chg-term-current-ma = <(-220)>;
 	//qcom,step-charging-enable;
 	qcom,sw-jeita-enable;
-	qcom,chg-warm-th= <480>;
+	qcom,chg-warm-th= <500>;
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
@@ -654,7 +654,7 @@ this file is for attribution only of alioth
 		mi,qc3-bat-curr-max = <3600>;
 		mi,qc3-bus-volt-max = <12000>;
 		mi,qc3-bus-curr-max = <2100>;
-		mi,qc3-battery-warm-th = <480>;
+		mi,qc3-battery-warm-th = <500>;
 		mi,use-qcom-gauge;
 		mi,support-qc3p5-without-smb;
 		//mi,cp-sec-enable;
@@ -669,7 +669,7 @@ this file is for attribution only of alioth
 		mi,pd-bus-curr-max = <3000>;
 		mi,pd-bus-curr-compensate  = <50>;
 		mi,pd-non-ffc-bat-volt-max = <4450>;
-		mi,pd-battery-warm-th = <480>;
+		mi,pd-battery-warm-th = <500>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
 		mi,therm-level-threshold = <12>;

@@ -3337,7 +3337,7 @@ And public attribution of xiaomi platforms(like pipa and so and)
 	qcom,chg-term-current-ma = <(-400)>;
 	qcom,step-charging-enable;
 	qcom,sw-jeita-enable;
-	qcom,chg-warm-th= <480>;
+	qcom,chg-warm-th= <500>;
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;

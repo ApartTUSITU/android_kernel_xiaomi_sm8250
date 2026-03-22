@@ -25,7 +25,7 @@
 #endif
 
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
-extern void susfs_generic_fillattr_spoofer(struct inode *inode, struct kstat *stat);
+extern void susfs_sus_kstat_spoof_generic_fillattr(struct inode *inode, struct kstat *stat);
 #endif
 
 /**
@@ -53,7 +53,7 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->blksize = i_blocksize(inode);
 	stat->blocks = inode->i_blocks;
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
-	susfs_generic_fillattr_spoofer(inode, stat);
+	susfs_sus_kstat_spoof_generic_fillattr(inode, stat);
 #endif
 
 	if (IS_NOATIME(inode))
@@ -91,7 +91,7 @@ int vfs_getattr_nosec(const struct path *path, struct kstat *stat,
 		int err = inode->i_op->getattr(path, stat, request_mask,
 					    query_flags);
 		if (!err)
-			susfs_generic_fillattr_spoofer(inode, stat);
+			susfs_sus_kstat_spoof_generic_fillattr(inode, stat);
 		return err;
 	}
 #else

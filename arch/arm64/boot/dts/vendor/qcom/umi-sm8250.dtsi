@@ -368,7 +368,7 @@ And public attribution of xiaomi platforms(like J2 and so and)
 	qcom,chg-term-src = <1>;
 	qcom,chg-term-current-ma = <(-220)>;
 	qcom,sw-jeita-enable;
-	qcom,chg-warm-th= <450>;
+	qcom,chg-warm-th= <500>;
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	mi,ncp-enable = <&tlmm 152 0x00>;
@@ -521,7 +521,7 @@ And public attribution of xiaomi platforms(like J2 and so and)
 		mi,qc3-bat-curr-max = <3600>;
 		mi,qc3-bus-volt-max = <12000>;
 		mi,qc3-bus-curr-max = <2100>;
-		mi,qc3-battery-warm-th = <450>;
+		mi,qc3-battery-warm-th = <500>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
 	};
@@ -535,7 +535,7 @@ And public attribution of xiaomi platforms(like J2 and so and)
 		mi,pd-bus-curr-max = <3000>;
 		mi,pd-non-ffc-bat-volt-max = <4400>;
 		mi,pd-bus-curr-compensate  = <0>;
-		mi,pd-battery-warm-th = <450>;
+		mi,pd-battery-warm-th = <500>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
 		mi,pd-power-max = <33>; /*charge power max : 33W */

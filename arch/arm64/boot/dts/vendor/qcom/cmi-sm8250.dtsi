@@ -48,7 +48,7 @@ this file is for attribution only of cmi
 		mi,qc3-bat-curr-max = <3600>;
 		mi,qc3-bus-volt-max = <12000>;
 		mi,qc3-bus-curr-max = <2100>;
-		mi,qc3-battery-warm-th = <480>;
+		mi,qc3-battery-warm-th = <500>;
 		mi,cp-sec-enable;
 	};
 
@@ -64,7 +64,7 @@ this file is for attribution only of cmi
 		mi,step-charge-high-vol-curr-max = <4400>;
 		mi,cell-vol-high-threshold-mv = <4448>;
 		mi,cell-vol-max-threshold-mv = <4477>;
-		mi,pd-battery-warm-th = <480>;
+		mi,pd-battery-warm-th = <500>;
 		mi,cp-sec-enable;
 		mi,pd-power-max = <50>; /*charge power max : 50W */
 	};

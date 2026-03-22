@@ -411,7 +411,7 @@ And public attribution of xiaomi platforms(like L3A and so and)
 	qcom,chg-term-current-ma = <(-200)>;
 	qcom,step-charging-enable;
 	qcom,sw-jeita-enable;
-	qcom,chg-warm-th= <480>;
+	qcom,chg-warm-th= <500>;
 	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	pinctrl-names = "default", "smb5_active", "smb5_suspend";
@@ -519,7 +519,7 @@ And public attribution of xiaomi platforms(like L3A and so and)
 		mi,qc3-bat-curr-max = <3600>;
 		mi,qc3-bus-volt-max = <12000>;
 		mi,qc3-bus-curr-max = <2100>;
-		mi,qc3-battery-warm-th = <480>;
+		mi,qc3-battery-warm-th = <500>;
 		mi,cp-sec-enable;
 		mi,support-qc3p5-without-smb;
 	};
@@ -536,7 +536,7 @@ And public attribution of xiaomi platforms(like L3A and so and)
 		mi,step-charge-high-vol-curr-max = <4400>;
 		mi,cell-vol-high-threshold-mv = <4510>;
 		mi,cell-vol-max-threshold-mv = <4540>;
-		mi,pd-battery-warm-th = <480>;
+		mi,pd-battery-warm-th = <500>;
 		mi,cp-sec-enable;
 		mi,pd-power-max = <67>; /*charge power max : 67W */
 	};

@@ -7,8 +7,9 @@
 #include <linux/hashtable.h>
 #include <linux/path.h>
 #include <linux/susfs_def.h>
+#include <linux/statfs.h>
 
-#define SUSFS_VERSION "v2.0.0"
+#define SUSFS_VERSION "v2.1.0"
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
 #define SUSFS_VARIANT "NON-GKI"
 #else
@@ -20,6 +21,17 @@
 /*********/
 #define getname_safe(name) (name == NULL ? ERR_PTR(-EINVAL) : getname(name))
 #define putname_safe(name) (IS_ERR(name) ? NULL : putname(name))
+
+/********/
+/* ENUM */
+/********/
+enum UID_SCHEME {
+	UID_NON_APP_PROC = 0,
+	UID_ROOT_PROC_EXCEPT_SU_PROC,
+	UID_NON_SU_PROC,
+	UID_UMOUNTED_APP_PROC,
+	UID_UMOUNTED_PROC,
+};
 
 /**********/
 /* STRUCT */
@@ -118,16 +130,21 @@ struct st_susfs_spoof_cmdline_or_bootconfig {
 /* open_redirect */
 #ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
 struct st_susfs_open_redirect {
-	unsigned long                           target_ino;
 	char                                    target_pathname[SUSFS_MAX_LEN_PATHNAME];
 	char                                    redirected_pathname[SUSFS_MAX_LEN_PATHNAME];
+	int                                     uid_scheme;
 	int                                     err;
 };
 
 struct st_susfs_open_redirect_hlist {
 	unsigned long                           target_ino;
-	char                                    target_pathname[SUSFS_MAX_LEN_PATHNAME];
-	char                                    redirected_pathname[SUSFS_MAX_LEN_PATHNAME];
+	unsigned long                           target_dev;
+	unsigned long                           redirected_ino;
+	unsigned long                           redirected_dev;
+	int                                     spoofed_mnt_id;
+	struct kstatfs                          spoofed_kstatfs;
+	struct st_susfs_open_redirect           info;
+	bool                                    reversed_lookup_only;
 	struct hlist_node                       node;
 };
 #endif
@@ -204,7 +221,6 @@ int susfs_spoof_cmdline_or_bootconfig(struct seq_file *m);
 /* open_redirect */
 #ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
 void susfs_add_open_redirect(void __user **user_info);
-struct filename* susfs_get_redirected_path(unsigned long ino);
 #endif
 
 /* sus_map */
