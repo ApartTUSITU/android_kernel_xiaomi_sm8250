@@ -68,7 +68,7 @@ UAPI_INC :=	-I$(AUDIO_ROOT)/include/$(UAPI_DIR)
 ############ COMMON ############
 COMMON_DIR :=	include
 COMMON_INC :=	-I$(AUDIO_ROOT)/$(COMMON_DIR)
-TFA_INC    :=   -I$(AUDIO_ROOT)/asoc/codecs/tfa98xx/inc
+TFA_INC    :=   -I $(srctree)/$(src)/inc
 
 # for TFA9874 Amplifer
 ifdef CONFIG_SND_SOC_TFA9874
@@ -85,7 +85,7 @@ INCS +=	$(COMMON_INC) \
 	$(UAPI_INC) \
 	$(TFA_INC)
 
-ccflags-y += -I$(srctree)/$(src)/inc
+ccflags-y += $(INCS)
 
 CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 		-DANI_LITTLE_BIT_ENDIAN \

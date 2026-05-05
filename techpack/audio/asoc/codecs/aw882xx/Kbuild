@@ -66,7 +66,7 @@ UAPI_INC :=	-I$(AUDIO_ROOT)/include/$(UAPI_DIR)
 ############ COMMON ############
 COMMON_DIR :=	include
 COMMON_INC :=	-I$(AUDIO_ROOT)/$(COMMON_DIR)
-AW_INC    :=   -I$(srctree)/techpack/audio/asoc/codecs/aw882xx/inc
+AW_INC    :=   -I $(srctree)/$(src)/inc
 
 # for AW882XX Amplifer
 ifdef CONFIG_SND_SOC_AW882XX
