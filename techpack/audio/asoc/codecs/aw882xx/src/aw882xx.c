@@ -32,11 +32,11 @@
 #include <linux/vmalloc.h>
 #include <linux/mmhardware_sysfs.h>
 
-#include "aw882xx.h"
-#include "aw882xx_log.h"
-#include "aw882xx_dsp.h"
-#include "aw882xx_bin_parse.h"
-#include "aw882xx_spin.h"
+#include "../inc/aw882xx.h"
+#include "../inc/aw882xx_log.h"
+#include "../inc/aw882xx_dsp.h"
+#include "../inc/aw882xx_bin_parse.h"
+#include "../inc/aw882xx_spin.h"
 
 #define AW882XX_DRIVER_VERSION "v1.13.0"
 #define AW882XX_I2C_NAME "aw882xx_smartpa"

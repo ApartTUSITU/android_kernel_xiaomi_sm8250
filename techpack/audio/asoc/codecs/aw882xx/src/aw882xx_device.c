@@ -17,12 +17,12 @@
 #include <linux/uaccess.h>
 
 
-#include "aw882xx_log.h"
-#include "aw882xx_device.h"
-#include "aw882xx_dsp.h"
+#include "../inc/aw882xx_log.h"
+#include "../inc/aw882xx_device.h"
+#include "../inc/aw882xx_dsp.h"
 /*#include "aw_afe.h"*/
-#include "aw882xx_bin_parse.h"
-#include "aw882xx_spin.h"
+#include "../inc/aw882xx_bin_parse.h"
+#include "../inc/aw882xx_spin.h"
 
 #define AW_DEV_SYSST_CHECK_MAX   (10)
 

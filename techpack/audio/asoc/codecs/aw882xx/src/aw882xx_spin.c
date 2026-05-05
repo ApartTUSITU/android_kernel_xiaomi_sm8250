@@ -24,9 +24,9 @@
 #include <linux/version.h>
 #include <linux/input.h>
 
-#include "aw882xx_log.h"
-#include "aw882xx.h"
-#include "aw882xx_spin.h"
+#include "../inc/aw882xx_log.h"
+#include "../inc/aw882xx.h"
+#include "../inc/aw882xx_spin.h"
 
 static unsigned int g_spin_mode = 0;
 static unsigned int g_spin_value = 0;

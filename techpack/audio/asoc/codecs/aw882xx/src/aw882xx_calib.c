@@ -27,10 +27,10 @@
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
 
-#include "aw882xx.h"
-#include "aw882xx_dsp.h"
-#include "aw882xx_log.h"
-#include "aw882xx_calib.h"
+#include "../inc/aw882xx.h"
+#include "../inc/aw882xx_dsp.h"
+#include "../inc/aw882xx_log.h"
+#include "../inc/aw882xx_calib.h"
 
 static bool is_single_cali = false; /*if mutli_dev cali false, single dev true*/
 

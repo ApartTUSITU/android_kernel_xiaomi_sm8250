@@ -31,10 +31,10 @@
 #include <linux/cdev.h>
 #include <linux/list.h>
 #include <linux/string.h>
-#include "aw882xx_bin_parse.h"
-#include "aw882xx_device.h"
-#include "aw882xx_data_type.h"
-#include "aw882xx_log.h"
+#include "../inc/aw882xx_bin_parse.h"
+#include "../inc/aw882xx_device.h"
+#include "../inc/aw882xx_data_type.h"
+#include "../inc/aw882xx_log.h"
 
 
 #define AWINIC_CODE_VERSION "V0.0.7-V1.0.4"	/* "code version"-"excel version" */
