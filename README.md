@@ -46,7 +46,7 @@ This kernel stands on the shoulders of giants, combining contributions from mult
 4. 支持 EROFS  
 5. zRAM 支持 LZ4、LZ4HC、lz4k_oplus、LZ4KD、ZSTD 等压缩算法  
 6. 向后移植 5.10 BPF(支持安卓 16)  
-7. 触摸屏驱动、相机驱动、音频驱动、GPU/DRM/MSM、CNSS2 驱动使用小米版本(来自 UtsavBalar1231's repo 和 MiCode, AOSP 版 Display/DRM 驱动为 LineageOS 版本), 并且触摸屏驱动具有双击亮屏节点  
+7. 触摸屏驱动、相机驱动、音频驱动、GPU/DRM/MSM、CNSS2 驱动使用小米版本(来自 [UtsavBalar1231's repo](https://github.com/UtsavBalar1231/kernel_xiaomi_sm8250) 和 [MiCode](https://github.com/MiCode), AOSP 版 Display/DRM 驱动为 LineageOS 版本), 并且触摸屏驱动具有双击亮屏节点  
 8. 修复[电量卡在 1% 的问题](https://github.com/liyafe1997/Xiaomi-fix-battery-one-percent)，并且支持解容  
 9. 集成 [BBG(Baseband-guard)](https://github.com/vc-teahouse/Baseband-guard)  
 
@@ -65,7 +65,7 @@ Below are some of the key features:
 4. Support for EROFS  
 5. zRAM with support for multiple compression algorithms, including LZ4, LZ4HC, lz4k_oplus, LZ4KD, and ZSTD  
 6. Backported BPF from Linux 5.10 (Android 16 compatible)  
-7. Touchscreen, camera, audio, GPU/DRM/MSM, and CNSS2 drivers use Xiaomi-specific implementations (sourced from UtsavBalar1231’s repository and MiCode. The AOSP version of the Display/DRM driver is the LineageOS version); also, the `double_tap` node has been added to the touchscreen driver  
+7. Touchscreen, camera, audio, GPU/DRM/MSM, and CNSS2 drivers use Xiaomi-specific implementations (sourced from [UtsavBalar1231’s repository](https://github.com/UtsavBalar1231/kernel_xiaomi_sm8250) and [MiCode](https://github.com/MiCode). The AOSP version of the Display/DRM driver is the LineageOS version); also, the `double_tap` node has been added to the touchscreen driver  
 8. Fixes [the issue where the battery percentage gets stuck at 1%](https://github.com/liyafe1997/Xiaomi-fix-battery-one-percent), and supports recognizing higher-capacity replacement batteries  
 9. Integrate [BBG(Baseband-guard)](https://github.com/vc-teahouse/Baseband-guard)  
 
@@ -156,7 +156,7 @@ Join ApartTUSITU's QQ Group: [700675046](https://qm.qq.com/q/Md7nXA3Toa)。
 
    注意：`build.sh` 中启用了 `ccache`，路径是 `$HOME/.cache/ccache_mikernel`。可修改或删除。  
 
-2. 下载 [ZyC-Clang v15](https://github.com/ZyCromerZ/Clang/releases/tag/15.0.7-20260507-release) 工具链:  
+2. 下载 [ZyC-Clang v16](https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20260510-release/Clang-16.0.6-20260510.tar.gz) 工具链:  
    ```
    mkdir zyc-clang
    cd zyc-clang
@@ -207,7 +207,7 @@ Join ApartTUSITU's QQ Group: [700675046](https://qm.qq.com/q/Md7nXA3Toa)。
 
    Note: `ccache` is enabled in `build.sh` (`$HOME/.cache/ccache_mikernel`). You may remove/modify it.  
 
-2. Download [ZyC-Clang v15](https://github.com/ZyCromerZ/Clang/releases/tag/15.0.7-20260507-release) toolchain:  
+2. Download [ZyC-Clang v16](https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20260510-release/Clang-16.0.6-20260510.tar.gz) toolchain:  
    ```
    mkdir zyc-clang
    cd zyc-clang
