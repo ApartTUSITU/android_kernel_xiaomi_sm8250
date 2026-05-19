@@ -110,9 +110,9 @@ fi
 echo "TARGET_DEVICE: $TARGET_DEVICE"
 
 # 检测设备以决定是否启用 Baseband-guard
-# Check if the device is elish/enuma/dagu/pipa to determine whether to enable Baseband-guard
+# Check if the device is elish/dagu/pipa to determine whether to enable Baseband-guard
 BBG_ENABLE=1
-if [[ "${TARGET_DEVICE}" == "elish" || "${TARGET_DEVICE}" == "enuma" || "${TARGET_DEVICE}" == "dagu" || "${TARGET_DEVICE}" == "pipa" ]]; then
+if [[ "${TARGET_DEVICE}" == "elish" || "${TARGET_DEVICE}" == "dagu" || "${TARGET_DEVICE}" == "pipa" ]]; then
     BBG_ENABLE=0
     echo "Target device is ${TARGET_DEVICE}, Baseband-guard will be disabled."
 fi
