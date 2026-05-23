@@ -109,6 +109,14 @@ fi
 
 echo "TARGET_DEVICE: $TARGET_DEVICE"
 
+# 检测设备以决定是否启用 Baseband-guard
+# Check if the device is elish/dagu/pipa to determine whether to enable Baseband-guard
+BBG_ENABLE=1
+if [[ "${TARGET_DEVICE}" == "elish" || "${TARGET_DEVICE}" == "dagu" || "${TARGET_DEVICE}" == "pipa" ]]; then
+    BBG_ENABLE=0
+    echo "Target device is ${TARGET_DEVICE}, Baseband-guard will be disabled."
+fi
+
 if [ $KSU_ENABLE -eq 1 ]; then
     echo "KSU is enabled"
     curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
@@ -116,9 +124,13 @@ else
     echo "KSU is disabled"
 fi
 
-echo "Integrating Baseband-guard..."
-curl -LSs "https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh" | bash
-sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
+if [ $BBG_ENABLE -eq 1 ]; then
+    echo "Integrating Baseband-guard..."
+    curl -LSs "https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh" | bash
+    sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
+else
+    echo "Skipping Baseband-guard integration for ${TARGET_DEVICE}..."
+fi
 
 echo "Cleaning..."
 
@@ -153,8 +165,11 @@ else
     scripts/config --file out/.config -d KSU
 fi
 
-scripts/config --file out/.config \
-    -e BBG
+if [ $BBG_ENABLE -eq 1 ]; then
+    scripts/config --file out/.config -e BBG
+else
+    scripts/config --file out/.config -d BBG
+fi
 
 scripts/config --file out/.config \
     -e REKERNEL \
@@ -296,8 +311,11 @@ else
     scripts/config --file out/.config -d KSU
 fi
 
-scripts/config --file out/.config \
-    -e BBG
+if [ $BBG_ENABLE -eq 1 ]; then
+    scripts/config --file out/.config -e BBG
+else
+    scripts/config --file out/.config -d BBG
+fi
 
 scripts/config --file out/.config \
     --set-str STATIC_USERMODEHELPER_PATH /system/bin/micd \
