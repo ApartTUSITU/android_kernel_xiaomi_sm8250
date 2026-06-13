@@ -69,6 +69,12 @@ menu "Xiaomi board selection"
 		help
 		  Support for Redmi K40S / POCO F4
 
+	config MACH_XIAOMI_PIPA
+		bool "Xiaomi pipa board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Xiaomi Pad 6
+
 	config MACH_XIAOMI_PSYCHE
 		bool "Xiaomi psyche board"
 		select MACH_XIAOMI_SM8250
