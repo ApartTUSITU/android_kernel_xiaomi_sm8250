@@ -2,4 +2,28 @@ menu "Tech packages"
 
 source "techpack/data/Kconfig"
 
+menu "Camera packages"
+
+config TECHPACK_CAMERA_XIAOMI
+    bool "Xiaomi camera"
+    help
+      Xiaomi camera
+
+config TECHPACK_CAMERA_XIAOMI_PSYCHE
+    bool "Xiaomi camera psyche"
+    help
+      Xiaomi camera psyche
+
+config TECHPACK_CAMERA_XIAOMI_CAS
+    bool "Xiaomi camera CAS"
+    help
+      Xiaomi camera CAS
+
+config TECHPACK_CAMERA_XIAOMI_TABLET
+    bool "Xiaomi camera tablet"
+    help
+      Xiaomi camera tablet
+
+endmenu
+
 endmenu
