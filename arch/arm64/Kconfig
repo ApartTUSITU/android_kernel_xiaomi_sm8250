@@ -182,7 +182,7 @@ config ARM64
 	select SYSCTL_EXCEPTION_TRACE
 	select THREAD_INFO_IN_TASK
 	select HAVE_ARCH_USERFAULTFD_MINOR if USERFAULTFD
-	select USER_STACKTRACE_SUPPORT if BOARD_XIAOMI
+	select USER_STACKTRACE_SUPPORT if MACH_XIAOMI
 	help
 	  ARM 64-bit (AArch64) Linux support.
 
@@ -1672,7 +1672,7 @@ config BUILD_ARM64_DT_OVERLAY
 
 config BOOT_INFO
 	bool "Boot information from bootloader"
-	default y if BOARD_XIAOMI
+	default y if MACH_XIAOMI
 	help
 	  On embedded linux device, we try to collect more information from
 	  bootloader to kernel. eg. powerup reason.

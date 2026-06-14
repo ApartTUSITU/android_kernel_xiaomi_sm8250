@@ -3244,7 +3244,7 @@ static void _sde_encoder_input_handler_register(
 	struct sde_encoder_virt *sde_enc = to_sde_encoder_virt(drm_enc);
 	int rc;
 
-#ifndef CONFIG_BOARD_XIAOMI
+#ifndef CONFIG_MACH_XIAOMI
 	if (!sde_encoder_check_curr_mode(drm_enc, MSM_DISPLAY_CMD_MODE))
 		return;
 #endif
@@ -3267,7 +3267,7 @@ static void _sde_encoder_input_handler_unregister(
 {
 	struct sde_encoder_virt *sde_enc = to_sde_encoder_virt(drm_enc);
 
-#ifndef CONFIG_BOARD_XIAOMI
+#ifndef CONFIG_MACH_XIAOMI
 	if (!sde_encoder_check_curr_mode(drm_enc, MSM_DISPLAY_CMD_MODE))
 		return;
 #endif

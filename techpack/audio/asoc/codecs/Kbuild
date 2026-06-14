@@ -92,19 +92,19 @@ ifeq ($(KERNEL_BUILD), 0)
 	endif
 endif
 
-ifdef CONFIG_BOARD_PSYCHE
+ifdef CONFIG_MACH_XIAOMI_PSYCHE
 CDEFINES += -DCONFIG_TARGET_PRODUCT_PSYCHE
 endif
 
-ifdef CONFIG_BOARD_MUNCH
+ifdef CONFIG_MACH_XIAOMI_MUNCH
 CDEFINES += -DCONFIG_TARGET_PRODUCT_MUNCH
 endif
 
-ifdef CONFIG_BOARD_DAGU
+ifdef CONFIG_MACH_XIAOMI_DAGU
 CDEFINES += -DCONFIG_TARGET_PRODUCT_DAGU
 endif
 
-ifdef CONFIG_BOARD_PIPA
+ifdef CONFIG_MACH_XIAOMI_PIPA
 CDEFINES += -DCONFIG_TARGET_PRODUCT_PIPA
 endif
 
@@ -265,11 +265,11 @@ ifeq ($(KERNEL_BUILD), 1)
 	obj-y	+= wcd937x/
 	obj-y	+= wcd938x/
 	obj-y	+= bolero/
-ifneq ($(filter y, $(CONFIG_BOARD_ENUMA) $(CONFIG_BOARD_ELISH) $(CONFIG_BOARD_DAGU)),)
+ifneq ($(filter y, $(CONFIG_MACH_XIAOMI_ENUMA) $(CONFIG_MACH_XIAOMI_ELISH) $(CONFIG_MACH_XIAOMI_DAGU)),)
 	obj-y	+= cs35l41_k81/
-else ifeq ($(CONFIG_BOARD_MUNCH), y)
+else ifeq ($(CONFIG_MACH_XIAOMI_MUNCH), y)
 	obj-y	+= tfa9874/
-else ifeq ($(CONFIG_BOARD_PIPA), y)
+else ifeq ($(CONFIG_MACH_XIAOMI_PIPA), y)
 	obj-y	+= aw882xx/
 else
 	obj-y	+= cs35l41/

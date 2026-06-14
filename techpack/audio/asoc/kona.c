@@ -5721,7 +5721,7 @@ static struct snd_soc_ops msm_mi2s_cs35l41_be_ops = {
 };
 #endif
 
-#ifdef CONFIG_BOARD_XIAOMI
+#ifdef CONFIG_MACH_XIAOMI
 static int cs35l41_init(struct snd_soc_pcm_runtime *rtd)
 {
 #if 0
@@ -5764,7 +5764,7 @@ static int tfa98xx_init(struct snd_soc_pcm_runtime *rtd)
 	return 0;
 }
 #endif // CONFIG_TARGET_PRODUCT_MUNCH
-#endif // CONFIG_BOARD_XIAOMI
+#endif // CONFIG_MACH_XIAOMI
 
 static struct snd_soc_ops msm_fe_qos_ops = {
 	.prepare = msm_fe_qos_prepare,
@@ -7718,7 +7718,7 @@ static struct snd_soc_dai_link pri_mi2s_rx_tfa9874_dai_links[] = {
 };
 #endif
 
-#ifdef CONFIG_BOARD_XIAOMI_SM7250
+#ifdef CONFIG_MACH_XIAOMI_SM7250
 static struct snd_soc_dai_link sec_mi2s_rx_tfa9874_be_dai_links[] = {
 	{
 		.name = LPASS_BE_SEC_MI2S_RX,
@@ -8155,7 +8155,7 @@ static struct snd_soc_dai_link msm_kona_dai_links[
 			ARRAY_SIZE(pri_mi2s_rx_tfa9874_dai_links) +
 			ARRAY_SIZE(tert_mi2s_rx_aw882xx_dai_links) +
 #endif
-#ifdef CONFIG_BOARD_XIAOMI_SM7250
+#ifdef CONFIG_MACH_XIAOMI_SM7250
 			ARRAY_SIZE(sec_mi2s_rx_tfa9874_be_dai_links) +
 			ARRAY_SIZE(sec_mi2s_rx_cs35l41_dai_links) +
 #endif
@@ -8494,7 +8494,7 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 					dev_info(dev, "%s: Using tert_mi2s_rx_aw882xx_dai_links\n", __func__);
 				}
 #endif
-#ifdef CONFIG_BOARD_XIAOMI_SM7250
+#ifdef CONFIG_MACH_XIAOMI_SM7250
 				if (get_hw_version_platform() == HARDWARE_PLATFORM_PICASSO) {
 					memcpy(msm_kona_dai_links + total_links,
 						sec_mi2s_rx_tfa9874_be_dai_links,

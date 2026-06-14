@@ -38,7 +38,7 @@
 #define SCM_DLOAD_FULLDUMP		0X10
 #define SCM_EDLOAD_MODE			0X01
 #define SCM_DLOAD_CMD			0x10
-#ifndef CONFIG_BOARD_XIAOMI
+#ifndef CONFIG_MACH_XIAOMI
 #define SCM_DLOAD_MINIDUMP		0X20
 #else
 #define SCM_DLOAD_MINIDUMP		0X40
@@ -69,7 +69,7 @@ static void scm_disable_sdi(void);
 static int download_mode = 1;
 static struct kobject dload_kobj;
 
-#ifndef CONFIG_BOARD_XIAOMI
+#ifndef CONFIG_MACH_XIAOMI
 static int in_panic;
 static int dload_type = SCM_DLOAD_FULLDUMP;
 #else

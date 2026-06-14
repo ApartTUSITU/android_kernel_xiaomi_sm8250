@@ -59,11 +59,11 @@ COMMON_DIR :=	include
 COMMON_INC :=	-I$(AUDIO_ROOT)/$(COMMON_DIR)
 
 # for mmhardware detection
-ifdef CONFIG_BOARD_DAGU
+ifdef CONFIG_MACH_XIAOMI_DAGU
 MMHARDWARE_OBJS += mmhardware_sysfs.o
 endif
 
-ifdef CONFIG_BOARD_PIPA
+ifdef CONFIG_MACH_XIAOMI_PIPA
 MMHARDWARE_OBJS += mmhardware_sysfs.o
 endif
 
