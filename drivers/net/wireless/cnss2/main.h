@@ -23,6 +23,7 @@
 
 #define MAX_NO_OF_MAC_ADDR		4
 #define QMI_WLFW_MAX_TIMESTAMP_LEN	32
+#define QMI_WLFW_MAX_NUM_MEM_SEG	32
 #define QMI_WLFW_MAX_BUILD_ID_LEN	128
 #define CNSS_RDDM_TIMEOUT_MS		20000
 #define RECOVERY_TIMEOUT		60000
@@ -30,8 +31,7 @@
 #define TIME_CLOCK_FREQ_HZ		19200000
 #define CNSS_RAMDUMP_MAGIC		0x574C414E
 #define CNSS_RAMDUMP_VERSION		0
-#define MAX_FIRMWARE_NAME_LEN		20
-#define CNSS_INVALID_CAL_DURATION       0xFFFFFFFF
+#define MAX_FIRMWARE_NAME_LEN		23
 
 #define CNSS_EVENT_SYNC   BIT(0)
 #define CNSS_EVENT_UNINTERRUPTIBLE BIT(1)
@@ -379,10 +379,10 @@ struct cnss_plat_data {
 	char fw_build_id[QMI_WLFW_MAX_BUILD_ID_LEN + 1];
 	u32 otp_version;
 	u32 fw_mem_seg_len;
-	struct cnss_fw_mem fw_mem[QMI_WLFW_MAX_NUM_MEM_SEG_V01];
+	struct cnss_fw_mem fw_mem[QMI_WLFW_MAX_NUM_MEM_SEG];
 	struct cnss_fw_mem m3_mem;
 	u32 qdss_mem_seg_len;
-	struct cnss_fw_mem qdss_mem[QMI_WLFW_MAX_NUM_MEM_SEG_V01];
+	struct cnss_fw_mem qdss_mem[QMI_WLFW_MAX_NUM_MEM_SEG];
 	u32 *qdss_reg;
 	struct cnss_pin_connect_result pin_result;
 	struct dentry *root_dentry;
@@ -398,7 +398,6 @@ struct cnss_plat_data {
 	u32 diag_reg_read_len;
 	u8 *diag_reg_read_buf;
 	u8 cal_done;
-	u32 cal_duration;
 	u8 powered_on;
 	u8 use_fw_path_with_prefix;
 	char firmware_name[MAX_FIRMWARE_NAME_LEN];
