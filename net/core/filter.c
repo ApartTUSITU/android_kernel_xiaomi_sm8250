@@ -9777,6 +9777,18 @@ static u32 sock_ops_convert_ctx_access(enum bpf_access_type type,
 						       tcp_flags),
 				      si->dst_reg, si->dst_reg, off);
 		break;
+
+	case offsetof(struct bpf_sock_ops, sk_uid):
+		SOCK_OPS_GET_FIELD(sk_uid, sk_uid, struct sock);
+		break;
+
+	case offsetof(struct bpf_sock_ops, voip_daddr):
+		SOCK_OPS_GET_FIELD(voip_daddr, sk_daddr, struct sock);
+		break;
+
+	case offsetof(struct bpf_sock_ops, voip_dport):
+		SOCK_OPS_GET_FIELD(voip_dport, sk_dport, struct sock);
+		break;
 	}
 	return insn - insn_buf;
 }
