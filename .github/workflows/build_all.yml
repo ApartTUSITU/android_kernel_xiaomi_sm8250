@@ -79,8 +79,6 @@ jobs:
           if [ "${{ matrix.ksu }}" = "true" ]; then
             ARGS="$ARGS ksu"
           fi
-          # Always enable DroidSpaces regardless of any condition
-          ARGS="$ARGS droidspaces"
           
           echo "Executing command: ./build_kernel.sh $ARGS"
           ./build_kernel.sh $ARGS
@@ -135,5 +133,5 @@ jobs:
             - **AOSP**: 适用于 LineageOS 等类原生 AOSP ROM。
             - **ReSukiSU-SuSFS**: 集成 ReSukiSU 与 SuSFS。
             - **NoKernelSU**: 原版纯净内核，支持自行使用 Magisk 或 APatch 刷入。
-            - **DroidSpaces**: 所有构建均已启用 DroidSpaces，文件名含该标识。如不需要，请使用 `Build Kernel` 单设备工作流构建（DroidSpaces 选项默认关闭），或 Fork 后自行修改 workflow。
+            - **DroidSpaces**: 所有构建均已启用 DroidSpaces，文件名含该标识。
           files: all_kernels/*.zip
