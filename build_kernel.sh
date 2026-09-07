@@ -30,6 +30,7 @@ fi
 ENABLE_KSU=0
 ENABLE_DROIDSPACES=0
 TARGET_OS="both"
+DS_TMP_DIR=""
 
 shift
 # Parse remaining arguments loosely
@@ -41,6 +42,14 @@ for arg in "$@"; do
         droidspaces) ENABLE_DROIDSPACES=1 ;;
     esac
 done
+
+# Remove the DroidSpaces temp dir on exit, whether the build succeeds or fails
+cleanup() {
+    if [ -n "$DS_TMP_DIR" ] && [ -d "$DS_TMP_DIR" ]; then
+        rm -rf "$DS_TMP_DIR"
+    fi
+}
+trap cleanup EXIT
 
 # ==========================================
 # Configuration & Environment
@@ -109,22 +118,43 @@ if [ "$ENABLE_DROIDSPACES" -eq 1 ]; then
     DS_BASE_URL="https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/non-GKI"
 
     echo "[*] Downloading DroidSpaces kernel patches..."
-    wget -q -O "$DS_TMP_DIR/01_fix_xt_qtaguid.patch" \
+    wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/01_fix_xt_qtaguid.patch" \
         "$DS_BASE_URL/01.fix_kernel_panic_in_xt_qtaguid.patch"
-    wget -q -O "$DS_TMP_DIR/02_fix_cgroup_prefix.patch" \
+    wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/02_fix_cgroup_prefix.patch" \
         "$DS_BASE_URL/02.fix_restore%20cgroup%20file%20prefix%20handling%20.patch"
 
     cd "$KERNEL_DIR"
 
-    # Dry-run first: skip cleanly when already applied or not applicable
+    # Classify the tree state with dry-runs first, then apply, skip, or warn.
+    # -f: never prompt and never auto-swap the patch direction.
     apply_droidspaces_patch() {
         local patch_file=$1
-        if patch -p1 --forward --dry-run < "$patch_file" > /dev/null 2>&1; then
-            patch -p1 --forward < "$patch_file"
-            echo "[+] Patch applied: $(basename "$patch_file")"
-        else
-            echo "[-] Patch skipped (already applied or not applicable): $(basename "$patch_file")"
+        local name
+        name=$(basename "$patch_file")
+
+        # Reverse dry-run succeeds -> patch is already fully applied
+        if patch -p1 --reverse --dry-run -f < "$patch_file" > /dev/null 2>&1; then
+            echo "[-] Patch already applied, skipping: $name"
+            return 0
         fi
+
+        # Forward dry-run succeeds -> tree is clean, apply for real
+        if patch -p1 --forward --dry-run -f < "$patch_file" > /dev/null 2>&1; then
+            patch -p1 --forward -f < "$patch_file"
+            echo "[+] Patch applied: $name"
+            return 0
+        fi
+
+        # Target file is missing -> not applicable to this tree, skip by design
+        if patch -p1 --forward --dry-run -f < "$patch_file" 2>&1 | grep -q "can't find file to patch"; then
+            echo "[-] Patch not applicable (target file missing), skipping: $name"
+            return 0
+        fi
+
+        # Otherwise the patch is partially applied or conflicts with the tree
+        echo "[!] WARNING: Patch partially applied or conflicting, skipping: $name"
+        echo "[!] The resulting kernel may miss part of the DroidSpaces fixes."
+        return 0
     }
 
     # 1) xt_qtaguid panic fix (auto-skipped if net/netfilter/xt_qtaguid.c does not exist)
@@ -483,10 +513,5 @@ fi
 echo "==========================================="
 echo "[*] ccache stats:"
 ccache -s
-
-# Cleanup DroidSpaces temp directory
-if [ -n "$DS_TMP_DIR" ] && [ -d "$DS_TMP_DIR" ]; then
-    rm -rf "$DS_TMP_DIR"
-fi
 
 echo "[+] All requested builds completed!"
