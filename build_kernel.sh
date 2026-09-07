@@ -8,12 +8,11 @@ set -e
 # ==========================================
 if [ -z "$1" ]; then
     echo "[!] Error: No device specified."
-    echo "Usage: $0 <device_name> [ksu] [miui|aosp] [droidspaces]"
+    echo "Usage: $0 <device_name> [ksu] [miui|aosp]"
     echo "Example: $0 lmi"
     echo "         $0 lmi ksu"
     echo "         $0 lmi ksu miui"
     echo "         $0 lmi aosp"
-    echo "         $0 lmi ksu miui droidspaces (DroidSpaces support)"
     exit 1
 fi
 
@@ -28,7 +27,6 @@ if [ ! -f "$DEFCONFIG_PATH" ]; then
 fi
 
 ENABLE_KSU=0
-ENABLE_DROIDSPACES=0
 TARGET_OS="both"
 DS_TMP_DIR=""
 
@@ -39,7 +37,6 @@ for arg in "$@"; do
         ksu) ENABLE_KSU=1 ;;
         miui) TARGET_OS="miui" ;;
         aosp) TARGET_OS="aosp" ;;
-        droidspaces) ENABLE_DROIDSPACES=1 ;;
     esac
 done
 
@@ -109,63 +106,62 @@ echo "==========================================="
 # ==========================================
 # DroidSpaces Setup
 # ==========================================
-if [ "$ENABLE_DROIDSPACES" -eq 1 ]; then
-    echo "==========================================="
-    echo " [*] Initializing DroidSpaces Setup"
-    echo "==========================================="
+echo "==========================================="
+echo " [*] Initializing DroidSpaces Setup"
+echo "==========================================="
 
-    DS_TMP_DIR=$(mktemp -d)
-    DS_BASE_URL="https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/non-GKI"
+DS_TMP_DIR=$(mktemp -d)
+DS_BASE_URL="https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/non-GKI"
 
-    echo "[*] Downloading DroidSpaces kernel patches..."
-    wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/01_fix_xt_qtaguid.patch" \
-        "$DS_BASE_URL/01.fix_kernel_panic_in_xt_qtaguid.patch"
-    wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/02_fix_cgroup_prefix.patch" \
-        "$DS_BASE_URL/02.fix_restore%20cgroup%20file%20prefix%20handling%20.patch"
+echo "[*] Downloading DroidSpaces kernel patches..."
+wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/01_fix_xt_qtaguid.patch" \
+    "$DS_BASE_URL/01.fix_kernel_panic_in_xt_qtaguid.patch"
+wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/02_fix_cgroup_prefix.patch" \
+    "$DS_BASE_URL/02.fix_restore%20cgroup%20file%20prefix%20handling%20.patch"
 
-    cd "$KERNEL_DIR"
+cd "$KERNEL_DIR"
 
-    # Classify the tree state with dry-runs first, then apply, skip, or warn.
-    # -f: never prompt and never auto-swap the patch direction.
-    apply_droidspaces_patch() {
-        local patch_file=$1
-        local name
-        name=$(basename "$patch_file")
+# Classify the tree state with dry-runs first, then apply, skip, or warn.
+# -f: never prompt and never auto-swap the patch direction.
+apply_droidspaces_patch() {
+    local patch_file=$1
+    local name
+    name=$(basename "$patch_file")
 
-        # Reverse dry-run succeeds -> patch is already fully applied
-        if patch -p1 --reverse --dry-run -f < "$patch_file" > /dev/null 2>&1; then
-            echo "[-] Patch already applied, skipping: $name"
-            return 0
-        fi
-
-        # Forward dry-run succeeds -> tree is clean, apply for real
-        if patch -p1 --forward --dry-run -f < "$patch_file" > /dev/null 2>&1; then
-            patch -p1 --forward -f < "$patch_file"
-            echo "[+] Patch applied: $name"
-            return 0
-        fi
-
-        # Target file is missing -> not applicable to this tree, skip by design
-        if patch -p1 --forward --dry-run -f < "$patch_file" 2>&1 | grep -q "can't find file to patch"; then
-            echo "[-] Patch not applicable (target file missing), skipping: $name"
-            return 0
-        fi
-
-        # Otherwise the patch is partially applied or conflicts with the tree
-        echo "[!] WARNING: Patch partially applied or conflicting, skipping: $name"
-        echo "[!] The resulting kernel may miss part of the DroidSpaces fixes."
+    # Reverse dry-run succeeds -> patch is already fully applied
+    if patch -p1 --reverse --dry-run -f < "$patch_file" > /dev/null 2>&1; then
+        echo "[-] Patch already applied, skipping: $name"
         return 0
-    }
+    fi
 
-    # 1) xt_qtaguid panic fix (auto-skipped if net/netfilter/xt_qtaguid.c does not exist)
-    apply_droidspaces_patch "$DS_TMP_DIR/01_fix_xt_qtaguid.patch"
+    # Forward dry-run succeeds -> tree is clean, apply for real
+    if patch -p1 --forward --dry-run -f < "$patch_file" > /dev/null 2>&1; then
+        patch -p1 --forward -f < "$patch_file"
+        echo "[+] Patch applied: $name"
+        return 0
+    fi
 
-    # 2) cgroup file prefix handling fix (required by DroidSpaces)
-    apply_droidspaces_patch "$DS_TMP_DIR/02_fix_cgroup_prefix.patch"
+    # Target file is missing -> not applicable to this tree, skip by design
+    if patch -p1 --forward --dry-run -f < "$patch_file" 2>&1 | grep -q "can't find file to patch"; then
+        echo "[-] Patch not applicable (target file missing), skipping: $name"
+        return 0
+    fi
 
-    # Generate DroidSpaces config fragment for later merging into out/.config
-    DS_CONFIG_FRAG="$DS_TMP_DIR/droidspaces.config"
-    cat > "$DS_CONFIG_FRAG" <<'EOF'
+    # Otherwise the patch is partially applied or conflicts with the tree
+    echo "[!] WARNING: Patch partially applied or conflicting, skipping: $name"
+    echo "[!] The resulting kernel may miss part of the DroidSpaces fixes."
+    return 0
+}
+
+# 1) xt_qtaguid panic fix (auto-skipped if net/netfilter/xt_qtaguid.c does not exist)
+apply_droidspaces_patch "$DS_TMP_DIR/01_fix_xt_qtaguid.patch"
+
+# 2) cgroup file prefix handling fix (required by DroidSpaces)
+apply_droidspaces_patch "$DS_TMP_DIR/02_fix_cgroup_prefix.patch"
+
+# Generate DroidSpaces config fragment for later merging into out/.config
+DS_CONFIG_FRAG="$DS_TMP_DIR/droidspaces.config"
+cat > "$DS_CONFIG_FRAG" <<'EOF'
 # Kernel configurations for full DroidSpaces support
 # Copyright (C) 2026 ravindu644 <droidcasts@protonmail.com>
 
@@ -264,9 +260,8 @@ CONFIG_NETFILTER_NETLINK_LOG=y
 CONFIG_NETFILTER_XT_TARGET_NFLOG=y
 EOF
 
-    echo "[+] DroidSpaces setup finished."
-    echo "==========================================="
-fi
+echo "[+] DroidSpaces setup finished."
+echo "==========================================="
 
 # ==========================================
 # AnyKernel3 Setup
@@ -434,10 +429,8 @@ build_target() {
     fi
 
     # 5. DroidSpaces configurations
-    if [ "$ENABLE_DROIDSPACES" -eq 1 ]; then
-        echo "[*] Merging DroidSpaces configurations..."
-        scripts/kconfig/merge_config.sh -O "${OUT_DIR}/" -m "${OUT_DIR}/.config" "${DS_CONFIG_FRAG}"
-    fi
+    echo "[*] Merging DroidSpaces configurations..."
+    scripts/kconfig/merge_config.sh -O "${OUT_DIR}/" -m "${OUT_DIR}/.config" "${DS_CONFIG_FRAG}"
 
     # We always need to re-evaluate dependencies because BBG is injected unconditionally
     echo "[*] Updating config (make olddefconfig)..."
@@ -478,10 +471,7 @@ build_target() {
         if [ "$ENABLE_KSU" -eq 1 ]; then
             KSU_ZIP_STR="ReSukiSU-SuSFS"
         fi
-        local DS_ZIP_STR=""
-        if [ "$ENABLE_DROIDSPACES" -eq 1 ]; then
-            DS_ZIP_STR="_DroidSpaces"
-        fi
+        local DS_ZIP_STR="_DroidSpaces"
         local GIT_COMMIT_ID=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
         local OS_UPPER=$(echo "$OS_TYPE" | tr '[:lower:]' '[:upper:]')
         local ZIP_FILENAME="APTKernel_${OS_UPPER}_${DEVICE_NAME}_${KSU_ZIP_STR}${DS_ZIP_STR}_$(date +'%Y%m%d_%H%M%S')_anykernel3_${GIT_COMMIT_ID}.zip"
