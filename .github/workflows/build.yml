@@ -36,15 +36,10 @@ on:
           - aosp
           - miui
           - both
-      droidspaces:
-        description: 'Enable DroidSpaces support'
-        required: true
-        type: boolean
-        default: false
 
 jobs:
   build-kernel:
-    name: Build ${{ github.event.inputs.device }} | KSU:${{ github.event.inputs.ksu }} | OS:${{ github.event.inputs.target_os }} | DS:${{ github.event.inputs.droidspaces }}
+    name: Build ${{ github.event.inputs.device }} | KSU:${{ github.event.inputs.ksu }} | OS:${{ github.event.inputs.target_os }}
     runs-on: ubuntu-latest
     
     steps:
@@ -90,10 +85,6 @@ jobs:
         
         if [ "${{ github.event.inputs.target_os }}" != "both" ]; then
           ARGS="$ARGS ${{ github.event.inputs.target_os }}"
-        fi
-
-        if [ "${{ github.event.inputs.droidspaces }}" == "true" ]; then
-          ARGS="$ARGS droidspaces"
         fi
         
         echo "Executing command: ./build_kernel.sh $ARGS"
