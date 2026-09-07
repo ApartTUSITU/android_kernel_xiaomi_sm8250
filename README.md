@@ -99,7 +99,7 @@ Join ApartTUSITU's QQ Group: [700675046](https://qm.qq.com/q/Md7nXA3Toa)。
 3. 如果你要为所有支持的设备编译内核，找到 `Build All Devices Kernel (Matrix Parallel + Release)`，点击 `Run workflow`  
 4. 如果你要为单个设备编译内核，找到 `Build Kernel`， 点击 `Run workflow` 并选择必要内容  
 
-**注意:** `Build All Devices Kernel (Matrix Parallel + Release)` 的所有构建均已启用 DroidSpaces。如果你不想要 DroidSpaces，请自行 Fork 仓库去 Actions 构建。  
+**注意:** `Build All Devices Kernel (Matrix Parallel + Release)` 的所有构建均已启用 DroidSpaces。如果你不想要 DroidSpaces，请改用 `Build Kernel` 单设备工作流构建（其 DroidSpaces 选项默认关闭），或 Fork 后自行修改 workflow。  
 
 **English:**  
 1. Fork this repo (don’t forget to leave a Star~)  
@@ -107,7 +107,7 @@ Join ApartTUSITU's QQ Group: [700675046](https://qm.qq.com/q/Md7nXA3Toa)。
 3. If you want to compile the kernel for all supported devices, find `Build All Devices Kernel (Matrix Parallel + Release)` and click `Run workflow`  
 4. If you want to compile the kernel for a single device, find `Build Kernel`, click `Run workflow`, and select the necessary options  
 
-**Note:** All builds from `Build All Devices Kernel (Matrix Parallel + Release)` come with DroidSpaces enabled. If you don't want DroidSpaces, please fork this repository and build it yourself via Actions.  
+**Note:** All builds from `Build All Devices Kernel (Matrix Parallel + Release)` come with DroidSpaces enabled. If you don't want DroidSpaces, use the `Build Kernel` single-device workflow instead (its DroidSpaces option is off by default), or fork this repository and adjust the workflow yourself.  
 
 ---
 
