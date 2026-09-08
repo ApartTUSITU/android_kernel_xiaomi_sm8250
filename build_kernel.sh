@@ -114,10 +114,18 @@ DS_TMP_DIR=$(mktemp -d)
 DS_BASE_URL="https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/non-GKI"
 
 echo "[*] Downloading DroidSpaces kernel patches..."
-wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/01_fix_xt_qtaguid.patch" \
-    "$DS_BASE_URL/01.fix_kernel_panic_in_xt_qtaguid.patch"
-wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/02_fix_cgroup_prefix.patch" \
-    "$DS_BASE_URL/02.fix_restore%20cgroup%20file%20prefix%20handling%20.patch"
+if ! wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/01_fix_xt_qtaguid.patch" \
+    "$DS_BASE_URL/01.fix_kernel_panic_in_xt_qtaguid.patch"; then
+    echo "[!] Error: Failed to download DroidSpaces patch 01 (xt_qtaguid fix)."
+    echo "[!] Check your network connection and try again."
+    exit 1
+fi
+if ! wget -q --timeout=30 --tries=3 -O "$DS_TMP_DIR/02_fix_cgroup_prefix.patch" \
+    "$DS_BASE_URL/02.fix_restore%20cgroup%20file%20prefix%20handling%20.patch"; then
+    echo "[!] Error: Failed to download DroidSpaces patch 02 (cgroup prefix fix)."
+    echo "[!] Check your network connection and try again."
+    exit 1
+fi
 
 cd "$KERNEL_DIR"
 
