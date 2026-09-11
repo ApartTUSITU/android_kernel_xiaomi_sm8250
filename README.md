@@ -99,11 +99,15 @@ Join ApartTUSITU's QQ Group: [700675046](https://qm.qq.com/q/Md7nXA3Toa)。
 3. 如果你要为所有支持的设备编译内核，找到 `Build All Devices Kernel (Matrix Parallel + Release)`，点击 `Run workflow`  
 4. 如果你要为单个设备编译内核，找到 `Build Kernel`， 点击 `Run workflow` 并选择必要内容  
 
+**注意:** 所有构建（包括手动构建）均已默认集成 DroidSpaces，文件名含 `_DroidSpaces` 标识。如果你不想要 DroidSpaces，请 Fork 后自行修改 `build_kernel.sh`。  
+
 **English:**  
 1. Fork this repo (don’t forget to leave a Star~)  
 2. Go to **Actions**  
 3. If you want to compile the kernel for all supported devices, find `Build All Devices Kernel (Matrix Parallel + Release)` and click `Run workflow`  
 4. If you want to compile the kernel for a single device, find `Build Kernel`, click `Run workflow`, and select the necessary options  
+
+**Note:** All builds (including manual ones) come with DroidSpaces enabled by default, and the ZIP filename carries the `_DroidSpaces` tag. If you don't want DroidSpaces, fork this repository and adjust `build_kernel.sh` yourself.  
 
 ---
 

@@ -133,4 +133,5 @@ jobs:
             - **AOSP**: 适用于 LineageOS 等类原生 AOSP ROM。
             - **ReSukiSU-SuSFS**: 集成 ReSukiSU 与 SuSFS。
             - **NoKernelSU**: 原版纯净内核，支持自行使用 Magisk 或 APatch 刷入。
+            - **DroidSpaces**: 所有构建均已启用 DroidSpaces，文件名含该标识。
           files: all_kernels/*.zip
